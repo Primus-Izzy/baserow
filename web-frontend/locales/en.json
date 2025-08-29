@@ -156,7 +156,9 @@
     "password": "Password",
     "ai": "AI prompt",
     "multipleCollaboratorsDropdown": "Dropdown",
-    "multipleCollaboratorsCheckboxes": "Checkboxes"
+    "multipleCollaboratorsCheckboxes": "Checkboxes",
+    "progressBar": "Progress bar",
+    "people": "People"
   },
   "fieldErrors": {
     "invalidNumber": "Invalid number",
@@ -168,7 +170,8 @@
     "invalidDuration": "Invalid format ({durationFormat}).",
     "overflowDuration": "Value is out of bounds.",
     "maxChars": "Max {max} chars.",
-    "minChars": "Min {min} chars."
+    "minChars": "Min {min} chars.",
+    "numberOutOfRange": "Number must be between {min} and {max}."
   },
   "fieldDocs": {
     "readOnly": "This is a read only field.",
@@ -203,7 +206,9 @@
     "multipleCollaborators": "Accepts an array of objects where each object contains a user's id.",
     "uuid": "A read-only unique and persistent uuid.",
     "autonumber": "A read-only field that automatically increments a number for each new row.",
-    "password": "A write-only field that holds a hashed password. The value will be `null` if not set, or `true` if it has been set. It accepts a string to set it."
+    "password": "A write-only field that holds a hashed password. The value will be `null` if not set, or `true` if it has been set. It accepts a string to set it.",
+    "progressBar": "Displays a visual progress indicator. Can be manually entered, linked to a numeric field, or calculated from a formula.",
+    "people": "Links to workspace users. Can be configured for single or multiple people selection with avatar display and notifications."
   },
   "fieldConstraint": {
     "uniqueWithEmpty": "Unique with empty"
@@ -320,10 +325,92 @@
     "grid": "Grid",
     "gallery": "Gallery",
     "form": "Form",
+    "kanban": "Kanban",
+    "timeline": "Timeline",
+    "calendar": "Calendar",
     "sharing": {
       "linkName": "view",
       "formLinkName": "form"
     }
+  },
+  "timelineView": {
+    "zoomDay": "Day",
+    "zoomWeek": "Week",
+    "zoomMonth": "Month",
+    "zoomYear": "Year",
+    "addMilestone": "Add Milestone",
+    "addDependency": "Add Dependency",
+    "showDependencies": "Show Dependencies",
+    "showMilestones": "Show Milestones",
+    "showCriticalPath": "Show Critical Path",
+    "dependencyTypes": {
+      "finishToStart": "Finish to Start",
+      "startToStart": "Start to Start",
+      "finishToFinish": "Finish to Finish",
+      "startToFinish": "Start to Finish"
+    },
+    "milestoneCreated": "Milestone created successfully",
+    "milestoneDeleted": "Milestone deleted successfully",
+    "dependencyCreated": "Dependency created successfully",
+    "dependencyDeleted": "Dependency deleted successfully",
+    "scheduleRecalculated": "Schedule recalculated successfully"
+  },
+  "calendarView": {
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "today": "Today",
+    "moreEvents": "more",
+    "showLess": "Show less",
+    "recurringEvent": "Recurring Event",
+    "recurringEventQuestion": "What would you like to do with this recurring event?",
+    "editThisEvent": "Edit this occurrence only",
+    "editAllEvents": "Edit all occurrences",
+    "deleteThisEvent": "Delete this occurrence only",
+    "deleteAllEvents": "Delete all occurrences",
+    "recurringPattern": "Recurring Pattern",
+    "patternType": "Pattern Type",
+    "interval": "Interval",
+    "endDate": "End Date",
+    "maxOccurrences": "Max Occurrences",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "externalSync": "External Calendar Sync",
+    "existingSyncs": "Existing Synchronizations",
+    "addNewSync": "Add New Synchronization",
+    "provider": "Provider",
+    "selectProvider": "Select a provider",
+    "calendarId": "Calendar ID",
+    "calendarIdPlaceholder": "Enter calendar ID",
+    "syncDirection": "Sync Direction",
+    "importOnly": "Import only",
+    "exportOnly": "Export only",
+    "bidirectional": "Bidirectional",
+    "addSync": "Add Sync",
+    "syncNow": "Sync Now",
+    "lastSync": "Last sync",
+    "confirmDeleteSync": "Are you sure you want to delete this sync configuration?",
+    "setupInstructions": "Setup Instructions",
+    "oauthInstructions": "To sync with external calendars, you need to configure OAuth authentication:",
+    "step1": "Create OAuth credentials in your calendar provider's developer console",
+    "step2": "Configure the redirect URI to point to your Baserow instance",
+    "step3": "Enter the calendar ID you want to sync with"
+  },
+  "calendarViewHeader": {
+    "settings": "Calendar Settings",
+    "dateField": "Date Field",
+    "selectDateField": "Select date field",
+    "titleField": "Title Field",
+    "selectTitleField": "Select title field",
+    "colorField": "Color Field",
+    "selectColorField": "Select color field",
+    "noColorField": "No color field",
+    "enableRecurring": "Enable recurring events",
+    "enableExternalSync": "Enable external sync",
+    "configureSync": "Configure Sync",
+    "fieldOptions": "Field Options"
   },
   "trashType": {
     "workspace": "workspace",

@@ -1,0 +1,25 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="8" fill="#f8f9fa"/>
+  <g transform="translate(8, 8)">
+    <!-- Radar grid -->
+    <polygon points="16,4 26,12 22,24 10,24 6,12" stroke="#e9ecef" stroke-width="1" fill="none"/>
+    <polygon points="16,8 22,14 20,20 12,20 10,14" stroke="#e9ecef" stroke-width="1" fill="none"/>
+    
+    <!-- Radar lines -->
+    <line x1="16" y1="4" x2="16" y2="24" stroke="#e9ecef" stroke-width="1"/>
+    <line x1="16" y1="14" x2="26" y2="12" stroke="#e9ecef" stroke-width="1"/>
+    <line x1="16" y1="14" x2="22" y2="24" stroke="#e9ecef" stroke-width="1"/>
+    <line x1="16" y1="14" x2="10" y2="24" stroke="#e9ecef" stroke-width="1"/>
+    <line x1="16" y1="14" x2="6" y2="12" stroke="#e9ecef" stroke-width="1"/>
+    
+    <!-- Data polygon -->
+    <polygon points="16,6 24,13 20,22 12,22 8,13" stroke="#5190ef" stroke-width="2" fill="#5190ef" fill-opacity="0.2"/>
+    
+    <!-- Data points -->
+    <circle cx="16" cy="6" r="2" fill="#5190ef"/>
+    <circle cx="24" cy="13" r="2" fill="#5190ef"/>
+    <circle cx="20" cy="22" r="2" fill="#5190ef"/>
+    <circle cx="12" cy="22" r="2" fill="#5190ef"/>
+    <circle cx="8" cy="13" r="2" fill="#5190ef"/>
+  </g>
+</svg>

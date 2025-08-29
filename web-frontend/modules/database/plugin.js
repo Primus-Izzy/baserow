@@ -32,6 +32,7 @@ import {
   UUIDFieldType,
   AutonumberFieldType,
   PasswordFieldType,
+  ProgressBarFieldType,
 } from '@baserow/modules/database/fieldTypes'
 import {
   EqualViewFilterType,
@@ -176,6 +177,7 @@ import rowModal from '@baserow/modules/database/store/rowModal'
 import publicStore from '@baserow/modules/database/store/view/public'
 import rowModalNavigationStore from '@baserow/modules/database/store/rowModalNavigation'
 import rowHistoryStore from '@baserow/modules/database/store/rowHistory'
+import notificationsStore from '@baserow/modules/database/store/notifications'
 
 import { registerRealtimeEvents } from '@baserow/modules/database/realtime'
 import { CSVTableExporterType } from '@baserow/modules/database/exporterTypes'
@@ -382,6 +384,7 @@ export default (context) => {
   store.registerModule('rowModal', rowModal)
   store.registerModule('rowModalNavigation', rowModalNavigationStore)
   store.registerModule('rowHistory', rowHistoryStore)
+  store.registerModule('database/notifications', notificationsStore)
   store.registerModule('page/view/grid', gridStore)
   store.registerModule('page/view/gallery', galleryStore)
   store.registerModule('page/view/form', formStore)
@@ -718,6 +721,7 @@ export default (context) => {
   app.$registry.register('field', new UUIDFieldType(context))
   app.$registry.register('field', new AutonumberFieldType(context))
   app.$registry.register('field', new PasswordFieldType(context))
+  app.$registry.register('field', new ProgressBarFieldType(context))
 
   app.$registry.register(
     'fieldConstraint',

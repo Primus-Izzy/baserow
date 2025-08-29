@@ -18,6 +18,11 @@ export default function DatabaseModule(options) {
     src: path.resolve(__dirname, 'plugin.js'),
   })
 
+  // Add the notifications plugin
+  this.appendPlugin({
+    src: path.resolve(__dirname, 'plugins/notifications.js'),
+  })
+
   // Add all the related routes.
   this.extendRoutes((configRoutes) => {
     configRoutes.push(...routes)

@@ -1,9 +1,11 @@
 from django.urls import include, path
 
+from .collaboration import urls as collaboration_urls
 from .data_sync import urls as data_sync_urls
 from .export import urls as export_urls
 from .fields import urls as field_urls
 from .formula import urls as formula_urls
+from .notifications import urls as notification_urls
 from .rows import urls as row_urls
 from .tables import urls as table_urls
 from .tokens import urls as token_urls
@@ -22,4 +24,10 @@ urlpatterns = [
     path("export/", include(export_urls, namespace="export")),
     path("formula/", include(formula_urls, namespace="formula")),
     path("data-sync/", include(data_sync_urls, namespace="data_sync")),
+    path("notifications/", include(notification_urls, namespace="notifications")),
+    path("", include(collaboration_urls, namespace="collaboration")),
+    # Enhanced API capabilities
+    path("batch/", include("baserow.contrib.database.api.batch.urls", namespace="batch")),
+    path("enhanced/", include("baserow.contrib.database.api.enhanced.urls", namespace="enhanced")),
+    path("integrations/", include("baserow.contrib.database.api.integrations.urls", namespace="integrations")),
 ]

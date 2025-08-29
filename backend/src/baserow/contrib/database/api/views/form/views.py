@@ -262,3 +262,279 @@ class FormUploadFileView(APIView):
 
         serializer = UserFileSerializer(user_file)
         return Response(serializer.data)
+
+from baserow.contrib.database.views.enhanced_form_handler import EnhancedFormHandler
+from .serializers import (
+    EnhancedFormViewSerializer,
+    EnhancedFormViewCustomBrandingSerializer,
+    EnhancedFormViewAccessControlSerializer,
+    EnhancedFormViewValidationConfigSerializer,
+    EnhancedFormViewShareableLinkSerializer,
+    EnhancedFormViewFieldOptionsSerializer,
+)
+
+
+class EnhancedFormViewCustomBrandingView(APIView):
+    """API view for managing custom branding of form views."""
+
+    @extend_schema(
+        operation_id="update_form_view_custom_branding",
+        description="Update custom branding configuration for a form view.",
+        request=EnhancedFormViewCustomBrandingSerializer,
+        responses={
+            200: EnhancedFormViewSerializer,
+            400: get_error_schema(["ERROR_REQUEST_BODY_VALIDATION"]),
+            404: get_error_schema(["ERROR_VIEW_DOES_NOT_EXIST"]),
+        },
+    )
+    @transaction.atomic
+    @map_exceptions({
+        ViewDoesNotExist: ERROR_VIEW_DOES_NOT_EXIST,
+    })
+    def patch(self, request: Request, view_id: int) -> Response:
+        """Update custom branding configuration for a form view."""
+        handler = ViewHandler()
+        view = handler.get_view(request.user, view_id, FormView)
+        
+        branding_data = validate_data(
+            EnhancedFormViewCustomBrandingSerializer, request.data
+        )
+        
+        enhanced_handler = EnhancedFormHandler()
+        updated_view = enhanced_handler.update_custom_branding(
+            request.user, view, branding_data
+        )
+        
+        serializer = EnhancedFormViewSerializer(updated_view)
+        return Response(serializer.data)
+
+
+class EnhancedFormViewAccessControlView(APIView):
+    """API view for managing access control of form views."""
+
+    @extend_schema(
+        operation_id="update_form_view_access_control",
+        description="Update access control settings for a form view.",
+        request=EnhancedFormViewAccessControlSerializer,
+        responses={
+            200: EnhancedFormViewSerializer,
+            400: get_error_schema(["ERROR_REQUEST_BODY_VALIDATION"]),
+            404: get_error_schema(["ERROR_VIEW_DOES_NOT_EXIST"]),
+        },
+    )
+    @transaction.atomic
+    @map_exceptions({
+        ViewDoesNotExist: ERROR_VIEW_DOES_NOT_EXIST,
+    })
+    def patch(self, request: Request, view_id: int) -> Response:
+        """Update access control settings for a form view."""
+        handler = ViewHandler()
+        view = handler.get_view(request.user, view_id, FormView)
+        
+        access_data = validate_data(
+            EnhancedFormViewAccessControlSerializer, request.data
+        )
+        
+        enhanced_handler = EnhancedFormHandler()
+        updated_view = enhanced_handler.update_access_control(
+            request.user, view, access_data
+        )
+        
+        serializer = EnhancedFormViewSerializer(updated_view)
+        return Response(serializer.data)
+
+
+class EnhancedFormViewValidationConfigView(APIView):
+    """API view for managing validation configuration of form views."""
+
+    @extend_schema(
+        operation_id="update_form_view_validation_config",
+        description="Update validation configuration for a form view.",
+        request=EnhancedFormViewValidationConfigSerializer,
+        responses={
+            200: EnhancedFormViewSerializer,
+            400: get_error_schema(["ERROR_REQUEST_BODY_VALIDATION"]),
+            404: get_error_schema(["ERROR_VIEW_DOES_NOT_EXIST"]),
+        },
+    )
+    @transaction.atomic
+    @map_exceptions({
+        ViewDoesNotExist: ERROR_VIEW_DOES_NOT_EXIST,
+    })
+    def patch(self, request: Request, view_id: int) -> Response:
+        """Update validation configuration for a form view."""
+        handler = ViewHandler()
+        view = handler.get_view(request.user, view_id, FormView)
+        
+        validation_data = validate_data(
+            EnhancedFormViewValidationConfigSerializer, request.data
+        )
+        
+        enhanced_handler = EnhancedFormHandler()
+        updated_view = enhanced_handler.update_validation_config(
+            request.user, view, validation_data
+        )
+        
+        serializer = EnhancedFormViewSerializer(updated_view)
+        return Response(serializer.data)
+
+
+class EnhancedFormViewShareableLinksView(APIView):
+    """API view for managing shareable links of form views."""
+
+    @extend_schema(
+        operation_id="list_form_view_shareable_links",
+        description="List all shareable links for a form view.",
+        responses={
+            200: EnhancedFormViewShareableLinkSerializer(many=True),
+            404: get_error_schema(["ERROR_VIEW_DOES_NOT_EXIST"]),
+        },
+    )
+    @map_exceptions({
+        ViewDoesNotExist: ERROR_VIEW_DOES_NOT_EXIST,
+    })
+    def get(self, request: Request, view_id: int) -> Response:
+        """List all shareable links for a form view."""
+        handler = ViewHandler()
+        view = handler.get_view(request.user, view_id, FormView)
+        
+        links = view.shareable_links or []
+        serializer = EnhancedFormViewShareableLinkSerializer(links, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        operation_id="create_form_view_shareable_link",
+        description="Create a new shareable link for a form view.",
+        request=EnhancedFormViewShareableLinkSerializer,
+        responses={
+            201: EnhancedFormViewShareableLinkSerializer,
+            400: get_error_schema(["ERROR_REQUEST_BODY_VALIDATION"]),
+            404: get_error_schema(["ERROR_VIEW_DOES_NOT_EXIST"]),
+        },
+    )
+    @transaction.atomic
+    @map_exceptions({
+        ViewDoesNotExist: ERROR_VIEW_DOES_NOT_EXIST,
+    })
+    def post(self, request: Request, view_id: int) -> Response:
+        """Create a new shareable link for a form view."""
+        handler = ViewHandler()
+        view = handler.get_view(request.user, view_id, FormView)
+        
+        link_data = validate_data(
+            EnhancedFormViewShareableLinkSerializer, request.data
+        )
+        
+        enhanced_handler = EnhancedFormHandler()
+        created_link = enhanced_handler.create_shareable_link(
+            request.user, view, link_data
+        )
+        
+        serializer = EnhancedFormViewShareableLinkSerializer(created_link)
+        return Response(serializer.data, status=201)
+
+
+class EnhancedFormViewShareableLinkDetailView(APIView):
+    """API view for managing individual shareable links."""
+
+    @extend_schema(
+        operation_id="update_form_view_shareable_link",
+        description="Update a shareable link for a form view.",
+        request=EnhancedFormViewShareableLinkSerializer,
+        responses={
+            200: EnhancedFormViewShareableLinkSerializer,
+            400: get_error_schema(["ERROR_REQUEST_BODY_VALIDATION"]),
+            404: get_error_schema(["ERROR_VIEW_DOES_NOT_EXIST"]),
+        },
+    )
+    @transaction.atomic
+    @map_exceptions({
+        ViewDoesNotExist: ERROR_VIEW_DOES_NOT_EXIST,
+    })
+    def patch(self, request: Request, view_id: int, link_id: str) -> Response:
+        """Update a shareable link for a form view."""
+        handler = ViewHandler()
+        view = handler.get_view(request.user, view_id, FormView)
+        
+        link_data = validate_data(
+            EnhancedFormViewShareableLinkSerializer, request.data
+        )
+        
+        enhanced_handler = EnhancedFormHandler()
+        updated_link = enhanced_handler.update_shareable_link(
+            request.user, view, link_id, link_data
+        )
+        
+        serializer = EnhancedFormViewShareableLinkSerializer(updated_link)
+        return Response(serializer.data)
+
+    @extend_schema(
+        operation_id="delete_form_view_shareable_link",
+        description="Delete a shareable link for a form view.",
+        responses={
+            204: None,
+            404: get_error_schema(["ERROR_VIEW_DOES_NOT_EXIST"]),
+        },
+    )
+    @transaction.atomic
+    @map_exceptions({
+        ViewDoesNotExist: ERROR_VIEW_DOES_NOT_EXIST,
+    })
+    def delete(self, request: Request, view_id: int, link_id: str) -> Response:
+        """Delete a shareable link for a form view."""
+        handler = ViewHandler()
+        view = handler.get_view(request.user, view_id, FormView)
+        
+        enhanced_handler = EnhancedFormHandler()
+        enhanced_handler.delete_shareable_link(request.user, view, link_id)
+        
+        return Response(status=204)
+
+
+class EnhancedFormViewFieldOptionsView(APIView):
+    """API view for managing enhanced field options."""
+
+    @extend_schema(
+        operation_id="update_form_view_field_options_conditional_logic",
+        description="Update conditional logic for a form field.",
+        request=EnhancedFormViewFieldOptionsSerializer,
+        responses={
+            200: EnhancedFormViewFieldOptionsSerializer,
+            400: get_error_schema(["ERROR_REQUEST_BODY_VALIDATION"]),
+            404: get_error_schema(["ERROR_VIEW_DOES_NOT_EXIST"]),
+        },
+    )
+    @transaction.atomic
+    @map_exceptions({
+        ViewDoesNotExist: ERROR_VIEW_DOES_NOT_EXIST,
+    })
+    def patch(self, request: Request, view_id: int, field_id: int) -> Response:
+        """Update conditional logic and validation rules for a form field."""
+        from baserow.contrib.database.views.models import FormViewFieldOptions
+        
+        handler = ViewHandler()
+        view = handler.get_view(request.user, view_id, FormView)
+        
+        try:
+            field_options = FormViewFieldOptions.objects.get(
+                form_view=view, field_id=field_id
+            )
+        except FormViewFieldOptions.DoesNotExist:
+            raise ViewDoesNotExist()
+        
+        enhanced_handler = EnhancedFormHandler()
+        
+        # Update conditional logic if provided
+        if "conditional_logic" in request.data:
+            enhanced_handler.update_field_conditional_logic(
+                request.user, field_options, request.data["conditional_logic"]
+            )
+        
+        # Update validation rules if provided
+        if "validation_rules" in request.data:
+            enhanced_handler.update_field_validation_rules(
+                request.user, field_options, request.data["validation_rules"]
+            )
+        
+        serializer = EnhancedFormViewFieldOptionsSerializer(field_options)
+        return Response(serializer.data)

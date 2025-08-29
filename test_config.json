@@ -1,0 +1,186 @@
+{
+  "test_configuration": {
+    "project_name": "Baserow Monday.com Expansion",
+    "version": "1.0.0",
+    "test_environment": {
+      "python_version": "3.9+",
+      "node_version": "16+",
+      "django_version": "4.0+",
+      "vue_version": "2.6+"
+    },
+    "database": {
+      "engine": "postgresql",
+      "test_database": "baserow_test",
+      "isolation_level": "read_committed"
+    },
+    "timeouts": {
+      "unit_tests": 300,
+      "integration_tests": 600,
+      "performance_tests": 900,
+      "e2e_tests": 1800
+    },
+    "performance_benchmarks": {
+      "formula_evaluation_ms": 100,
+      "kanban_view_loading_ms": 2000,
+      "real_time_update_latency_ms": 500,
+      "batch_operations_per_second": 100,
+      "query_execution_ms": 1000,
+      "memory_usage_mb": 512
+    },
+    "coverage_requirements": {
+      "unit_tests_minimum": 80,
+      "integration_tests_minimum": 70,
+      "e2e_tests_minimum": 60,
+      "overall_minimum": 75
+    },
+    "test_suites": {
+      "backend_unit": {
+        "enabled": true,
+        "priority": "high",
+        "parallel": true,
+        "tests": [
+          "backend.tests.baserow.contrib.database.fields.test_comprehensive_field_types",
+          "backend.tests.baserow.contrib.database.views.test_comprehensive_view_types",
+          "backend.tests.baserow.contrib.database.fields.test_progress_bar_field",
+          "backend.tests.baserow.contrib.database.fields.test_people_field",
+          "backend.tests.baserow.contrib.database.views.test_kanban_view",
+          "backend.tests.baserow.contrib.database.views.test_kanban_models",
+          "backend.tests.baserow.contrib.database.collaboration.test_enhanced_comment_system",
+          "backend.tests.baserow.contrib.database.collaboration.test_comment_api",
+          "backend.tests.baserow.contrib.database.collaboration.test_comment_mentions",
+          "backend.tests.baserow.contrib.database.collaboration.test_collaboration_handler",
+          "backend.tests.baserow.contrib.database.collaboration.test_collaboration_integration",
+          "backend.tests.baserow.contrib.automation.nodes.test_enhanced_triggers",
+          "backend.tests.baserow.contrib.automation.nodes.test_enhanced_actions",
+          "backend.tests.baserow.contrib.dashboard",
+          "backend.tests.baserow.contrib.database.permissions.test_granular_permissions",
+          "backend.tests.baserow.contrib.security.test_security_system"
+        ]
+      },
+      "backend_integration": {
+        "enabled": true,
+        "priority": "high",
+        "parallel": false,
+        "tests": [
+          "backend.tests.baserow.contrib.database.api.test_comprehensive_api_integration"
+        ]
+      },
+      "performance": {
+        "enabled": true,
+        "priority": "medium",
+        "parallel": false,
+        "tests": [
+          "backend.tests.baserow.performance.test_comprehensive_performance"
+        ]
+      },
+      "frontend_unit": {
+        "enabled": true,
+        "priority": "high",
+        "parallel": true,
+        "tests": [
+          "test_comprehensive_components.spec.js",
+          "test_kanban_frontend.js",
+          "test_calendar_frontend.js",
+          "test_progress_bar_frontend.js",
+          "test_people_field_frontend.js",
+          "test_comment_system_frontend.js",
+          "test_activity_log_frontend.js",
+          "test_visual_automation_builder.js",
+          "test_enhanced_dashboard_widgets.js",
+          "test_advanced_chart_types.js"
+        ]
+      },
+      "e2e": {
+        "enabled": true,
+        "priority": "medium",
+        "parallel": false,
+        "tests": [
+          "comprehensive-workflows.spec.ts"
+        ]
+      },
+      "verification": {
+        "enabled": true,
+        "priority": "high",
+        "parallel": true,
+        "scripts": [
+          "verify_kanban_implementation.py",
+          "verify_calendar_implementation.py",
+          "verify_people_field_backend.py",
+          "verify_people_field_frontend.py",
+          "verify_progress_bar_frontend.py",
+          "verify_activity_logging_implementation.py",
+          "verify_enhanced_form_implementation.py",
+          "verify_enhanced_action_implementation.py",
+          "verify_dashboard_sharing_export.py",
+          "verify_granular_permissions.py",
+          "verify_security_implementation.py",
+          "verify_enhanced_api_implementation.py",
+          "verify_mobile_optimization.py"
+        ]
+      },
+      "feature_tests": {
+        "enabled": true,
+        "priority": "medium",
+        "parallel": true,
+        "tests": [
+          "test_kanban_simple.py",
+          "test_calendar_backend.py",
+          "test_timeline_backend.py",
+          "test_progress_bar_frontend.py",
+          "test_people_field_frontend.py",
+          "test_comment_system_frontend.py",
+          "test_activity_logging_system.py",
+          "test_notification_system.py",
+          "test_notification_system_integration.py",
+          "test_visual_automation_builder.js",
+          "test_enhanced_dashboard_widgets.py",
+          "test_dashboard_sharing_export.py",
+          "test_native_integrations.py",
+          "test_enhanced_api_capabilities.py",
+          "test_mobile_features.py"
+        ]
+      }
+    },
+    "reporting": {
+      "formats": ["json", "html", "junit"],
+      "output_directory": "test_reports",
+      "include_coverage": true,
+      "include_performance_metrics": true,
+      "notifications": {
+        "slack_webhook": null,
+        "email_recipients": [],
+        "on_failure_only": true
+      }
+    },
+    "ci_cd": {
+      "github_actions": true,
+      "gitlab_ci": false,
+      "jenkins": false,
+      "quality_gates": {
+        "coverage_threshold": 75,
+        "performance_regression_threshold": 10,
+        "security_issues_threshold": 0
+      }
+    },
+    "test_data": {
+      "fixtures_directory": "test_fixtures",
+      "large_dataset_size": 1000,
+      "performance_dataset_size": 5000,
+      "cleanup_after_tests": true
+    },
+    "mock_services": {
+      "google_calendar": true,
+      "slack_webhooks": true,
+      "email_service": true,
+      "file_storage": true,
+      "external_apis": true
+    },
+    "browser_testing": {
+      "browsers": ["chromium", "firefox", "webkit"],
+      "mobile_devices": ["iPhone 12", "Pixel 5", "iPad"],
+      "headless": true,
+      "screenshot_on_failure": true,
+      "video_recording": false
+    }
+  }
+}

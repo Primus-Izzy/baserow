@@ -54,6 +54,9 @@ from baserow.contrib.database.api.views.errors import (
 )
 from baserow.contrib.database.api.views.grid.serializers import (
     GridViewFieldOptionsSerializer,
+    GridViewConditionalFormattingSerializer,
+    GridViewFilterPresetSerializer,
+    GridViewColumnGroupSerializer,
 )
 from baserow.contrib.database.api.views.serializers import FieldOptionsField
 from baserow.contrib.database.api.views.utils import (
@@ -84,7 +87,12 @@ from baserow.contrib.database.views.exceptions import (
 )
 from baserow.contrib.database.views.filters import AdHocFilters
 from baserow.contrib.database.views.handler import ViewHandler
-from baserow.contrib.database.views.models import GridView
+from baserow.contrib.database.views.models import (
+    GridView,
+    GridViewConditionalFormatting,
+    GridViewFilterPreset,
+    GridViewColumnGroup,
+)
 from baserow.contrib.database.views.registries import (
     view_aggregation_type_registry,
     view_type_registry,
@@ -845,3 +853,262 @@ class PublicGridViewRowsView(APIView):
             response.data.update(group_by_metadata=serialized_group_by_metadata)
 
         return response
+
+
+class GridViewConditionalFormattingView(APIView):
+    """
+    API view for managing conditional formatting rules in grid views.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="view_id",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="Returns the conditional formatting rules for the grid view related to the provided value.",
+            )
+        ],
+        tags=["Database table grid view"],
+        operation_id="list_grid_view_conditional_formatting",
+        description="Lists all conditional formatting rules for a grid view.",
+        responses={
+            200: GridViewConditionalFormattingSerializer(many=True),
+            400: get_error_schema(["ERROR_USER_NOT_IN_GROUP"]),
+            404: get_error_schema(["ERROR_GRID_DOES_NOT_EXIST"]),
+        },
+    )
+    @map_exceptions(
+        {
+            UserNotInWorkspace: ERROR_USER_NOT_IN_GROUP,
+            ViewDoesNotExist: ERROR_GRID_DOES_NOT_EXIST,
+        }
+    )
+    def get(self, request: Request, view_id: int) -> Response:
+        """
+        Lists all conditional formatting rules for the specified grid view.
+        """
+        view = ViewHandler().get_view(view_id, GridView)
+        ViewHandler().check_view_permissions(
+            request.user, "read", view, view.table.database.workspace
+        )
+        
+        rules = view.conditional_formatting_rules.all()
+        serializer = GridViewConditionalFormattingSerializer(rules, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="view_id",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="Creates a conditional formatting rule for the grid view related to the provided value.",
+            )
+        ],
+        tags=["Database table grid view"],
+        operation_id="create_grid_view_conditional_formatting",
+        description="Creates a new conditional formatting rule for a grid view.",
+        request=GridViewConditionalFormattingSerializer,
+        responses={
+            201: GridViewConditionalFormattingSerializer,
+            400: get_error_schema(["ERROR_USER_NOT_IN_GROUP", "ERROR_REQUEST_BODY_VALIDATION"]),
+            404: get_error_schema(["ERROR_GRID_DOES_NOT_EXIST"]),
+        },
+    )
+    @map_exceptions(
+        {
+            UserNotInWorkspace: ERROR_USER_NOT_IN_GROUP,
+            ViewDoesNotExist: ERROR_GRID_DOES_NOT_EXIST,
+        }
+    )
+    @validate_body(GridViewConditionalFormattingSerializer)
+    def post(self, request: Request, view_id: int, data) -> Response:
+        """
+        Creates a new conditional formatting rule for the specified grid view.
+        """
+        view = ViewHandler().get_view(view_id, GridView)
+        ViewHandler().check_view_permissions(
+            request.user, "update", view, view.table.database.workspace
+        )
+        
+        rule = GridViewConditionalFormatting.objects.create(
+            grid_view=view,
+            **data
+        )
+        serializer = GridViewConditionalFormattingSerializer(rule)
+        return Response(serializer.data, status=201)
+
+
+class GridViewFilterPresetView(APIView):
+    """
+    API view for managing filter presets in grid views.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="view_id",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="Returns the filter presets for the grid view related to the provided value.",
+            )
+        ],
+        tags=["Database table grid view"],
+        operation_id="list_grid_view_filter_presets",
+        description="Lists all filter presets for a grid view.",
+        responses={
+            200: GridViewFilterPresetSerializer(many=True),
+            400: get_error_schema(["ERROR_USER_NOT_IN_GROUP"]),
+            404: get_error_schema(["ERROR_GRID_DOES_NOT_EXIST"]),
+        },
+    )
+    @map_exceptions(
+        {
+            UserNotInWorkspace: ERROR_USER_NOT_IN_GROUP,
+            ViewDoesNotExist: ERROR_GRID_DOES_NOT_EXIST,
+        }
+    )
+    def get(self, request: Request, view_id: int) -> Response:
+        """
+        Lists all filter presets for the specified grid view.
+        """
+        view = ViewHandler().get_view(view_id, GridView)
+        ViewHandler().check_view_permissions(
+            request.user, "read", view, view.table.database.workspace
+        )
+        
+        presets = view.filter_presets.all()
+        serializer = GridViewFilterPresetSerializer(presets, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="view_id",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="Creates a filter preset for the grid view related to the provided value.",
+            )
+        ],
+        tags=["Database table grid view"],
+        operation_id="create_grid_view_filter_preset",
+        description="Creates a new filter preset for a grid view.",
+        request=GridViewFilterPresetSerializer,
+        responses={
+            201: GridViewFilterPresetSerializer,
+            400: get_error_schema(["ERROR_USER_NOT_IN_GROUP", "ERROR_REQUEST_BODY_VALIDATION"]),
+            404: get_error_schema(["ERROR_GRID_DOES_NOT_EXIST"]),
+        },
+    )
+    @map_exceptions(
+        {
+            UserNotInWorkspace: ERROR_USER_NOT_IN_GROUP,
+            ViewDoesNotExist: ERROR_GRID_DOES_NOT_EXIST,
+        }
+    )
+    @validate_body(GridViewFilterPresetSerializer)
+    def post(self, request: Request, view_id: int, data) -> Response:
+        """
+        Creates a new filter preset for the specified grid view.
+        """
+        view = ViewHandler().get_view(view_id, GridView)
+        ViewHandler().check_view_permissions(
+            request.user, "update", view, view.table.database.workspace
+        )
+        
+        preset = GridViewFilterPreset.objects.create(
+            grid_view=view,
+            created_by=request.user,
+            **data
+        )
+        serializer = GridViewFilterPresetSerializer(preset)
+        return Response(serializer.data, status=201)
+
+
+class GridViewColumnGroupView(APIView):
+    """
+    API view for managing column groups in grid views.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="view_id",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="Returns the column groups for the grid view related to the provided value.",
+            )
+        ],
+        tags=["Database table grid view"],
+        operation_id="list_grid_view_column_groups",
+        description="Lists all column groups for a grid view.",
+        responses={
+            200: GridViewColumnGroupSerializer(many=True),
+            400: get_error_schema(["ERROR_USER_NOT_IN_GROUP"]),
+            404: get_error_schema(["ERROR_GRID_DOES_NOT_EXIST"]),
+        },
+    )
+    @map_exceptions(
+        {
+            UserNotInWorkspace: ERROR_USER_NOT_IN_GROUP,
+            ViewDoesNotExist: ERROR_GRID_DOES_NOT_EXIST,
+        }
+    )
+    def get(self, request: Request, view_id: int) -> Response:
+        """
+        Lists all column groups for the specified grid view.
+        """
+        view = ViewHandler().get_view(view_id, GridView)
+        ViewHandler().check_view_permissions(
+            request.user, "read", view, view.table.database.workspace
+        )
+        
+        groups = view.column_groups.all()
+        serializer = GridViewColumnGroupSerializer(groups, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="view_id",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="Creates a column group for the grid view related to the provided value.",
+            )
+        ],
+        tags=["Database table grid view"],
+        operation_id="create_grid_view_column_group",
+        description="Creates a new column group for a grid view.",
+        request=GridViewColumnGroupSerializer,
+        responses={
+            201: GridViewColumnGroupSerializer,
+            400: get_error_schema(["ERROR_USER_NOT_IN_GROUP", "ERROR_REQUEST_BODY_VALIDATION"]),
+            404: get_error_schema(["ERROR_GRID_DOES_NOT_EXIST"]),
+        },
+    )
+    @map_exceptions(
+        {
+            UserNotInWorkspace: ERROR_USER_NOT_IN_GROUP,
+            ViewDoesNotExist: ERROR_GRID_DOES_NOT_EXIST,
+        }
+    )
+    @validate_body(GridViewColumnGroupSerializer)
+    def post(self, request: Request, view_id: int, data) -> Response:
+        """
+        Creates a new column group for the specified grid view.
+        """
+        view = ViewHandler().get_view(view_id, GridView)
+        ViewHandler().check_view_permissions(
+            request.user, "update", view, view.table.database.workspace
+        )
+        
+        group = GridViewColumnGroup.objects.create(
+            grid_view=view,
+            **data
+        )
+        serializer = GridViewColumnGroupSerializer(group)
+        return Response(serializer.data, status=201)

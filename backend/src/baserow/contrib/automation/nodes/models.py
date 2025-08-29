@@ -31,6 +31,14 @@ __all__ = [
     "LocalBaserowUpdateRowActionNode",
     "LocalBaserowDeleteRowActionNode",
     "CoreSMTPEmailActionNode",
+    # Enhanced action models
+    "NotificationActionNode",
+    "WebhookActionNode", 
+    "StatusChangeActionNode",
+    "ConditionalBranchNode",
+    "DelayActionNode",
+    "WorkflowExecutionLog",
+    "ActionTemplate",
 ]
 
 
@@ -255,3 +263,15 @@ class CoreHTTPRequestActionNode(AutomationActionNode):
 
 class CoreSMTPEmailActionNode(AutomationActionNode):
     ...
+
+
+# Import enhanced action models
+from baserow.contrib.automation.nodes.enhanced_action_models import (
+    NotificationActionNode,
+    WebhookActionNode,
+    StatusChangeActionNode,
+    ConditionalBranchNode,
+    DelayActionNode,
+    WorkflowExecutionLog,
+    ActionTemplate,
+)

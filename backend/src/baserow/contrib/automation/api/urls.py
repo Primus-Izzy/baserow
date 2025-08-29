@@ -2,6 +2,8 @@ from django.urls import include, path, re_path
 
 from baserow.contrib.automation.api.nodes import urls as node_urls
 from baserow.contrib.automation.api.workflows import urls as workflow_urls
+from baserow.contrib.automation.api.enhanced_triggers import urls as enhanced_trigger_urls
+from baserow.contrib.automation.api.enhanced_actions import urls as enhanced_action_urls
 
 app_name = "baserow.contrib.automation.api"
 
@@ -28,6 +30,20 @@ paths_without_automation_id = [
         include(
             node_urls,
             namespace="nodes",
+        ),
+    ),
+    path(
+        "triggers/",
+        include(
+            enhanced_trigger_urls,
+            namespace="enhanced_triggers",
+        ),
+    ),
+    path(
+        "actions/",
+        include(
+            enhanced_action_urls,
+            namespace="enhanced_actions",
         ),
     ),
 ]

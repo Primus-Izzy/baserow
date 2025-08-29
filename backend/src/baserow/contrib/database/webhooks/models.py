@@ -1,147 +1,170 @@
+"""
+Models for webhook system with reliable delivery.
+"""
 import uuid
-
-from django.conf import settings
-from django.contrib.contenttypes.fields import GenericRelation
-from django.core.validators import MaxLengthValidator
 from django.db import models
+from django.contrib.auth import get_user_model
+from baserow.contrib.database.models import Table
+from baserow.core.models import Group
 
-from baserow.contrib.database.fields.models import Field
-from baserow.contrib.database.table.models import Table
-from baserow.contrib.database.views.models import View
-from baserow.core.models import CreatedAndUpdatedOnMixin
-
-from .validators import header_name_validator, header_value_validator, url_validator
+User = get_user_model()
 
 
-class WebhookRequestMethods(models.TextChoices):
-    POST = "POST"
-    GET = "GET"
-    PUT = "PUT"
-    PATCH = "PATCH"
-    DELETE = "DELETE"
-
-
-class TableWebhook(CreatedAndUpdatedOnMixin, models.Model):
-    table = models.ForeignKey(Table, on_delete=models.CASCADE)
-    active = models.BooleanField(
-        default=True,
-        help_text="Indicates whether the web hook is active. When a webhook has "
-        "failed multiple times, it will automatically be deactivated.",
-    )
-    use_user_field_names = models.BooleanField(
-        default=True,
-        help_text="Indicates whether the field names must be used as payload key "
-        "instead of the id.",
-    )
-
-    # We use a `TextField` here as Django `URLField` is based on 255 chars
-    # limited `CharField`
-    url = models.TextField(
-        help_text="The URL that must be called when the webhook is triggered.",
-        validators=[MaxLengthValidator(2000), url_validator],
-    )
-    request_method = models.CharField(
-        max_length=10,
-        choices=WebhookRequestMethods.choices,
-        default=WebhookRequestMethods.POST,
-        help_text="The request method that be used when the event occurs.",
-    )
-    name = models.CharField(
-        max_length=255, help_text="An internal name of the webhook."
-    )
-    include_all_events = models.BooleanField(
-        default=True,
-        help_text="Indicates whether this webhook should listen to all events.",
-    )
-    failed_triggers = models.IntegerField(
-        default=0, help_text="The amount of failed webhook calls."
-    )
-
-    @property
-    def header_dict(self):
-        return {header.name: header.value for header in self.headers.all()}
-
-    @property
-    def batch_limit(self) -> int:
-        """
-        This value will be used to limit the amount batches a single webhook can make to
-        paginate the payload. If the payload is too large to be sent in one go, the
-        event_type can split it into multiple batches. If the number of batches exceeds
-        this limit, a notification will be sent to workspace admins informing them that
-        the webhook couldn't send all the data.
-        """
-
-        return settings.BASEROW_WEBHOOKS_BATCH_LIMIT
-
-    class Meta:
-        ordering = ("id",)
-
-
-class TableWebhookEvent(CreatedAndUpdatedOnMixin, models.Model):
-    webhook = models.ForeignKey(
-        TableWebhook, related_name="events", on_delete=models.CASCADE
-    )
-    event_type = models.CharField(max_length=50)
-    fields = models.ManyToManyField(Field)
-    views = models.ManyToManyField(View)
-    view_subscriptions = GenericRelation(
-        "ViewSubscription",
-        content_type_field="subscriber_content_type",
-        object_id_field="subscriber_id",
-    )
-
-    def get_type(self):
-        from .registries import webhook_event_type_registry
-
-        return webhook_event_type_registry.get(self.event_type)
-
-    class Meta:
-        ordering = ("id",)
-
-
-class TableWebhookHeader(models.Model):
-    webhook = models.ForeignKey(
-        TableWebhook, related_name="headers", on_delete=models.CASCADE
-    )
-    name = models.TextField(validators=[header_name_validator])
-    value = models.TextField(validators=[header_value_validator])
-
-    class Meta:
-        ordering = ("id",)
-
-
-class TableWebhookCall(models.Model):
-    event_id = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="Event ID where the call originated from.",
-    )
-    batch_id = models.PositiveIntegerField(
+class Webhook(models.Model):
+    """
+    Model representing a webhook endpoint for real-time notifications.
+    """
+    TRIGGER_CHOICES = [
+        ('row_created', 'Row Created'),
+        ('row_updated', 'Row Updated'),
+        ('row_deleted', 'Row Deleted'),
+        ('table_created', 'Table Created'),
+        ('table_updated', 'Table Updated'),
+        ('table_deleted', 'Table Deleted'),
+        ('field_created', 'Field Created'),
+        ('field_updated', 'Field Updated'),
+        ('field_deleted', 'Field Deleted'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('paused', 'Paused'),
+        ('disabled', 'Disabled'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    url = models.URLField(max_length=2000)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='webhooks')
+    table = models.ForeignKey(
+        Table, 
+        on_delete=models.CASCADE, 
+        related_name='webhooks',
         null=True,
-        help_text=(
-            "The batch ID for this call. Null if not part of a batch. "
-            "Used for batching multiple calls of the same event_id due to large data."
-        ),
+        blank=True,
+        help_text="If specified, webhook only triggers for this table"
     )
+    triggers = models.JSONField(
+        default=list,
+        help_text="List of trigger events that activate this webhook"
+    )
+    headers = models.JSONField(
+        default=dict,
+        help_text="Custom headers to include in webhook requests"
+    )
+    secret = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Secret for webhook signature verification"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='active'
+    )
+    max_retries = models.PositiveIntegerField(default=3)
+    retry_delay = models.PositiveIntegerField(
+        default=60,
+        help_text="Delay in seconds between retries"
+    )
+    timeout = models.PositiveIntegerField(
+        default=30,
+        help_text="Request timeout in seconds"
+    )
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Statistics
+    total_deliveries = models.PositiveIntegerField(default=0)
+    successful_deliveries = models.PositiveIntegerField(default=0)
+    failed_deliveries = models.PositiveIntegerField(default=0)
+    last_delivery_at = models.DateTimeField(null=True, blank=True)
+    last_success_at = models.DateTimeField(null=True, blank=True)
+    last_failure_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'database_webhook'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.name} ({self.url})"
+
+
+class WebhookDelivery(models.Model):
+    """
+    Model tracking individual webhook delivery attempts.
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('success', 'Success'),
+        ('failed', 'Failed'),
+        ('retrying', 'Retrying'),
+        ('abandoned', 'Abandoned'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     webhook = models.ForeignKey(
-        TableWebhook, related_name="calls", on_delete=models.CASCADE
+        Webhook, 
+        on_delete=models.CASCADE, 
+        related_name='deliveries'
+    )
+    trigger_event = models.CharField(max_length=50)
+    payload = models.JSONField()
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+    attempts = models.PositiveIntegerField(default=0)
+    max_attempts = models.PositiveIntegerField(default=3)
+    next_retry_at = models.DateTimeField(null=True, blank=True)
+    
+    # Response details
+    response_status_code = models.PositiveIntegerField(null=True, blank=True)
+    response_headers = models.JSONField(default=dict)
+    response_body = models.TextField(blank=True)
+    error_message = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'database_webhook_delivery'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['webhook', 'status']),
+            models.Index(fields=['next_retry_at']),
+        ]
+    
+    def __str__(self):
+        return f"Delivery {self.id} for {self.webhook.name}"
+
+
+class WebhookLog(models.Model):
+    """
+    Model for webhook activity logging.
+    """
+    webhook = models.ForeignKey(
+        Webhook, 
+        on_delete=models.CASCADE, 
+        related_name='logs'
+    )
+    delivery = models.ForeignKey(
+        WebhookDelivery,
+        on_delete=models.CASCADE,
+        related_name='logs',
+        null=True,
+        blank=True
     )
     event_type = models.CharField(max_length=50)
-    called_time = models.DateTimeField(null=True)
-    called_url = models.TextField(validators=[MaxLengthValidator(2000), url_validator])
-    request = models.TextField(
-        null=True, help_text="A text copy of the request headers and body."
-    )
-    response = models.TextField(
-        null=True, help_text="A text copy of the response headers and body."
-    )
-    response_status = models.IntegerField(
-        null=True, help_text="The HTTP response status code."
-    )
-    error = models.TextField(
-        null=True, help_text="An internal error reflecting what went wrong."
-    )
-
+    message = models.TextField()
+    details = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
     class Meta:
-        ordering = ("-called_time",)
-        unique_together = ("event_id", "batch_id", "webhook", "event_type")
+        db_table = 'database_webhook_log'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['webhook', 'created_at']),
+        ]

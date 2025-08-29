@@ -951,6 +951,49 @@ class AutonumberField(Field):
     pass
 
 
+class PeopleField(Field):
+    """
+    People/Owner field that links to Baserow user accounts within the workspace.
+    Supports single or multiple user selection with permission integration and
+    notification capabilities.
+    """
+    
+    # Selection configuration
+    multiple_people = models.BooleanField(
+        default=False,
+        help_text="Whether multiple people can be selected for this field"
+    )
+    
+    # Notification configuration
+    notify_when_added = models.BooleanField(
+        default=True,
+        help_text="Whether to notify users when they are added to this field"
+    )
+    
+    notify_when_removed = models.BooleanField(
+        default=False,
+        help_text="Whether to notify users when they are removed from this field"
+    )
+    
+    # Default value configuration
+    people_default = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Default user IDs for this field. Can be None, user IDs, or 0 for current user"
+    )
+    
+    # Display configuration
+    show_avatar = models.BooleanField(
+        default=True,
+        help_text="Whether to show user avatars in the field display"
+    )
+    
+    show_email = models.BooleanField(
+        default=False,
+        help_text="Whether to show user email addresses in the field display"
+    )
+
+
 class PasswordField(Field):
     allow_endpoint_authentication = models.BooleanField(
         db_default=False,
@@ -959,6 +1002,107 @@ class PasswordField(Field):
         "`password_field_authentication` API endpoint to check if the password is "
         "correct. This can be used to use Baserow as authentication backend.",
     )
+
+
+class ProgressBarField(Field):
+    """
+    Progress bar field that displays visual progress indicators based on numeric values.
+    Can be linked to numeric fields, formulas, or manual input with customizable
+    color schemes and range configurations.
+    """
+    
+    # Source configuration - what drives the progress value
+    source_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('manual', 'Manual input'),
+            ('field', 'Numeric field'),
+            ('formula', 'Formula calculation'),
+        ],
+        default='manual',
+        help_text="Source type for progress calculation"
+    )
+    
+    source_field = models.ForeignKey(
+        'Field',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Source field for progress calculation (when source_type is 'field')"
+    )
+    
+    source_formula = models.TextField(
+        blank=True,
+        default='',
+        help_text="Formula expression for progress calculation (when source_type is 'formula')"
+    )
+    
+    # Range configuration
+    min_value = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Minimum value for progress calculation"
+    )
+    
+    max_value = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=100,
+        help_text="Maximum value for progress calculation"
+    )
+    
+    # Display configuration
+    show_percentage = models.BooleanField(
+        default=True,
+        help_text="Whether to show percentage text on the progress bar"
+    )
+    
+    color_scheme = models.CharField(
+        max_length=20,
+        choices=[
+            ('default', 'Default (blue)'),
+            ('success', 'Success (green)'),
+            ('warning', 'Warning (yellow)'),
+            ('danger', 'Danger (red)'),
+            ('custom', 'Custom colors'),
+        ],
+        default='default',
+        help_text="Color scheme for the progress bar"
+    )
+    
+    custom_color_start = models.CharField(
+        max_length=7,
+        blank=True,
+        default='#3b82f6',
+        help_text="Start color for custom gradient (hex format)"
+    )
+    
+    custom_color_end = models.CharField(
+        max_length=7,
+        blank=True,
+        default='#1d4ed8',
+        help_text="End color for custom gradient (hex format)"
+    )
+    
+    def save(self, *args, **kwargs):
+        """
+        Validate field configuration before saving.
+        """
+        if self.source_type == 'field' and not self.source_field:
+            raise ValueError("Source field is required when source_type is 'field'")
+        
+        if self.source_type == 'formula' and not self.source_formula:
+            raise ValueError("Source formula is required when source_type is 'formula'")
+        
+        if self.min_value >= self.max_value:
+            raise ValueError("Minimum value must be less than maximum value")
+        
+        if self.color_scheme == 'custom':
+            if not self.custom_color_start or not self.custom_color_end:
+                raise ValueError("Custom colors are required when color_scheme is 'custom'")
+        
+        super().save(*args, **kwargs)
 
 
 class DuplicateFieldJob(

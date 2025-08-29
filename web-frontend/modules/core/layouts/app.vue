@@ -12,6 +12,9 @@
           :width="col1Width"
           @set-col1-width="col1Width = $event"
         ></Sidebar>
+        <div class="layout__notifications">
+          <NotificationCenter />
+        </div>
       </div>
       <div class="layout__col-2" :style="{ left: col1Width + 'px' }">
         <nuxt />
@@ -41,6 +44,7 @@ import Sidebar from '@baserow/modules/core/components/sidebar/Sidebar'
 import undoRedo from '@baserow/modules/core/mixins/undoRedo'
 import HorizontalResize from '@baserow/modules/core/components/HorizontalResize'
 import GuidedTour from '@baserow/modules/core/components/guidedTour/GuidedTour'
+import NotificationCenter from '@baserow/modules/database/components/notifications/NotificationCenter'
 import { CORE_ACTION_SCOPES } from '@baserow/modules/core/utils/undoRedoConstants'
 import {
   isOsSpecificModifierPressed,
@@ -53,6 +57,7 @@ export default {
     Sidebar,
     HorizontalResize,
     GuidedTour,
+    NotificationCenter,
   },
   mixins: [undoRedo],
   middleware: [
@@ -154,3 +159,12 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+.layout__notifications {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+}
+</style>

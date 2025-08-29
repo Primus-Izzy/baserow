@@ -175,3 +175,13 @@ class LocalBaserowRowsDeletedNodeTriggerType(AutomationNodeTriggerType):
     type = "rows_deleted"
     model_class = LocalBaserowRowsDeletedTriggerNode
     service_type = LocalBaserowRowsDeletedTriggerServiceType.type
+
+
+# Enhanced Action Node Types
+from baserow.contrib.automation.nodes.enhanced_action_node_types import (
+    NotificationActionNodeType,
+    WebhookActionNodeType,
+    StatusChangeActionNodeType,
+    ConditionalBranchNodeType,
+    DelayActionNodeType,
+)

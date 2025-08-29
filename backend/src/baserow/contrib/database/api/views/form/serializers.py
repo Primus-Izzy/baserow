@@ -213,3 +213,125 @@ class FormViewNotifyOnSubmitSerializerMixin(serializers.Serializer):
             ret["receive_notification_on_submit"] = receive_notification
 
         return ret
+
+
+class EnhancedFormViewCustomBrandingSerializer(serializers.Serializer):
+    """Serializer for custom branding configuration."""
+    logo_url = serializers.URLField(required=False, allow_blank=True)
+    logo_alt = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    primary_color = serializers.CharField(required=False, allow_blank=True, max_length=7)
+    secondary_color = serializers.CharField(required=False, allow_blank=True, max_length=7)
+    background_color = serializers.CharField(required=False, allow_blank=True, max_length=7)
+    text_color = serializers.CharField(required=False, allow_blank=True, max_length=7)
+    thank_you_title = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    thank_you_message = serializers.CharField(required=False, allow_blank=True)
+    custom_css = serializers.CharField(required=False, allow_blank=True)
+
+
+class EnhancedFormViewAccessControlSerializer(serializers.Serializer):
+    """Serializer for access control configuration."""
+    public_access = serializers.BooleanField(default=True)
+    require_authentication = serializers.BooleanField(default=False)
+    allowed_domains = serializers.ListField(
+        child=serializers.CharField(max_length=255),
+        required=False,
+        allow_empty=True
+    )
+    ip_restrictions = serializers.ListField(
+        child=serializers.CharField(max_length=45),
+        required=False,
+        allow_empty=True
+    )
+    submission_limit = serializers.IntegerField(required=False, allow_null=True, min_value=1)
+    time_restrictions = serializers.DictField(required=False, allow_empty=True)
+
+
+class EnhancedFormViewValidationConfigSerializer(serializers.Serializer):
+    """Serializer for validation configuration."""
+    global_rules = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        allow_empty=True
+    )
+    field_rules = serializers.DictField(required=False, allow_empty=True)
+    custom_messages = serializers.DictField(required=False, allow_empty=True)
+
+
+class EnhancedFormViewShareableLinkSerializer(serializers.Serializer):
+    """Serializer for shareable link configuration."""
+    id = serializers.CharField(read_only=True)
+    token = serializers.CharField(read_only=True)
+    name = serializers.CharField(max_length=255)
+    description = serializers.CharField(required=False, allow_blank=True)
+    access_type = serializers.ChoiceField(
+        choices=[("public", "Public"), ("restricted", "Restricted")],
+        default="public"
+    )
+    expires_at = serializers.DateTimeField(required=False, allow_null=True)
+    max_submissions = serializers.IntegerField(required=False, allow_null=True, min_value=1)
+    current_submissions = serializers.IntegerField(read_only=True)
+    is_active = serializers.BooleanField(default=True)
+    created_by = serializers.IntegerField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True, required=False)
+    permissions = serializers.DictField(required=False, allow_empty=True)
+
+
+class EnhancedFormViewSerializer(serializers.ModelSerializer):
+    """Enhanced serializer for FormView with new features."""
+    custom_branding = EnhancedFormViewCustomBrandingSerializer(required=False)
+    access_control = EnhancedFormViewAccessControlSerializer(required=False)
+    validation_config = EnhancedFormViewValidationConfigSerializer(required=False)
+    shareable_links = EnhancedFormViewShareableLinkSerializer(many=True, required=False)
+
+    class Meta:
+        model = FormView
+        fields = (
+            "id", "name", "title", "description", "mode", "cover_image", "logo_image",
+            "submit_text", "submit_action", "submit_action_message", 
+            "submit_action_redirect_url", "public", "slug", "custom_branding",
+            "access_control", "validation_config", "shareable_links"
+        )
+
+
+class EnhancedFormViewFieldOptionsConditionalLogicSerializer(serializers.Serializer):
+    """Serializer for conditional logic configuration."""
+    enabled = serializers.BooleanField(default=False)
+    logic_type = serializers.ChoiceField(
+        choices=[("AND", "AND"), ("OR", "OR")],
+        default="AND"
+    )
+    show_when_true = serializers.BooleanField(default=True)
+    conditions = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        allow_empty=True
+    )
+
+
+class EnhancedFormViewFieldOptionsValidationRuleSerializer(serializers.Serializer):
+    """Serializer for field validation rules."""
+    type = serializers.ChoiceField(choices=[
+        ("required", "Required"),
+        ("min_length", "Minimum Length"),
+        ("max_length", "Maximum Length"),
+        ("pattern", "Pattern"),
+        ("email", "Email"),
+        ("url", "URL"),
+        ("numeric", "Numeric"),
+        ("min_value", "Minimum Value"),
+        ("max_value", "Maximum Value"),
+    ])
+    value = serializers.CharField(required=False, allow_blank=True)
+    error_message = serializers.CharField(max_length=255)
+
+
+class EnhancedFormViewFieldOptionsSerializer(FormViewFieldOptionsSerializer):
+    """Enhanced serializer for FormViewFieldOptions with new features."""
+    conditional_logic = EnhancedFormViewFieldOptionsConditionalLogicSerializer(required=False)
+    validation_rules = EnhancedFormViewFieldOptionsValidationRuleSerializer(many=True, required=False)
+
+    class Meta(FormViewFieldOptionsSerializer.Meta):
+        fields = FormViewFieldOptionsSerializer.Meta.fields + (
+            "conditional_logic", "validation_rules"
+        )

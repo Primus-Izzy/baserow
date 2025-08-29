@@ -157,6 +157,33 @@ class AutomationConfig(AppConfig):
                 LocalBaserowRowsDeletedNodeTriggerType()
             )
 
+            # Register enhanced trigger node types
+            from baserow.contrib.automation.nodes.enhanced_trigger_node_types import (
+                DateBasedTriggerNodeType,
+                LinkedRecordChangeTriggerNodeType,
+                WebhookTriggerNodeType,
+                ConditionalTriggerNodeType,
+            )
+            
+            automation_node_type_registry.register(DateBasedTriggerNodeType())
+            automation_node_type_registry.register(LinkedRecordChangeTriggerNodeType())
+            automation_node_type_registry.register(WebhookTriggerNodeType())
+            automation_node_type_registry.register(ConditionalTriggerNodeType())
+
+            # Register enhanced trigger service types
+            from baserow.contrib.automation.nodes.enhanced_trigger_service_types import (
+                DateBasedTriggerServiceType,
+                LinkedRecordChangeTriggerServiceType,
+                WebhookTriggerServiceType,
+                ConditionalTriggerServiceType,
+            )
+            from baserow.core.services.registries import service_type_registry
+            
+            service_type_registry.register(DateBasedTriggerServiceType())
+            service_type_registry.register(LinkedRecordChangeTriggerServiceType())
+            service_type_registry.register(WebhookTriggerServiceType())
+            service_type_registry.register(ConditionalTriggerServiceType())
+
             from baserow.contrib.automation.data_providers.data_provider_types import (
                 PreviousNodeProviderType,
             )

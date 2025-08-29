@@ -1,278 +1,103 @@
-from django.utils.functional import lazy
-
-from drf_spectacular.openapi import OpenApiTypes
-from drf_spectacular.utils import extend_schema_field
+"""
+Serializers for webhook API endpoints.
+"""
 from rest_framework import serializers
-
-from baserow.contrib.database.api.webhooks.validators import (
-    http_header_validation,
-    url_validation,
-)
-from baserow.contrib.database.webhooks.handler import WebhookHandler
-from baserow.contrib.database.webhooks.models import TableWebhook, TableWebhookCall
-from baserow.contrib.database.webhooks.registries import webhook_event_type_registry
-from baserow.core.utils import truncate_middle
+from baserow.contrib.database.webhooks.models import Webhook, WebhookDelivery, WebhookLog
 
 
-class TableWebhookEventsSerializer(serializers.ListField):
-    child = serializers.ChoiceField(
-        choices=lazy(webhook_event_type_registry.get_types, list)()
-    )
-
-
-class TableWebhookEventConfig(serializers.Serializer):
-    event_type = serializers.ChoiceField(
-        help_text="The type of the event.",
-        choices=webhook_event_type_registry.get_types(),
-    )
-    fields = serializers.ListField(
-        required=False,
-        child=serializers.IntegerField(),
-        help_text="A list of field IDs that are related to the event.",
-        allow_empty=True,
-    )
-    views = serializers.ListField(
-        required=False,
-        child=serializers.IntegerField(),
-        help_text="A list of view IDs that are related to the event.",
-    )
-
-
-class TableWebhookCreateRequestSerializer(serializers.ModelSerializer):
-    events = serializers.ListField(
-        required=False,
-        child=serializers.ChoiceField(choices=webhook_event_type_registry.get_types()),
-        help_text="A list containing the events that will trigger this webhook.",
-    )
-    event_config = serializers.ListField(
-        required=False,
-        child=TableWebhookEventConfig(),
-        help_text="A list containing the addition event options.",
-    )
-    headers = serializers.DictField(
-        required=False,
-        validators=[http_header_validation],
-        help_text="The additional headers as an object where the key is the name and "
-        "the value the value.",
-    )
-    url = serializers.CharField(
-        max_length=2000,
-        validators=[url_validation],
-        help_text="The URL that must be called when the webhook is triggered.",
-    )
-
+class WebhookSerializer(serializers.ModelSerializer):
+    """Serializer for webhook model."""
+    
     class Meta:
-        model = TableWebhook
-        fields = (
-            "url",
-            "include_all_events",
-            "events",
-            "event_config",
-            "request_method",
-            "headers",
-            "name",
-            "use_user_field_names",
-        )
-
-
-class TableWebhookUpdateRequestSerializer(serializers.ModelSerializer):
-    events = serializers.ListField(
-        required=False,
-        child=serializers.ChoiceField(choices=webhook_event_type_registry.get_types()),
-        help_text="A list containing the events that will trigger this webhook.",
-    )
-    event_config = serializers.ListField(
-        required=False,
-        child=TableWebhookEventConfig(),
-        help_text="A list containing the addition event options.",
-    )
-    headers = serializers.DictField(
-        required=False,
-        validators=[http_header_validation],
-        help_text="The additional headers as an object where the key is the name and "
-        "the value the value.",
-    )
-    url = serializers.CharField(
-        required=False,
-        max_length=2000,
-        validators=[url_validation],
-        help_text="The URL that must be called when the webhook is triggered.",
-    )
-
-    class Meta:
-        model = TableWebhook
-        fields = (
-            "url",
-            "include_all_events",
-            "events",
-            "event_config",
-            "request_method",
-            "headers",
-            "name",
-            "active",
-            "use_user_field_names",
-        )
-        extra_kwargs = {
-            "name": {"required": False},
-            "active": {"required": False},
-            "use_user_field_names": {"required": False},
-            "request_method": {"required": False},
-        }
-
-
-class TableWebhookCallSerializer(serializers.ModelSerializer):
-    request = serializers.SerializerMethodField(
-        help_text="A text copy of the request headers and body."
-    )
-    response = serializers.SerializerMethodField(
-        help_text="A text copy of the response headers and body."
-    )
-
-    class Meta:
-        model = TableWebhookCall
+        model = Webhook
         fields = [
-            "id",
-            "event_id",
-            "event_type",
-            "called_time",
-            "called_url",
-            "request",
-            "response",
-            "response_status",
-            "error",
+            'id', 'name', 'url', 'table', 'triggers', 'headers', 'status',
+            'max_retries', 'retry_delay', 'timeout', 'created_at', 'updated_at',
+            'total_deliveries', 'successful_deliveries', 'failed_deliveries',
+            'last_delivery_at', 'last_success_at', 'last_failure_at'
         ]
+        read_only_fields = [
+            'id', 'created_at', 'updated_at', 'total_deliveries',
+            'successful_deliveries', 'failed_deliveries', 'last_delivery_at',
+            'last_success_at', 'last_failure_at'
+        ]
+    
+    def validate_triggers(self, value):
+        """Validate webhook triggers."""
+        valid_triggers = [choice[0] for choice in Webhook.TRIGGER_CHOICES]
+        for trigger in value:
+            if trigger not in valid_triggers:
+                raise serializers.ValidationError(f"Invalid trigger: {trigger}")
+        return value
+    
+    def validate_max_retries(self, value):
+        """Validate max retries."""
+        if value < 0 or value > 10:
+            raise serializers.ValidationError("Max retries must be between 0 and 10")
+        return value
+    
+    def validate_retry_delay(self, value):
+        """Validate retry delay."""
+        if value < 1 or value > 3600:
+            raise serializers.ValidationError("Retry delay must be between 1 and 3600 seconds")
+        return value
+    
+    def validate_timeout(self, value):
+        """Validate timeout."""
+        if value < 1 or value > 300:
+            raise serializers.ValidationError("Timeout must be between 1 and 300 seconds")
+        return value
 
-    def get_request(self, obj):
-        if obj.request is None:
-            return ""
-        return truncate_middle(obj.request, 100000, "\n...(truncated)\n")
 
-    def get_response(self, obj):
-        if obj.response is None:
-            return ""
-        return truncate_middle(obj.response, 100000, "\n...(truncated)\n")
+class CreateWebhookSerializer(WebhookSerializer):
+    """Serializer for creating webhooks."""
+    secret = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    
+    class Meta(WebhookSerializer.Meta):
+        fields = WebhookSerializer.Meta.fields + ['secret']
 
 
-class TableWebhookSerializer(serializers.ModelSerializer):
-    events = serializers.SerializerMethodField(
-        help_text="A list containing the events that will trigger this webhook.",
-    )
-    event_config = serializers.SerializerMethodField(
-        help_text="A list containing the addition event options."
-    )
-    headers = serializers.SerializerMethodField(
-        help_text="The additional headers as an object where the key is the name and "
-        "the value the value."
-    )
-    calls = TableWebhookCallSerializer(
-        many=True, help_text="All the calls that this webhook made."
-    )
-
+class WebhookDeliverySerializer(serializers.ModelSerializer):
+    """Serializer for webhook delivery model."""
+    
     class Meta:
-        model = TableWebhook
+        model = WebhookDelivery
         fields = [
-            "id",
-            "events",
-            "event_config",
-            "headers",
-            "calls",
-            "created_on",
-            "updated_on",
-            "use_user_field_names",
-            "url",
-            "request_method",
-            "name",
-            "include_all_events",
-            "failed_triggers",
-            "active",
+            'id', 'trigger_event', 'status', 'attempts', 'max_attempts',
+            'next_retry_at', 'response_status_code', 'response_headers',
+            'error_message', 'created_at', 'delivered_at'
         ]
-
-    @extend_schema_field(OpenApiTypes.OBJECT)
-    def get_events(self, instance):
-        return [event.event_type for event in instance.events.all()]
-
-    @extend_schema_field(TableWebhookEventConfig(many=True))
-    def get_event_config(self, instance):
-        events = []
-        for event in instance.events.all():
-            evt = {"event_type": event.event_type}
-            if fields := [f.id for f in event.fields.all()]:
-                evt["fields"] = fields
-            if views := [v.id for v in event.views.all()]:
-                evt["views"] = views
-            events.append(evt)
-
-        return [TableWebhookEventConfig(event).data for event in events]
-
-    @extend_schema_field(OpenApiTypes.OBJECT)
-    def get_headers(self, instance):
-        return {header.name: header.value for header in instance.headers.all()}
+        read_only_fields = fields
 
 
-class TableWebhookTestCallRequestSerializer(serializers.ModelSerializer):
-    event_type = serializers.ChoiceField(
-        choices=lazy(webhook_event_type_registry.get_types, list)(),
-        help_text="The event type that must be used for the test call.",
-    )
-    headers = serializers.DictField(
-        required=False,
-        validators=[http_header_validation],
-        help_text="The additional headers as an object where the key is the name and "
-        "the value the value.",
-    )
-    url = serializers.CharField(
-        max_length=2000,
-        validators=[url_validation],
-        help_text="The URL that must be called when the webhook is triggered.",
-    )
-
+class WebhookLogSerializer(serializers.ModelSerializer):
+    """Serializer for webhook log model."""
+    
     class Meta:
-        model = TableWebhook
-        fields = (
-            "url",
-            "event_type",
-            "request_method",
-            "headers",
-            "use_user_field_names",
-        )
+        model = WebhookLog
+        fields = [
+            'id', 'event_type', 'message', 'details', 'created_at'
+        ]
+        read_only_fields = fields
 
 
-class TableWebhookTestCallResponseSerializer(serializers.Serializer):
-    request = serializers.SerializerMethodField(
-        help_text="A text copy of the request headers and body."
-    )
-    response = serializers.SerializerMethodField(
-        help_text="A text copy of the response headers and body."
-    )
-    status_code = serializers.SerializerMethodField(
-        help_text="The HTTP response status code."
-    )
-    is_unreachable = serializers.SerializerMethodField(
-        help_text="Indicates whether the provided URL could be reached."
-    )
+class WebhookTestSerializer(serializers.Serializer):
+    """Serializer for testing webhook endpoints."""
+    test_payload = serializers.JSONField(required=False, default=dict)
+    
+    def validate_test_payload(self, value):
+        """Validate test payload."""
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("Test payload must be a JSON object")
+        return value
 
-    @extend_schema_field(OpenApiTypes.STR)
-    def get_request(self, instance):
-        request = instance.get("request")
 
-        if request is not None:
-            return WebhookHandler().format_request(request)
-        return ""
-
-    @extend_schema_field(OpenApiTypes.STR)
-    def get_response(self, instance):
-        response = instance.get("response")
-        if response is not None:
-            return WebhookHandler().format_response(response)
-        return ""
-
-    @extend_schema_field(OpenApiTypes.INT)
-    def get_status_code(self, instance):
-        response = instance.get("response")
-        if response is not None:
-            return response.status_code
-        return None
-
-    @extend_schema_field(OpenApiTypes.BOOL)
-    def get_is_unreachable(self, instance):
-        return "response" not in instance
+class WebhookStatsSerializer(serializers.Serializer):
+    """Serializer for webhook statistics."""
+    total_webhooks = serializers.IntegerField()
+    active_webhooks = serializers.IntegerField()
+    total_deliveries = serializers.IntegerField()
+    successful_deliveries = serializers.IntegerField()
+    failed_deliveries = serializers.IntegerField()
+    success_rate = serializers.FloatField()
+    recent_deliveries = WebhookDeliverySerializer(many=True)

@@ -68,8 +68,14 @@ class DashboardConfig(AppConfig):
 
         from baserow.contrib.dashboard.widgets.registries import widget_type_registry
         from baserow.contrib.dashboard.widgets.widget_types import SummaryWidgetType
+        from baserow.contrib.dashboard.widgets.enhanced_widget_types import (
+            KPIWidgetType,
+            EnhancedChartWidgetType
+        )
 
         widget_type_registry.register(SummaryWidgetType())
+        widget_type_registry.register(KPIWidgetType())
+        widget_type_registry.register(EnhancedChartWidgetType())
 
         from baserow.contrib.dashboard.widgets.trash_types import (
             WidgetTrashableItemType,

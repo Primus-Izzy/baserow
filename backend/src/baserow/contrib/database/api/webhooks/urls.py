@@ -1,19 +1,21 @@
-from django.urls import re_path
+"""
+URL patterns for webhook API endpoints.
+"""
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
-from baserow.contrib.database.api.webhooks.views import (
-    TableWebhooksView,
-    TableWebhookTestCallView,
-    TableWebhookView,
-)
+from .views import WebhookViewSet, WebhookStatsView
 
 app_name = "baserow.contrib.database.api.webhooks"
 
+router = DefaultRouter()
+router.register(r'webhooks', WebhookViewSet, basename='webhook')
+
 urlpatterns = [
-    re_path(r"table/(?P<table_id>[0-9]+)/$", TableWebhooksView.as_view(), name="list"),
-    re_path(
-        r"table/(?P<table_id>[0-9]+)/test-call/$",
-        TableWebhookTestCallView.as_view(),
-        name="test",
+    path('', include(router.urls)),
+    path(
+        'groups/<int:group_id>/webhook-stats/',
+        WebhookStatsView.as_view(),
+        name='webhook_stats'
     ),
-    re_path(r"(?P<webhook_id>[0-9]+)/$", TableWebhookView.as_view(), name="item"),
 ]

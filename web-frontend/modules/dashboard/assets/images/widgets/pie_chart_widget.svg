@@ -1,0 +1,14 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="8" fill="#F8F9FA"/>
+  <rect x="4" y="4" width="40" height="40" rx="6" fill="white" stroke="#E1E5E9"/>
+  
+  <!-- Pie Chart -->
+  <circle cx="24" cy="24" r="12" fill="#E1E5E9"/>
+  
+  <!-- Pie segments -->
+  <path d="M24 12 A12 12 0 0 1 36 24 L24 24 Z" fill="#5190EF"/>
+  <path d="M36 24 A12 12 0 0 1 30 35 L24 24 Z" fill="#2BC3F1"/>
+  <path d="M30 35 A12 12 0 0 1 18 35 L24 24 Z" fill="#FFC744"/>
+  <path d="M18 35 A12 12 0 0 1 12 24 L24 24 Z" fill="#E26AB0"/>
+  <path d="M12 24 A12 12 0 0 1 24 12 L24 24 Z" fill="#3E4ACB"/>
+</svg>

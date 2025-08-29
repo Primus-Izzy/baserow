@@ -234,7 +234,9 @@ from .models import (
     MultipleSelectField,
     NumberField,
     PasswordField,
+    PeopleField,
     PhoneNumberField,
+    ProgressBarField,
     RatingField,
     RollupField,
     SelectOption,
@@ -251,6 +253,7 @@ from .registries import (
     StartingRowType,
     field_type_registry,
 )
+from .fields import MultipleSelectManyToManyField
 from .utils import DeferredForeignKeyUpdater
 from .utils.duration import (
     DURATION_FORMATS,
@@ -7383,3 +7386,569 @@ class PasswordFieldType(FieldType):
     def is_searchable(self, field: Field) -> bool:
         # passwords shouldn't be searchable!
         return False
+
+
+class ProgressBarFieldType(FieldType):
+    """
+    Progress bar field type that displays visual progress indicators based on numeric values.
+    Can be linked to numeric fields, formulas, or manual input with customizable
+    color schemes and range configurations.
+    """
+    
+    type = "progress_bar"
+    model_class = ProgressBarField
+    allowed_fields = [
+        "source_type", "source_field", "source_formula", "min_value", "max_value",
+        "show_percentage", "color_scheme", "custom_color_start", "custom_color_end"
+    ]
+    serializer_field_names = [
+        "source_type", "source_field", "source_formula", "min_value", "max_value",
+        "show_percentage", "color_scheme", "custom_color_start", "custom_color_end"
+    ]
+    serializer_field_overrides = {
+        "source_type": serializers.ChoiceField(
+            choices=[
+                ('manual', 'Manual input'),
+                ('field', 'Numeric field'),
+                ('formula', 'Formula calculation'),
+            ],
+            required=False,
+            default='manual'
+        ),
+        "source_field": serializers.PrimaryKeyRelatedField(
+            queryset=Field.objects.all(),
+            required=False,
+            allow_null=True
+        ),
+        "source_formula": serializers.CharField(
+            required=False,
+            allow_blank=True,
+            default=''
+        ),
+        "min_value": serializers.DecimalField(
+            max_digits=10,
+            decimal_places=2,
+            required=False,
+            default=0
+        ),
+        "max_value": serializers.DecimalField(
+            max_digits=10,
+            decimal_places=2,
+            required=False,
+            default=100
+        ),
+        "show_percentage": serializers.BooleanField(
+            required=False,
+            default=True
+        ),
+        "color_scheme": serializers.ChoiceField(
+            choices=[
+                ('default', 'Default (blue)'),
+                ('success', 'Success (green)'),
+                ('warning', 'Warning (yellow)'),
+                ('danger', 'Danger (red)'),
+                ('custom', 'Custom colors'),
+            ],
+            required=False,
+            default='default'
+        ),
+        "custom_color_start": serializers.CharField(
+            max_length=7,
+            required=False,
+            default='#3b82f6'
+        ),
+        "custom_color_end": serializers.CharField(
+            max_length=7,
+            required=False,
+            default='#1d4ed8'
+        ),
+    }
+    _can_group_by = True
+    _can_have_db_index = True
+    can_upsert = True
+
+    def get_serializer_field(self, instance, **kwargs):
+        """
+        Return the serializer field for progress bar values.
+        For manual input, accepts numeric values.
+        For field/formula sources, the value is calculated automatically.
+        """
+        if instance.source_type == 'manual':
+            return serializers.DecimalField(
+                max_digits=10,
+                decimal_places=2,
+                required=False,
+                allow_null=True,
+                **kwargs
+            )
+        else:
+            # For field/formula sources, the field is read-only
+            return serializers.DecimalField(
+                max_digits=10,
+                decimal_places=2,
+                required=False,
+                allow_null=True,
+                read_only=True,
+                **kwargs
+            )
+
+    def prepare_value_for_db(self, instance, value):
+        """
+        Prepare the value for database storage.
+        For manual input, validate and store the value.
+        For field/formula sources, calculate the value.
+        """
+        if instance.source_type == 'manual':
+            if value is None:
+                return None
+            
+            try:
+                value = Decimal(str(value))
+            except (ValueError, TypeError, InvalidOperation):
+                raise ValidationError(
+                    f"The value for field {instance.id} is not a valid number",
+                    code="invalid",
+                )
+            
+            return value
+        
+        elif instance.source_type == 'field' and instance.source_field:
+            # Calculate value from source field
+            return self._calculate_from_field(instance, value)
+        
+        elif instance.source_type == 'formula' and instance.source_formula:
+            # Calculate value from formula
+            return self._calculate_from_formula(instance, value)
+        
+        return None
+
+    def _calculate_from_field(self, instance, row_data):
+        """
+        Calculate progress value from a source field.
+        """
+        if not instance.source_field:
+            return None
+        
+        # Get the source field value from the row data
+        source_value = getattr(row_data, instance.source_field.db_column, None)
+        if source_value is None:
+            return None
+        
+        try:
+            source_value = Decimal(str(source_value))
+        except (ValueError, TypeError, InvalidOperation):
+            return None
+        
+        # Calculate percentage based on min/max range
+        return self._calculate_percentage(instance, source_value)
+
+    def _calculate_from_formula(self, instance, row_data):
+        """
+        Calculate progress value from a formula.
+        This is a simplified implementation - in a full implementation,
+        you would integrate with Baserow's formula engine.
+        """
+        if not instance.source_formula:
+            return None
+        
+        # For now, return None - full formula integration would require
+        # more complex implementation with the formula engine
+        return None
+
+    def _calculate_percentage(self, instance, value):
+        """
+        Calculate percentage based on min/max range.
+        """
+        if instance.min_value >= instance.max_value:
+            return Decimal('0')
+        
+        # Clamp value to range
+        value = max(instance.min_value, min(instance.max_value, value))
+        
+        # Calculate percentage
+        range_size = instance.max_value - instance.min_value
+        progress = (value - instance.min_value) / range_size * 100
+        
+        return round(progress, 2)
+
+    def get_model_field(self, instance, **kwargs):
+        """
+        Return the Django model field for storing progress values.
+        """
+        return models.DecimalField(
+            max_digits=10,
+            decimal_places=2,
+            null=True,
+            blank=True,
+            db_index=instance.db_index,
+            **kwargs,
+        )
+
+    def get_export_value(self, value, field_object, rich_value=False):
+        """
+        Export the progress value.
+        """
+        if value is None:
+            return "" if not rich_value else None
+        
+        if rich_value:
+            return {
+                "value": float(value),
+                "percentage": float(value),
+                "color_scheme": field_object["color_scheme"],
+                "show_percentage": field_object["show_percentage"]
+            }
+        
+        return str(value)
+
+    def get_human_readable_value(self, value, field_object):
+        """
+        Return a human-readable representation of the progress value.
+        """
+        if value is None:
+            return ""
+        
+        if field_object.get("show_percentage", True):
+            return f"{value}%"
+        else:
+            return str(value)
+
+    def random_value(self, instance, fake, cache):
+        """
+        Generate a random progress value for testing.
+        """
+        if instance.source_type == 'manual':
+            return fake.pydecimal(
+                left_digits=3,
+                right_digits=2,
+                positive=True,
+                min_value=float(instance.min_value),
+                max_value=float(instance.max_value)
+            )
+        return None
+
+    def contains_query(self, *args):
+        return contains_filter(*args)
+
+    def contains_word_query(self, *args):
+        return contains_word_filter(*args)
+
+    def to_baserow_formula_type(self, field) -> BaserowFormulaType:
+        return BaserowFormulaNumberType(0)
+
+    def from_baserow_formula_type(
+        self, formula_type: BaserowFormulaNumberType
+    ) -> "ProgressBarField":
+        return ProgressBarField()
+
+    def should_backup_field_data_for_same_type_update(
+        self, old_field: ProgressBarField, new_field_attrs: Dict[str, Any]
+    ) -> bool:
+        """
+        Determine if field data should be backed up when updating field configuration.
+        """
+        # Backup if source type changes or range changes significantly
+        new_source_type = new_field_attrs.get("source_type", old_field.source_type)
+        new_min_value = new_field_attrs.get("min_value", old_field.min_value)
+        new_max_value = new_field_attrs.get("max_value", old_field.max_value)
+        
+        return (
+            old_field.source_type != new_source_type or
+            old_field.min_value != new_min_value or
+            old_field.max_value != new_max_value
+        )
+
+
+class PeopleFieldType(CollationSortMixin, FieldType):
+    """
+    People/Owner field type that links to Baserow user accounts within the workspace.
+    Supports single or multiple user selection with permission integration and
+    notification capabilities.
+    """
+    
+    type = "people"
+    model_class = PeopleField
+    can_get_unique_values = False
+    allowed_fields = [
+        "multiple_people",
+        "notify_when_added", 
+        "notify_when_removed",
+        "people_default",
+        "show_avatar",
+        "show_email"
+    ]
+    request_serializer_field_names = [
+        "multiple_people",
+        "notify_when_added",
+        "notify_when_removed", 
+        "people_default",
+        "show_avatar",
+        "show_email"
+    ]
+    request_serializer_field_overrides = {
+        "multiple_people": serializers.BooleanField(required=False, default=False),
+        "notify_when_added": serializers.BooleanField(required=False, default=True),
+        "notify_when_removed": serializers.BooleanField(required=False, default=False),
+        "people_default": serializers.JSONField(required=False, allow_null=True),
+        "show_avatar": serializers.BooleanField(required=False, default=True),
+        "show_email": serializers.BooleanField(required=False, default=False),
+    }
+    serializer_field_names = [
+        "available_people",
+        *request_serializer_field_names,
+    ]
+    serializer_field_overrides = {
+        "available_people": AvailableCollaboratorsSerializer(),
+        **request_serializer_field_overrides,
+    }
+
+    def can_represent_collaborators(self, field):
+        return True
+
+    def get_serializer_field(self, instance, **kwargs):
+        required = kwargs.pop("required", False)
+        field_serializer = CollaboratorSerializer(
+            **{
+                "required": required,
+                "allow_null": not required,
+                **kwargs,
+            }
+        )
+        
+        if instance.multiple_people:
+            return serializers.ListSerializer(
+                child=field_serializer, required=required, **kwargs
+            )
+        else:
+            return field_serializer
+
+    def get_response_serializer_field(self, instance, **kwargs):
+        required = kwargs.get("required", False)
+        serializer = CollaboratorSerializer(
+            **{
+                "required": required,
+                "allow_null": not required,
+                **kwargs,
+            }
+        )
+        
+        if instance.multiple_people:
+            return serializers.ListSerializer(child=serializer, **kwargs)
+        else:
+            return serializer
+
+    def get_search_expression(
+        self, field: PeopleField, queryset: QuerySet
+    ) -> Expression:
+        if field.multiple_people:
+            # For multiple people, search across all linked users
+            return Subquery(
+                queryset.filter(pk=OuterRef("pk")).values(
+                    aggregated=StringAgg(
+                        f"{field.db_column}__first_name",
+                        " ",
+                        output_field=models.TextField(),
+                    )
+                )[:1]
+            )
+        else:
+            # For single person, search the linked user's name
+            return F(f"{field.db_column}__first_name")
+
+    def get_internal_value_from_db(
+        self, row: "GeneratedTableModel", field_name: str
+    ) -> Union[int, List[int], None]:
+        # Get the field instance to check if it's multiple_people
+        field_obj = None
+        for field in row._meta.model._field_objects.values():
+            if field.db_column == field_name:
+                field_obj = field
+                break
+        
+        if field_obj and field_obj.multiple_people:
+            related_objects = getattr(row, field_name)
+            return [related_object.id for related_object in related_objects.all()]
+        else:
+            related_object = getattr(row, field_name)
+            return related_object.id if related_object else None
+
+    def prepare_value_for_db(self, instance, value):
+        if value is None:
+            return None if not instance.multiple_people else []
+
+        if instance.multiple_people:
+            if not isinstance(value, (list, set, tuple)):
+                raise ValidationError(
+                    f"The value for field {instance.id} must be a list for multiple people field",
+                    code="invalid",
+                )
+            
+            if len(value) == 0:
+                return []
+
+            user_ids = [v["id"] if isinstance(v, dict) else v for v in value]
+        else:
+            if isinstance(value, (list, set, tuple)):
+                if len(value) == 0:
+                    return None
+                elif len(value) == 1:
+                    user_ids = [value[0]["id"] if isinstance(value[0], dict) else value[0]]
+                else:
+                    raise ValidationError(
+                        f"The value for field {instance.id} must be a single user for single people field",
+                        code="invalid",
+                    )
+            else:
+                user_ids = [value["id"] if isinstance(value, dict) else value]
+
+        # Validate that all user IDs are valid workspace users
+        workspace = instance.table.database.workspace
+        workspace_users_count = WorkspaceUser.objects.filter(
+            user_id__in=user_ids, workspace_id=workspace.id
+        ).count()
+
+        if workspace_users_count != len(user_ids):
+            from baserow.contrib.database.api.fields.errors import AllProvidedCollaboratorIdsMustBeValidUsers
+            raise AllProvidedCollaboratorIdsMustBeValidUsers(user_ids)
+
+        return user_ids[0] if not instance.multiple_people else user_ids
+
+    def get_serializer_help_text(self, instance):
+        if instance.multiple_people:
+            return (
+                "This field accepts a list of objects representing the chosen "
+                "people through the object's `id` property. The id is Baserow "
+                "user id. The response objects also contains the person name "
+                "directly along with its id."
+            )
+        else:
+            return (
+                "This field accepts an object representing the chosen "
+                "person through the object's `id` property. The id is Baserow "
+                "user id. The response object also contains the person name "
+                "directly along with its id."
+            )
+
+    def get_export_value(self, value, field_object, rich_value=False):
+        if not value:
+            return [] if rich_value else ""
+
+        if field_object.multiple_people:
+            if hasattr(value, "all"):
+                value = value.all()
+            result = [f"{user.first_name} <{user.email}>" for user in value]
+            if rich_value:
+                return result
+            else:
+                return list_to_comma_separated_string(result)
+        else:
+            result = f"{value.first_name} <{value.email}>"
+            return [result] if rich_value else result
+
+    def get_human_readable_value(self, value, field_object):
+        export_value = self.get_export_value(value, field_object, rich_value=True)
+        if not export_value:
+            return ""
+        if isinstance(export_value, list):
+            return ", ".join(export_value)
+        return export_value
+
+    def get_model_field(self, instance, **kwargs):
+        if instance.multiple_people:
+            return None  # Will be handled in after_model_generation
+        else:
+            return models.ForeignKey(
+                get_user_model(),
+                on_delete=models.SET_NULL,
+                null=True,
+                blank=True,
+                db_constraint=False,
+                **kwargs
+            )
+
+    def after_model_generation(self, instance, model, field_name):
+        if instance.multiple_people:
+            # Create many-to-many relationship for multiple people
+            user_meta = type(
+                "Meta",
+                (AbstractUser.Meta,),
+                {
+                    "managed": False,
+                    "app_label": model._meta.app_label,
+                    "db_tablespace": model._meta.db_tablespace,
+                    "db_table": get_user_model().objects.model._meta.db_table,
+                    "apps": model._meta.apps,
+                },
+            )
+            user_model = type(
+                str(f"PeopleField{instance.id}User"),
+                (AbstractUser,),
+                {
+                    "groups": None,
+                    "user_permissions": None,
+                    "Meta": user_meta,
+                    "__module__": model.__module__,
+                    "_generated_table_model": True,
+                },
+            )
+
+            related_name = f"reversed_field_{instance.id}"
+            shared_kwargs = {
+                "null": True,
+                "blank": True,
+                "db_table": f"database_peoplerelation_{instance.id}",
+                "db_constraint": False,
+            }
+            additional_filters = {
+                "id__in": WorkspaceUser.objects.filter(
+                    workspace_id=instance.table.database.workspace_id
+                ).values_list("user_id", flat=True)
+            }
+
+            MultipleSelectManyToManyField(
+                to=user_model,
+                related_name=related_name,
+                additional_filters=additional_filters,
+                **shared_kwargs,
+            ).contribute_to_class(model, field_name)
+            MultipleSelectManyToManyField(
+                to=model,
+                related_name=field_name,
+                reversed_additional_filters=additional_filters,
+                **shared_kwargs,
+            ).contribute_to_class(user_model, related_name)
+
+    def enhance_queryset(self, queryset, field, name, **kwargs):
+        if field.multiple_people:
+            return queryset.prefetch_related(name)
+        else:
+            return queryset.select_related(name)
+
+    def random_value(self, instance, fake, cache):
+        """
+        Selects random users from the workspace for testing.
+        """
+        workspace_users = WorkspaceUser.objects.filter(
+            workspace_id=instance.table.database.workspace_id
+        ).values_list("user_id", flat=True)
+        
+        if not workspace_users:
+            return None if not instance.multiple_people else []
+
+        if instance.multiple_people:
+            # Select 0-3 random users
+            num_users = fake.random_int(0, min(3, len(workspace_users)))
+            if num_users == 0:
+                return []
+            selected_users = fake.random_sample(list(workspace_users), num_users)
+            return [{"id": user_id} for user_id in selected_users]
+        else:
+            # Select one random user
+            selected_user = fake.random_element(workspace_users)
+            return {"id": selected_user}
+
+    def contains_query(self, *args):
+        return contains_filter(*args)
+
+    def contains_word_query(self, *args):
+        return contains_word_filter(*args)

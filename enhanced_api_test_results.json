@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-08-23T11:18:18.872030",
+  "tests": {
+    "batch_operations": {
+      "success": false,
+      "error": "Batch operations test error: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/database/batch/records/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000262C0DEFA10>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+      "timestamp": "2025-08-23T11:18:23.001162"
+    },
+    "webhook_system": {
+      "success": false,
+      "error": "Webhook system test error: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/database/webhooks/webhooks/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000262C0DD7890>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+      "timestamp": "2025-08-23T11:18:27.071127"
+    },
+    "enhanced_endpoints": {
+      "success": false,
+      "error": "Enhanced endpoints test error: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/database/enhanced/users/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000262C0DD7D90>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+      "timestamp": "2025-08-23T11:18:31.144398"
+    },
+    "zapier_integration": {
+      "success": false,
+      "error": "Zapier integration test error: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/database/integrations/zapier/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000262C0DB3820>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+      "timestamp": "2025-08-23T11:18:35.197180"
+    },
+    "make_integration": {
+      "success": false,
+      "error": "Make.com integration test error: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/database/integrations/make/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000262C0DB3E10>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+      "timestamp": "2025-08-23T11:18:39.289005"
+    },
+    "api_statistics": {
+      "success": false,
+      "error": "API statistics test error: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/database/enhanced/stats/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000262C0E6AF90>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+      "timestamp": "2025-08-23T11:18:43.357051"
+    },
+    "api_key_management": {
+      "success": false,
+      "error": "API key management test error: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /api/database/enhanced/api-keys/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000262C0E82360>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))",
+      "timestamp": "2025-08-23T11:18:47.446890"
+    }
+  },
+  "summary": {
+    "total": 7,
+    "passed": 0,
+    "failed": 7,
+    "errors": []
+  }
+}

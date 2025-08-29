@@ -162,6 +162,9 @@ class CoreConsumer(AsyncJsonWebsocketConsumer):
             await self._add_page_scope(content)
         if "remove_page" in content:
             await self._remove_page_scope(content)
+        
+        # Handle collaboration messages
+        await self._handle_collaboration_message(content)
 
     async def _get_page_context(
         self, content: dict, page_name_attr: str
@@ -440,3 +443,31 @@ class CoreConsumer(AsyncJsonWebsocketConsumer):
             await self._remove_page_scopes_associated_with_perm_group(
                 event["permission_group_name"]
             )
+
+    async def _handle_collaboration_message(self, content):
+        """
+        Handle collaboration-specific messages by delegating to the collaboration consumer.
+        """
+        collaboration_message_types = [
+            "update_presence",
+            "start_typing", 
+            "stop_typing",
+            "cursor_move",
+            "acquire_lock",
+            "release_lock", 
+            "create_comment",
+            "get_active_users",
+        ]
+        
+        message_type = content.get("type")
+        if message_type in collaboration_message_types:
+            # Import here to avoid circular imports
+            from baserow.contrib.database.collaboration.consumers import CollaborationConsumer
+            
+            # Create a temporary collaboration consumer instance to handle the message
+            collaboration_consumer = CollaborationConsumer()
+            collaboration_consumer.scope = self.scope
+            collaboration_consumer.channel_layer = self.channel_layer
+            collaboration_consumer.send_json = self.send_json
+            
+            await collaboration_consumer.receive_json(content)

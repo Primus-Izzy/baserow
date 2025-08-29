@@ -2,7 +2,12 @@ from django.utils.functional import lazy
 
 from rest_framework import serializers
 
-from baserow.contrib.database.views.models import GridViewFieldOptions
+from baserow.contrib.database.views.models import (
+    GridViewFieldOptions,
+    GridViewConditionalFormatting,
+    GridViewFilterPreset,
+    GridViewColumnGroup,
+)
 from baserow.contrib.database.views.registries import view_aggregation_type_registry
 
 
@@ -36,7 +41,57 @@ class GridViewFieldOptionsSerializer(serializers.ModelSerializer):
             "order",
             "aggregation_type",
             "aggregation_raw_type",
+            "inline_editing_config",
         )
+
+
+class GridViewConditionalFormattingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GridViewConditionalFormatting
+        fields = (
+            "id",
+            "name",
+            "field",
+            "condition_type",
+            "condition_value",
+            "background_color",
+            "text_color",
+            "is_active",
+            "order",
+        )
+
+
+class GridViewFilterPresetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GridViewFilterPreset
+        fields = (
+            "id",
+            "name",
+            "filters",
+            "is_default",
+            "created_by",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("created_by", "created_at", "updated_at")
+
+
+class GridViewColumnGroupSerializer(serializers.ModelSerializer):
+    fields = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    
+    class Meta:
+        model = GridViewColumnGroup
+        fields = (
+            "id",
+            "name",
+            "fields",
+            "is_collapsed",
+            "order",
+            "color",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("created_at", "updated_at")
 
 
 class GridViewFilterSerializer(serializers.Serializer):

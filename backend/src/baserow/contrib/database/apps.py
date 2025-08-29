@@ -204,7 +204,9 @@ class DatabaseConfig(AppConfig):
             MultipleSelectFieldType,
             NumberFieldType,
             PasswordFieldType,
+            PeopleFieldType,
             PhoneNumberFieldType,
+            ProgressBarFieldType,
             RatingFieldType,
             RollupFieldType,
             SingleSelectFieldType,
@@ -239,6 +241,8 @@ class DatabaseConfig(AppConfig):
         field_type_registry.register(UUIDFieldType())
         field_type_registry.register(AutonumberFieldType())
         field_type_registry.register(PasswordFieldType())
+        field_type_registry.register(PeopleFieldType())
+        field_type_registry.register(ProgressBarFieldType())
 
         from .fields.field_aggregations import (
             AverageFieldAggregationType,
@@ -324,11 +328,14 @@ class DatabaseConfig(AppConfig):
         action_type_registry.register(DuplicateFieldActionType())
         action_type_registry.register(ChangePrimaryFieldActionType())
 
-        from .views.view_types import FormViewType, GalleryViewType, GridViewType
+        from .views.view_types import FormViewType, GalleryViewType, GridViewType, KanbanViewType, TimelineViewType, CalendarViewType
 
         view_type_registry.register(GridViewType())
         view_type_registry.register(GalleryViewType())
         view_type_registry.register(FormViewType())
+        view_type_registry.register(KanbanViewType())
+        view_type_registry.register(TimelineViewType())
+        view_type_registry.register(CalendarViewType())
 
         from .views.view_filters import (
             BooleanViewFilterType,
@@ -567,6 +574,17 @@ class DatabaseConfig(AppConfig):
         page_registry.register(TablePageType())
         page_registry.register(PublicViewPageType())
         page_registry.register(RowPageType())
+
+        # Register collaboration WebSocket pages
+        from .collaboration.ws_pages import (
+            CollaborationRowPageType,
+            CollaborationTablePageType,
+            CollaborationViewPageType,
+        )
+
+        page_registry.register(CollaborationTablePageType())
+        page_registry.register(CollaborationViewPageType())
+        page_registry.register(CollaborationRowPageType())
 
         from .export.table_exporters.csv_table_exporter import CsvTableExporter
 
@@ -1017,6 +1035,11 @@ class DatabaseConfig(AppConfig):
         notification_type_registry.register(FormSubmittedNotificationType())
         notification_type_registry.register(WebhookDeactivatedNotificationType())
         notification_type_registry.register(WebhookPayloadTooLargeNotificationType())
+        
+        from baserow.contrib.database.collaboration.notification_types import (
+            CommentMentionNotificationType,
+        )
+        notification_type_registry.register(CommentMentionNotificationType())
 
         from baserow.contrib.database.mcp.rows.tools import (
             CreateRowMcpTool,

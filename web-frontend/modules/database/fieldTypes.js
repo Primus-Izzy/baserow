@@ -39,6 +39,8 @@ import FieldSingleSelectOptionsSubForm from '@baserow/modules/database/component
 import FieldCollaboratorSubForm from '@baserow/modules/database/components/field/FieldCollaboratorSubForm'
 import FieldPasswordSubForm from '@baserow/modules/database/components/field/FieldPasswordSubForm'
 import FieldBooleanSubForm from '@baserow/modules/database/components/field/FieldBooleanSubForm'
+import FieldProgressBarSubForm from '@baserow/modules/database/components/field/FieldProgressBarSubForm'
+import FieldPeopleSubForm from '@baserow/modules/database/components/field/FieldPeopleSubForm'
 
 import GridViewFieldText from '@baserow/modules/database/components/view/grid/fields/GridViewFieldText'
 import GridViewFieldLongText from '@baserow/modules/database/components/view/grid/fields/GridViewFieldLongText'
@@ -61,6 +63,8 @@ import GridViewFieldUUID from '@baserow/modules/database/components/view/grid/fi
 import GridViewFieldAutonumber from '@baserow/modules/database/components/view/grid/fields/GridViewFieldAutonumber'
 import GridViewFieldLastModifiedBy from '@baserow/modules/database/components/view/grid/fields/GridViewFieldLastModifiedBy'
 import GridViewFieldPassword from '@baserow/modules/database/components/view/grid/fields/GridViewFieldPassword'
+import GridViewFieldProgressBar from '@baserow/modules/database/components/view/grid/fields/GridViewFieldProgressBar'
+import GridViewFieldPeople from '@baserow/modules/database/components/view/grid/fields/GridViewFieldPeople'
 
 import FunctionalGridViewFieldText from '@baserow/modules/database/components/view/grid/fields/FunctionalGridViewFieldText'
 import FunctionalGridViewFieldDuration from '@baserow/modules/database/components/view/grid/fields/FunctionalGridViewFieldDuration'
@@ -81,6 +85,8 @@ import FunctionalGridViewFieldUUID from '@baserow/modules/database/components/vi
 import FunctionalGridViewFieldAutonumber from '@baserow/modules/database/components/view/grid/fields/FunctionalGridViewFieldAutonumber'
 import FunctionalGridViewFieldLastModifiedBy from '@baserow/modules/database/components/view/grid/fields/FunctionalGridViewFieldLastModifiedBy'
 import FunctionalGridVIewFieldPassword from '@baserow/modules/database/components/view/grid/fields/FunctionalGridVIewFieldPassword.vue'
+import FunctionalGridViewFieldProgressBar from '@baserow/modules/database/components/view/grid/fields/FunctionalGridViewFieldProgressBar'
+import FunctionalGridViewFieldPeople from '@baserow/modules/database/components/view/grid/fields/FunctionalGridViewFieldPeople'
 
 import RowEditFieldText from '@baserow/modules/database/components/row/RowEditFieldText'
 import RowEditFieldLongText from '@baserow/modules/database/components/row/RowEditFieldLongText'
@@ -103,6 +109,8 @@ import RowEditFieldUUID from '@baserow/modules/database/components/row/RowEditFi
 import RowEditFieldAutonumber from '@baserow/modules/database/components/row/RowEditFieldAutonumber'
 import RowEditFieldLastModifiedBy from '@baserow/modules/database/components/row/RowEditFieldLastModifiedBy'
 import RowEditFieldPassword from '@baserow/modules/database/components/row/RowEditFieldPassword'
+import RowEditFieldProgressBar from '@baserow/modules/database/components/row/RowEditFieldProgressBar'
+import RowEditFieldPeople from '@baserow/modules/database/components/row/RowEditFieldPeople'
 
 import RowCardFieldBoolean from '@baserow/modules/database/components/card/RowCardFieldBoolean'
 import RowCardFieldDate from '@baserow/modules/database/components/card/RowCardFieldDate'
@@ -124,6 +132,8 @@ import RowCardFieldUUID from '@baserow/modules/database/components/card/RowCardF
 import RowCardFieldAutonumber from '@baserow/modules/database/components/card/RowCardFieldAutonumber'
 import RowCardFieldLastModifiedBy from '@baserow/modules/database/components/card/RowCardFieldLastModifiedBy'
 import RowCardFieldPassword from '@baserow/modules/database/components/card/RowCardFieldPassword'
+import RowCardFieldProgressBar from '@baserow/modules/database/components/card/RowCardFieldProgressBar'
+import RowCardFieldPeople from '@baserow/modules/database/components/card/RowCardFieldPeople'
 
 import RowHistoryFieldText from '@baserow/modules/database/components/row/RowHistoryFieldText'
 import RowHistoryFieldRichText from '@baserow/modules/database/components/row/RowHistoryFieldRichText'
@@ -137,6 +147,8 @@ import RowHistoryFieldSingleSelect from '@baserow/modules/database/components/ro
 import RowHistoryFieldBoolean from '@baserow/modules/database/components/row/RowHistoryFieldBoolean'
 import RowHistoryFieldLinkRow from '@baserow/modules/database/components/row/RowHistoryFieldLinkRow'
 import RowHistoryFieldPassword from '@baserow/modules/database/components/row/RowHistoryFieldPassword'
+import RowHistoryFieldProgressBar from '@baserow/modules/database/components/row/RowHistoryFieldProgressBar'
+import RowHistoryFieldPeople from '@baserow/modules/database/components/row/RowHistoryFieldPeople'
 
 import FormViewFieldLinkRow from '@baserow/modules/database/components/view/form/FormViewFieldLinkRow'
 import FormViewFieldMultipleLinkRow from '@baserow/modules/database/components/view/form/FormViewFieldMultipleLinkRow'
@@ -4943,5 +4955,466 @@ export class PasswordFieldType extends FieldType {
 
   getRowHistoryEntryComponent() {
     return RowHistoryFieldPassword
+  }
+}
+
+export class ProgressBarFieldType extends FieldType {
+  static getType() {
+    return 'progress_bar'
+  }
+
+  static getIconClass() {
+    return 'iconoir-percentage'
+  }
+
+  getName() {
+    const { i18n } = this.app
+    return i18n.t('fieldType.progressBar')
+  }
+
+  getFormComponent() {
+    return FieldProgressBarSubForm
+  }
+
+  getGridViewFieldComponent() {
+    return GridViewFieldProgressBar
+  }
+
+  getFunctionalGridViewFieldComponent() {
+    return FunctionalGridViewFieldProgressBar
+  }
+
+  getRowEditFieldComponent(field) {
+    return RowEditFieldProgressBar
+  }
+
+  getCardComponent() {
+    return RowCardFieldProgressBar
+  }
+
+  getRowHistoryEntryComponent() {
+    return RowHistoryFieldProgressBar
+  }
+
+  getFilterInputComponent(field, filterType) {
+    return ViewFilterTypeNumber
+  }
+
+  getSortIndicator() {
+    return ['text', '0%', '100%']
+  }
+
+  getDefaultValue(field, flat) {
+    if (field.source_type === 'manual') {
+      return field.min_value || 0
+    }
+    return null
+  }
+
+  canUpsert() {
+    return true
+  }
+
+  isReadOnlyField(field) {
+    return field.source_type !== 'manual'
+  }
+
+  toSearchableString(field, value, delimiter = ', ') {
+    if (value === null || value === undefined) {
+      return ''
+    }
+    return String(value)
+  }
+
+  toHumanReadableString(field, value, delimiter = ', ') {
+    if (value === null || value === undefined) {
+      return ''
+    }
+    
+    const percentage = this.calculatePercentage(field, value)
+    return field.show_percentage ? `${percentage}%` : String(value)
+  }
+
+  prepareValueForCopy(field, value) {
+    return this.toHumanReadableString(field, value)
+  }
+
+  getCanBePrimaryField() {
+    return false
+  }
+
+  getDocsDataType(field) {
+    return 'number'
+  }
+
+  getDocsDescription(field) {
+    return this.app.i18n.t('fieldDocs.progressBar')
+  }
+
+  getDocsRequestExample(field) {
+    return field.source_type === 'manual' ? '75' : null
+  }
+
+  getValidationError(field, value) {
+    if (field.source_type !== 'manual') {
+      return null
+    }
+
+    if (value === null || value === undefined || value === '') {
+      return null
+    }
+
+    const numValue = parseFloat(value)
+    if (isNaN(numValue)) {
+      return this.app.i18n.t('fieldErrors.invalidNumber')
+    }
+
+    if (numValue < field.min_value || numValue > field.max_value) {
+      return this.app.i18n.t('fieldErrors.numberOutOfRange', {
+        min: field.min_value,
+        max: field.max_value
+      })
+    }
+
+    return null
+  }
+
+  /**
+   * Calculate percentage based on field configuration
+   */
+  calculatePercentage(field, value) {
+    if (value === null || value === undefined) {
+      return 0
+    }
+
+    const numValue = parseFloat(value)
+    if (isNaN(numValue)) {
+      return 0
+    }
+
+    const range = field.max_value - field.min_value
+    if (range <= 0) {
+      return 0
+    }
+
+    const clampedValue = Math.max(field.min_value, Math.min(field.max_value, numValue))
+    const percentage = ((clampedValue - field.min_value) / range) * 100
+    return Math.round(percentage * 100) / 100 // Round to 2 decimal places
+  }
+
+  /**
+   * Get color scheme configuration
+   */
+  getColorScheme(field) {
+    const colorSchemes = {
+      default: { start: '#3b82f6', end: '#1d4ed8' },
+      success: { start: '#10b981', end: '#059669' },
+      warning: { start: '#f59e0b', end: '#d97706' },
+      danger: { start: '#ef4444', end: '#dc2626' },
+      custom: { 
+        start: field.custom_color_start || '#3b82f6', 
+        end: field.custom_color_end || '#1d4ed8' 
+      }
+    }
+
+    return colorSchemes[field.color_scheme] || colorSchemes.default
+  }
+}
+
+export class PeopleFieldType extends FieldType {
+  static getType() {
+    return 'people'
+  }
+
+  static getIconClass() {
+    return 'iconoir-community'
+  }
+
+  getName() {
+    const { i18n } = this.app
+    return i18n.t('fieldType.people')
+  }
+
+  getAlias() {
+    return 'people person user owner team member'
+  }
+
+  getFormComponent() {
+    return FieldPeopleSubForm
+  }
+
+  getGridViewFieldComponent() {
+    return GridViewFieldPeople
+  }
+
+  getFunctionalGridViewFieldComponent() {
+    return FunctionalGridViewFieldPeople
+  }
+
+  getRowEditFieldComponent(field) {
+    return RowEditFieldPeople
+  }
+
+  getCardComponent() {
+    return RowCardFieldPeople
+  }
+
+  getRowHistoryEntryComponent() {
+    return RowHistoryFieldPeople
+  }
+
+  prepareValueForUpdate(field, value) {
+    if (value === undefined || value === null) {
+      return field.multiple_people ? [] : null
+    }
+    return value
+  }
+
+  getDefaultValue(field, flat) {
+    if (field.people_default) {
+      if (field.multiple_people) {
+        return Array.isArray(field.people_default) ? field.people_default : [field.people_default]
+      } else {
+        return Array.isArray(field.people_default) ? field.people_default[0] || null : field.people_default
+      }
+    }
+    return field.multiple_people ? [] : null
+  }
+
+  getCanImport() {
+    return true
+  }
+
+  getSort(name, order) {
+    return (a, b) => {
+      const valuesA = a[name]
+      const valuesB = b[name]
+
+      let stringA = ''
+      let stringB = ''
+
+      const workspaces = this.app.store.getters['workspace/getAll']
+
+      if (this.field && this.field.multiple_people) {
+        // Multiple people field
+        if (valuesA && valuesA.length > 0 && workspaces.length > 0) {
+          stringA = valuesA
+            .map(
+              (obj) =>
+                this.app.store.getters['workspace/getUserById'](obj.id).name
+            )
+            .join('')
+        } else if (valuesA && valuesA.length > 0) {
+          stringA = valuesA.map((obj) => obj.name).join('')
+        }
+
+        if (valuesB && valuesB.length > 0 && workspaces.length > 0) {
+          stringB = valuesB
+            .map(
+              (obj) =>
+                this.app.store.getters['workspace/getUserById'](obj.id).name
+            )
+            .join('')
+        } else if (valuesB && valuesB.length > 0) {
+          stringB = valuesB.map((obj) => obj.name).join('')
+        }
+      } else {
+        // Single people field
+        if (valuesA && valuesA.id && workspaces.length > 0) {
+          stringA = this.app.store.getters['workspace/getUserById'](valuesA.id).name
+        } else if (valuesA && valuesA.name) {
+          stringA = valuesA.name
+        }
+
+        if (valuesB && valuesB.id && workspaces.length > 0) {
+          stringB = this.app.store.getters['workspace/getUserById'](valuesB.id).name
+        } else if (valuesB && valuesB.name) {
+          stringB = valuesB.name
+        }
+      }
+
+      return collatedStringCompare(stringA, stringB, order)
+    }
+  }
+
+  prepareValueForCopy(field, value) {
+    if (value === undefined || value === null) {
+      return ''
+    }
+    
+    const nameList = this._peopleCellValueToListOfNames(field, value)
+    return this.app.$papa.unparse([nameList], { delimiter: ', ' })
+  }
+
+  _peopleCellValueToListOfNames(field, value) {
+    const workspaces = this.app.store.getters['workspace/getAll']
+    const values = field.multiple_people 
+      ? (Array.isArray(value) ? value : [])
+      : (value && value.id ? [value] : [])
+
+    if (workspaces.length > 0) {
+      return values.map((value) => {
+        const workspaceUser = this.app.store.getters['workspace/getUserById'](
+          value.id
+        )
+        return workspaceUser.name
+      })
+    } else {
+      // public views
+      return values.map((value) => {
+        return value.name
+      })
+    }
+  }
+
+  prepareRichValueForCopy(field, value) {
+    if (value === undefined) {
+      return field.multiple_people ? [] : null
+    }
+    return value
+  }
+
+  checkRichValueIsCompatible(field, value) {
+    if (field.multiple_people) {
+      return (
+        value === null ||
+        (Array.isArray(value) &&
+          value.every((v) => Object.prototype.hasOwnProperty.call(v, 'id')))
+      )
+    } else {
+      return (
+        value === null ||
+        (value && Object.prototype.hasOwnProperty.call(value, 'id'))
+      )
+    }
+  }
+
+  prepareValueForPaste(field, clipboardData, richClipboardData) {
+    if (this.checkRichValueIsCompatible(field, richClipboardData)) {
+      if (richClipboardData === null) {
+        return field.multiple_people ? [] : null
+      }
+      return richClipboardData
+    } else {
+      // Fallback to text version
+      try {
+        const data = this.app.$papa.stringToArray(clipboardData)
+        const uniqueValuesOnly = Array.from(new Set(data))
+
+        const users = uniqueValuesOnly
+          .map((emailOrName) => {
+            // verify if it respects the format `$name ($email)`
+            const matches = emailOrName.match(/(.*)\s*<(.*)>/)
+            let email = emailOrName
+            if (matches) {
+              email = matches[2]
+            }
+            const workspaceUser =
+              this.app.store.getters['workspace/getUserByEmail'](email)
+            if (workspaceUser !== undefined) {
+              return workspaceUser
+            }
+            return this.app.store.getters['workspace/getUserByName'](
+              emailOrName
+            )
+          })
+          .filter((obj) => obj !== null)
+          .map((obj) => {
+            return {
+              id: obj.user_id,
+              name: obj.name,
+            }
+          })
+
+        if (field.multiple_people) {
+          return users
+        } else {
+          return users.length > 0 ? users[0] : null
+        }
+      } catch (e) {
+        return field.multiple_people ? [] : null
+      }
+    }
+  }
+
+  getDocsDataType(field) {
+    return field.multiple_people ? 'array' : 'object'
+  }
+
+  getDocsDescription(field) {
+    return this.app.i18n.t('fieldDocs.people')
+  }
+
+  getDocsRequestExample(field) {
+    if (field.multiple_people) {
+      return [{ id: 1 }]
+    } else {
+      return { id: 1 }
+    }
+  }
+
+  getDocsResponseExample(field) {
+    if (field.multiple_people) {
+      return [
+        {
+          id: 1,
+          name: 'John',
+        },
+      ]
+    } else {
+      return {
+        id: 1,
+        name: 'John',
+      }
+    }
+  }
+
+  toHumanReadableString(field, value, delimiter = ', ') {
+    if (value === undefined || value === null) {
+      return ''
+    }
+    return this._peopleCellValueToListOfNames(field, value).join(delimiter)
+  }
+
+  canBeReferencedByFormulaField() {
+    return true
+  }
+
+  getCanGroupByInView(field) {
+    return true
+  }
+
+  getRowValueFromGroupValue(field, value) {
+    if (field.multiple_people) {
+      return value.map((optId) => {
+        return { id: optId }
+      })
+    } else {
+      return value ? { id: value } : null
+    }
+  }
+
+  getGroupValueFromRowValue(field, value) {
+    if (field.multiple_people) {
+      return value && value.map((o) => o.id)
+    } else {
+      return value ? value.id : null
+    }
+  }
+
+  isEqual(field, value1, value2) {
+    if (field.multiple_people) {
+      const value1Ids = (value1 || []).map((v) => v.id)
+      const value2Ids = (value2 || []).map((v) => v.id)
+      return _.isEqual(value1Ids, value2Ids)
+    } else {
+      const id1 = value1 ? value1.id : null
+      const id2 = value2 ? value2.id : null
+      return id1 === id2
+    }
+  }
+
+  getCanBePrimaryField() {
+    return false
   }
 }

@@ -1,0 +1,21 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="8" fill="#f8f9fa"/>
+  <g transform="translate(8, 8)">
+    <!-- Gauge background -->
+    <path d="M 4 20 A 12 12 0 0 1 28 20" stroke="#e9ecef" stroke-width="3" fill="none"/>
+    
+    <!-- Gauge segments -->
+    <path d="M 4 20 A 12 12 0 0 1 12 8.5" stroke="#dc3545" stroke-width="3" fill="none"/>
+    <path d="M 12 8.5 A 12 12 0 0 1 20 8.5" stroke="#ffc107" stroke-width="3" fill="none"/>
+    <path d="M 20 8.5 A 12 12 0 0 1 28 20" stroke="#28a745" stroke-width="3" fill="none"/>
+    
+    <!-- Needle -->
+    <line x1="16" y1="20" x2="22" y2="12" stroke="#495057" stroke-width="2"/>
+    
+    <!-- Center dot -->
+    <circle cx="16" cy="20" r="2" fill="#495057"/>
+    
+    <!-- Value display -->
+    <text x="16" y="26" text-anchor="middle" font-family="Arial" font-size="8" fill="#333">75%</text>
+  </g>
+</svg>

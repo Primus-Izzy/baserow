@@ -10,7 +10,18 @@ import ko from '@baserow/modules/dashboard/locales/ko.json'
 import { registerRealtimeEvents } from '@baserow/modules/dashboard/realtime'
 import { DashboardApplicationType } from '@baserow/modules/dashboard/applicationTypes'
 import { SummaryWidgetType } from '@baserow/modules/dashboard/widgetTypes'
+import {
+  KPIWidgetType,
+  EnhancedChartWidgetType,
+  BarChartWidgetType,
+  LineChartWidgetType,
+  AreaChartWidgetType,
+  PieChartWidgetType,
+  HeatmapWidgetType,
+  GaugeWidgetType
+} from '@baserow/modules/dashboard/enhancedWidgetTypes'
 import dashboardApplicationStore from '@baserow/modules/dashboard/store/dashboardApplication'
+import enhancedDashboardStore from '@baserow/modules/dashboard/store/enhancedDashboard'
 
 export default (context) => {
   const { app, isDev, store } = context
@@ -35,7 +46,18 @@ export default (context) => {
     'template/dashboardApplication',
     dashboardApplicationStore
   )
+  store.registerModule('enhancedDashboard', enhancedDashboardStore)
 
   app.$registry.register('application', new DashboardApplicationType(context))
   app.$registry.register('dashboardWidget', new SummaryWidgetType(context))
+  
+  // Register enhanced widget types
+  app.$registry.register('dashboardWidget', new KPIWidgetType(context))
+  app.$registry.register('dashboardWidget', new EnhancedChartWidgetType(context))
+  app.$registry.register('dashboardWidget', new BarChartWidgetType(context))
+  app.$registry.register('dashboardWidget', new LineChartWidgetType(context))
+  app.$registry.register('dashboardWidget', new AreaChartWidgetType(context))
+  app.$registry.register('dashboardWidget', new PieChartWidgetType(context))
+  app.$registry.register('dashboardWidget', new HeatmapWidgetType(context))
+  app.$registry.register('dashboardWidget', new GaugeWidgetType(context))
 }

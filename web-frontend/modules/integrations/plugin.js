@@ -1,89 +1,21 @@
-import en from '@baserow/modules/integrations/locales/en.json'
-import fr from '@baserow/modules/integrations/locales/fr.json'
-import nl from '@baserow/modules/integrations/locales/nl.json'
-import de from '@baserow/modules/integrations/locales/de.json'
-import es from '@baserow/modules/integrations/locales/es.json'
-import it from '@baserow/modules/integrations/locales/it.json'
-import pl from '@baserow/modules/integrations/locales/pl.json'
-import ko from '@baserow/modules/integrations/locales/ko.json'
-
-import { FF_AUTOMATION } from '@baserow/modules/core/plugins/featureFlags'
-import { LocalBaserowIntegrationType } from '@baserow/modules/integrations/localBaserow/integrationTypes'
-import { SMTPIntegrationType } from '@baserow/modules/integrations/core/integrationTypes'
-import {
-  LocalBaserowGetRowServiceType,
-  LocalBaserowListRowsServiceType,
-  LocalBaserowAggregateRowsServiceType,
-  LocalBaserowCreateRowWorkflowServiceType,
-  LocalBaserowDeleteRowWorkflowServiceType,
-  LocalBaserowUpdateRowWorkflowServiceType,
-  LocalBaserowRowsCreatedTriggerServiceType,
-  LocalBaserowRowsUpdatedTriggerServiceType,
-  LocalBaserowRowsDeletedTriggerServiceType,
-} from '@baserow/modules/integrations/localBaserow/serviceTypes'
-import {
-  CoreHTTPRequestServiceType,
-  CoreSMTPEmailServiceType,
-} from '@baserow/modules/integrations/core/serviceTypes'
+import { registerRealtimeEvents } from '@baserow/modules/core/plugins/clientHandler'
 
 export default (context) => {
-  const { app, isDev } = context
+  const { store, app } = context
 
-  // Allow locale file hot reloading in dev
-  if (isDev && app.i18n) {
-    const { i18n } = app
-    i18n.mergeLocaleMessage('en', en)
-    i18n.mergeLocaleMessage('fr', fr)
-    i18n.mergeLocaleMessage('nl', nl)
-    i18n.mergeLocaleMessage('de', de)
-    i18n.mergeLocaleMessage('es', es)
-    i18n.mergeLocaleMessage('it', it)
-    i18n.mergeLocaleMessage('pl', pl)
-    i18n.mergeLocaleMessage('ko', ko)
-  }
-
-  app.$registry.register(
-    'integration',
-    new LocalBaserowIntegrationType(context)
-  )
-  app.$registry.register('integration', new SMTPIntegrationType(context))
-
-  app.$registry.register('service', new LocalBaserowGetRowServiceType(context))
-  app.$registry.register(
-    'service',
-    new LocalBaserowListRowsServiceType(context)
-  )
-  app.$registry.register(
-    'service',
-    new LocalBaserowAggregateRowsServiceType(context)
-  )
-  app.$registry.register(
-    'service',
-    new LocalBaserowCreateRowWorkflowServiceType(context)
-  )
-  app.$registry.register(
-    'service',
-    new LocalBaserowUpdateRowWorkflowServiceType(context)
-  )
-  app.$registry.register(
-    'service',
-    new LocalBaserowDeleteRowWorkflowServiceType(context)
-  )
-  app.$registry.register('service', new CoreHTTPRequestServiceType(context))
-  app.$registry.register('service', new CoreSMTPEmailServiceType(context))
-
-  if (app.$featureFlagIsEnabled(FF_AUTOMATION)) {
-    app.$registry.register(
-      'service',
-      new LocalBaserowRowsCreatedTriggerServiceType(context)
-    )
-    app.$registry.register(
-      'service',
-      new LocalBaserowRowsUpdatedTriggerServiceType(context)
-    )
-    app.$registry.register(
-      'service',
-      new LocalBaserowRowsDeletedTriggerServiceType(context)
-    )
-  }
+  // Register integration-related realtime events
+  registerRealtimeEvents(app.$realtime, [
+    {
+      type: 'integration_connection_updated',
+      handler({ connection_id, status }) {
+        store.dispatch('integrations/updateConnectionStatus', { connection_id, status })
+      },
+    },
+    {
+      type: 'integration_sync_completed',
+      handler({ sync_id, status, error_message }) {
+        store.dispatch('integrations/updateSyncStatus', { sync_id, status, error_message })
+      },
+    },
+  ])
 }

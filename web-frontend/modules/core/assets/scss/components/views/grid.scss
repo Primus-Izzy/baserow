@@ -103,6 +103,13 @@
   height: 33px;
   background-color: $palette-neutral-25;
   border-bottom: 1px solid $palette-neutral-400;
+
+  &--sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .grid-view__head-row-identifier {
@@ -805,4 +812,173 @@
 
 .grid-view__add-row-icon {
   font-size: 16px;
+}
+
+// Enhanced Grid View Features
+
+// Conditional Formatting
+.grid-view__cell--conditional-formatting {
+  position: relative;
+  
+  &::before {
+    content: '';
+    @include absolute(0);
+    border-radius: 3px;
+    pointer-events: none;
+  }
+}
+
+// Column Groups
+.grid-view__column-group {
+  position: relative;
+  
+  &::before {
+    content: '';
+    @include absolute(0, 0, auto, 0);
+    height: 3px;
+    border-radius: 2px 2px 0 0;
+  }
+  
+  &--collapsed {
+    .grid-view__column {
+      display: none;
+    }
+    
+    &::after {
+      content: '...';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 12px;
+      color: $palette-neutral-600;
+      font-weight: 600;
+    }
+  }
+}
+
+.grid-view__column-group-header {
+  @include absolute(0, 0, auto, 0);
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: $white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 2px 2px 0 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+// Enhanced Inline Editing
+.grid-view__cell--enhanced-editing {
+  .grid-view__cell-content {
+    position: relative;
+    
+    &:hover {
+      background: rgba(66, 133, 244, 0.05);
+      border-radius: 3px;
+    }
+  }
+}
+
+// Rich Text Editor in cells
+.grid-view__rich-text-content {
+  strong, b {
+    font-weight: 600;
+  }
+  
+  em, i {
+    font-style: italic;
+  }
+  
+  u {
+    text-decoration: underline;
+  }
+  
+  a {
+    color: $color-primary-500;
+    text-decoration: underline;
+    
+    &:hover {
+      color: $color-primary-600;
+    }
+  }
+}
+
+// Filter Presets indicator
+.grid-view__filter-preset-indicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background: $color-primary-500;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+// Formula field syntax highlighting
+.grid-view__formula-editor {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  
+  .formula-function {
+    color: $color-primary-600;
+    font-weight: 600;
+  }
+  
+  .formula-field {
+    color: $color-success-600;
+  }
+  
+  .formula-operator {
+    color: $color-warning-600;
+  }
+  
+  .formula-string {
+    color: $color-error-600;
+  }
+  
+  .formula-number {
+    color: $color-info-600;
+  }
+  
+  .formula-error {
+    background: rgba(244, 67, 54, 0.1);
+    border-bottom: 2px wavy $color-error-500;
+  }
+}
+
+// Enhanced scrolling with sticky elements
+.grid-view--enhanced {
+  .grid-view__head {
+    transition: box-shadow 0.2s;
+  }
+  
+  .grid-view__body {
+    scroll-behavior: smooth;
+  }
+}
+
+// Mobile optimizations for enhanced features
+@media (max-width: 768px) {
+  .grid-view__column-group-header {
+    font-size: 10px;
+    height: 16px;
+  }
+  
+  .grid-view__rich-text-content {
+    font-size: 14px;
+  }
+  
+  .grid-view__formula-editor {
+    font-size: 12px;
+  }
 }

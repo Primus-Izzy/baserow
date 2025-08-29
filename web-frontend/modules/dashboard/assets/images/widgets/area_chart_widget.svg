@@ -1,0 +1,20 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="8" fill="#F8F9FA"/>
+  <rect x="4" y="4" width="40" height="40" rx="6" fill="white" stroke="#E1E5E9"/>
+  
+  <!-- Area Chart -->
+  <path d="M10 32 L16 26 L22 20 L28 24 L34 18 L40 22 L40 38 L10 38 Z" fill="#5190EF" opacity="0.2"/>
+  <path d="M10 32 L16 26 L22 20 L28 24 L34 18 L40 22" stroke="#5190EF" stroke-width="2" fill="none"/>
+  
+  <!-- Data points -->
+  <circle cx="10" cy="32" r="2" fill="#5190EF"/>
+  <circle cx="16" cy="26" r="2" fill="#5190EF"/>
+  <circle cx="22" cy="20" r="2" fill="#5190EF"/>
+  <circle cx="28" cy="24" r="2" fill="#5190EF"/>
+  <circle cx="34" cy="18" r="2" fill="#5190EF"/>
+  <circle cx="40" cy="22" r="2" fill="#5190EF"/>
+  
+  <!-- Axis lines -->
+  <line x1="8" y1="38" x2="40" y2="38" stroke="#E1E5E9" stroke-width="1"/>
+  <line x1="8" y1="38" x2="8" y2="16" stroke="#E1E5E9" stroke-width="1"/>
+</svg>

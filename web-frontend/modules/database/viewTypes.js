@@ -6,6 +6,12 @@ import GalleryView from '@baserow/modules/database/components/view/gallery/Galle
 import GalleryViewHeader from '@baserow/modules/database/components/view/gallery/GalleryViewHeader'
 import FormView from '@baserow/modules/database/components/view/form/FormView'
 import FormViewHeader from '@baserow/modules/database/components/view/form/FormViewHeader'
+import KanbanView from '@baserow/modules/database/components/view/kanban/KanbanView'
+import KanbanViewHeader from '@baserow/modules/database/components/view/kanban/KanbanViewHeader'
+import TimelineView from '@baserow/modules/database/components/view/timeline/TimelineView'
+import TimelineViewHeader from '@baserow/modules/database/components/view/timeline/TimelineViewHeader'
+import CalendarView from '@baserow/modules/database/components/view/calendar/CalendarView'
+import CalendarViewHeader from '@baserow/modules/database/components/view/calendar/CalendarViewHeader'
 import { FileFieldType } from '@baserow/modules/database/fieldTypes'
 import {
   filterVisibleFieldsFunction,
@@ -1251,5 +1257,461 @@ export class FormViewType extends ViewType {
    */
   isCompatibleWithDataSync(dataSync) {
     return !dataSync
+  }
+}
+
+export class KanbanViewType extends BaseBufferedRowViewTypeMixin(ViewType) {
+  static getType() {
+    return 'kanban'
+  }
+
+  getIconClass() {
+    return 'baserow-icon-kanban'
+  }
+
+  getColorClass() {
+    return 'color-success'
+  }
+
+  getName() {
+    const { i18n } = this.app
+    return i18n.t('viewType.kanban')
+  }
+
+  getHeaderComponent() {
+    return KanbanViewHeader
+  }
+
+  getComponent() {
+    return KanbanView
+  }
+
+  canShare() {
+    return true
+  }
+
+  canShowRowModal() {
+    return true
+  }
+
+  getPublicRoute() {
+    return 'database-public-kanban-view'
+  }
+
+  getDefaultFieldOptionValues() {
+    // The default values should be the same as in the `KanbanViewFieldOptions`
+    // model in the backend to stay consistent.
+    return {
+      hidden: false,
+      order: maxPossibleOrderValue,
+    }
+  }
+
+  /**
+   * Kanban view can only fetch rows if a status field is configured.
+   */
+  canFetch(context, database, view, fields) {
+    return view.single_select_field !== null
+  }
+
+  async afterFieldUpdated(
+    { dispatch, rootGetters },
+    field,
+    oldField,
+    fieldType,
+    storePrefix
+  ) {
+    // If the status field is updated or deleted, we need to refresh the view
+    const view = rootGetters['view/getSelected']
+    if (field.id === view.single_select_field) {
+      await dispatch(
+        storePrefix + 'view/kanban/refresh',
+        {
+          fields: rootGetters['field/getAll'],
+        },
+        {
+          root: true,
+        }
+      )
+    }
+  }
+
+  /**
+   * When a field is deleted, check if it was the status field and clear it.
+   */
+  async afterFieldDeleted({ dispatch, rootGetters }, field, fieldType, storePrefix = '') {
+    await dispatch(
+      storePrefix + 'view/kanban/forceDeleteFieldOptions',
+      field.id,
+      {
+        root: true,
+      }
+    )
+
+    // If the deleted field was the status field, clear it from all kanban views
+    this._setFieldToNull({ rootGetters, dispatch }, field, 'single_select_field')
+    this._setFieldToNull({ rootGetters, dispatch }, field, 'card_cover_image_field')
+  }
+}
+export class TimelineViewType extends BaseBufferedRowViewTypeMixin(ViewType) {
+  static getType() {
+    return 'timeline'
+  }
+
+  getIconClass() {
+    return 'iconoir-timeline'
+  }
+
+  getColorClass() {
+    return 'color-warning'
+  }
+
+  getName() {
+    const { i18n } = this.app
+    return i18n.t('viewType.timeline')
+  }
+
+  getHeaderComponent() {
+    return TimelineViewHeader
+  }
+
+  getComponent() {
+    return TimelineView
+  }
+
+  canShare() {
+    return true
+  }
+
+  canShowRowModal() {
+    return true
+  }
+
+  getPublicRoute() {
+    return 'database-public-timeline-view'
+  }
+
+  getDefaultFieldOptionValues() {
+    // The default values should be the same as in the `TimelineViewFieldOptions`
+    // model in the backend to stay consistent.
+    return {
+      hidden: false,
+      order: maxPossibleOrderValue,
+      show_in_timeline: true,
+      color_field: null,
+    }
+  }
+
+  /**
+   * Timeline view can only fetch rows if start or end date fields are configured.
+   */
+  canFetch(context, database, view, fields) {
+    return view.start_date_field !== null || view.end_date_field !== null
+  }
+
+  async afterFieldUpdated(
+    { dispatch, rootGetters },
+    field,
+    oldField,
+    fieldType,
+    storePrefix
+  ) {
+    // If the date fields are updated or deleted, we need to refresh the view
+    const view = rootGetters['view/getSelected']
+    if (field.id === view.start_date_field || field.id === view.end_date_field) {
+      await dispatch(
+        storePrefix + 'view/timeline/refresh',
+        {
+          fields: rootGetters['field/getAll'],
+        },
+        {
+          root: true,
+        }
+      )
+    }
+  }
+
+  /**
+   * When a field is deleted, check if it was a date field and clear it.
+   */
+  async afterFieldDeleted({ dispatch, rootGetters }, field, fieldType, storePrefix = '') {
+    await dispatch(
+      storePrefix + 'view/timeline/forceDeleteFieldOptions',
+      field.id,
+      {
+        root: true,
+      }
+    )
+
+    // If the deleted field was a date field, clear it from all timeline views
+    this._setFieldToNull({ rootGetters, dispatch }, field, 'start_date_field')
+    this._setFieldToNull({ rootGetters, dispatch }, field, 'end_date_field')
+  }
+
+  /**
+   * Timeline view should refresh when dependencies or milestones change.
+   */
+  async rowUpdated(
+    { store },
+    tableId,
+    fields,
+    row,
+    values,
+    metadata,
+    updatedFieldIds,
+    storePrefix = ''
+  ) {
+    if (this.isCurrentView(store, tableId)) {
+      await store.dispatch(
+        storePrefix + 'view/timeline/afterExistingRowUpdated',
+        {
+          view: store.getters['view/getSelected'],
+          fields,
+          row,
+          values,
+        }
+      )
+
+      // Check if date fields were updated and recalculate dependencies if needed
+      const view = store.getters['view/getSelected']
+      const dateFieldsUpdated = updatedFieldIds.some(
+        fieldId => fieldId === view.start_date_field || fieldId === view.end_date_field
+      )
+
+      if (dateFieldsUpdated && view.enable_dependencies && view.auto_reschedule) {
+        try {
+          await store.dispatch(
+            storePrefix + 'view/timeline/recalculateSchedule',
+            {
+              viewId: view.id,
+              rowId: row.id,
+            }
+          )
+        } catch (error) {
+          console.error('Failed to recalculate schedule:', error)
+        }
+      }
+    }
+  }
+}
+expo
+rt class CalendarViewType extends ViewType {
+  static getType() {
+    return 'calendar'
+  }
+
+  getIconClass() {
+    return 'iconoir-calendar'
+  }
+
+  getColorClass() {
+    return 'color-success'
+  }
+
+  getName() {
+    const { i18n } = this.app
+    return i18n.t('viewType.calendar')
+  }
+
+  getHeaderComponent() {
+    return CalendarViewHeader
+  }
+
+  getComponent() {
+    return CalendarView
+  }
+
+  canShare() {
+    return true
+  }
+
+  canShowRowModal() {
+    return true
+  }
+
+  getPublicRoute() {
+    return 'database-public-calendar-view'
+  }
+
+  /**
+   * Calendar view can only fetch events if a date field is configured.
+   */
+  canFetch(context, database, view, fields) {
+    return view.date_field !== null
+  }
+
+  async fetch({ store }, database, view, fields, storePrefix = '') {
+    if (!this.canFetch({ store }, database, view, fields)) {
+      // Set the viewId so the refresh will work when the view can fetch events.
+      await store.dispatch(`${storePrefix}view/calendar/setViewId`, {
+        viewId: view.id,
+      })
+      return
+    }
+
+    // Calculate initial date range (current month)
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    
+    // Extend to show full weeks
+    const startOfWeek = new Date(startOfMonth)
+    const day = startOfWeek.getDay()
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1)
+    startOfWeek.setDate(diff)
+    
+    const endOfWeek = new Date(endOfMonth)
+    const endDay = endOfWeek.getDay()
+    const endDiff = endOfWeek.getDate() + (7 - endDay) + (endDay === 0 ? -7 : 0)
+    endOfWeek.setDate(endDiff)
+
+    await store.dispatch(`${storePrefix}view/calendar/fetchEvents`, {
+      viewId: view.id,
+      startDate: startOfWeek.toISOString().split('T')[0],
+      endDate: endOfWeek.toISOString().split('T')[0],
+      includeRecurring: view.enable_recurring_events,
+    })
+  }
+
+  async refresh(
+    { store },
+    database,
+    view,
+    fields,
+    storePrefix = '',
+    includeFieldOptions = false,
+    sourceEvent = null
+  ) {
+    if (!this.canFetch({ store }, database, view, fields)) {
+      return
+    }
+
+    // Use the last fetched range or default to current month
+    const lastRange = store.getters[storePrefix + 'view/calendar/getLastFetchedRange']
+    let startDate, endDate
+
+    if (lastRange.startDate && lastRange.endDate) {
+      startDate = lastRange.startDate
+      endDate = lastRange.endDate
+    } else {
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      startDate = startOfMonth.toISOString().split('T')[0]
+      endDate = endOfMonth.toISOString().split('T')[0]
+    }
+
+    await store.dispatch(storePrefix + 'view/calendar/fetchEvents', {
+      viewId: view.id,
+      startDate,
+      endDate,
+      includeRecurring: view.enable_recurring_events,
+    })
+  }
+
+  async afterFieldCreated(
+    { dispatch },
+    table,
+    field,
+    fieldType,
+    storePrefix = ''
+  ) {
+    await dispatch(
+      storePrefix + 'view/calendar/addField',
+      { field },
+      { root: true }
+    )
+  }
+
+  async afterFieldDeleted({ dispatch, rootGetters }, field, fieldType, storePrefix = '') {
+    await dispatch(
+      storePrefix + 'view/calendar/forceDeleteFieldOptions',
+      field.id,
+      {
+        root: true,
+      }
+    )
+
+    // If the deleted field was the date field, clear it from all calendar views
+    this._setFieldToNull({ rootGetters, dispatch }, field, 'date_field')
+    this._setFieldToNull({ rootGetters, dispatch }, field, 'event_title_field')
+    this._setFieldToNull({ rootGetters, dispatch }, field, 'event_color_field')
+    this._setFieldToNull({ rootGetters, dispatch }, field, 'recurring_pattern_field')
+  }
+
+  async fieldOptionsUpdated({ store }, view, fieldOptions, storePrefix) {
+    await store.dispatch(
+      storePrefix + 'view/calendar/forceUpdateAllFieldOptions',
+      fieldOptions,
+      {
+        root: true,
+      }
+    )
+  }
+
+  async rowCreated(
+    { store },
+    tableId,
+    fields,
+    values,
+    metadata,
+    storePrefix = ''
+  ) {
+    if (this.isCurrentView(store, tableId)) {
+      await store.dispatch(
+        storePrefix + 'view/calendar/afterNewRowCreated',
+        {
+          view: store.getters['view/getSelected'],
+          fields,
+          values,
+        }
+      )
+    }
+  }
+
+  async rowUpdated(
+    { store },
+    tableId,
+    fields,
+    row,
+    values,
+    metadata,
+    updatedFieldIds,
+    storePrefix = ''
+  ) {
+    if (this.isCurrentView(store, tableId)) {
+      await store.dispatch(
+        storePrefix + 'view/calendar/afterExistingRowUpdated',
+        {
+          view: store.getters['view/getSelected'],
+          fields,
+          row,
+          values,
+        }
+      )
+    }
+  }
+
+  async rowDeleted({ store }, tableId, fields, row, storePrefix = '') {
+    if (this.isCurrentView(store, tableId)) {
+      await store.dispatch(
+        storePrefix + 'view/calendar/afterExistingRowDeleted',
+        {
+          view: store.getters['view/getSelected'],
+          fields,
+          row,
+        }
+      )
+    }
+  }
+
+  /**
+   * When the view is updated, refresh if date field configuration changed.
+   */
+  updated(context, view, oldView, storePrefix) {
+    const dateFieldChanged = view.date_field !== oldView.date_field
+    const recurringChanged = view.enable_recurring_events !== oldView.enable_recurring_events
+    
+    return dateFieldChanged || recurringChanged
   }
 }

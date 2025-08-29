@@ -594,6 +594,26 @@ class GridView(View):
         max_length=10,
         db_default="small",
     )
+    # Enhanced table view features
+    sticky_header = models.BooleanField(
+        default=True,
+        help_text="Whether column headers should remain visible during vertical scrolling"
+    )
+    conditional_formatting = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Rules for conditional formatting with color-coding based on field values"
+    )
+    column_groups = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Configuration for column grouping with collapsible/expandable groups"
+    )
+    filter_presets = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Saved filter configurations for quick reuse"
+    )
 
 
 class GridViewFieldOptionsManager(models.Manager):
@@ -661,6 +681,12 @@ class GridViewFieldOptions(HierarchicalModelMixin, models.Model):
             "This type must be registered in the backend prior to use it."
         ),
     )
+    # Enhanced inline editing configuration
+    inline_editing_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Configuration for enhanced inline editing including rich text, dropdowns, and input types"
+    )
 
     def get_parent(self):
         return self.grid_view
@@ -681,6 +707,478 @@ class GalleryView(View):
         help_text="References a file field of which the first image must be shown as "
         "card cover image.",
     )
+
+
+class GridViewConditionalFormatting(models.Model):
+    """
+    Model for storing conditional formatting rules for grid views.
+    """
+    grid_view = models.ForeignKey(GridView, on_delete=models.CASCADE, related_name='conditional_formatting_rules')
+    name = models.CharField(max_length=255, help_text="Name of the conditional formatting rule")
+    field = models.ForeignKey(Field, on_delete=models.CASCADE, help_text="Field to apply the condition to")
+    condition_type = models.CharField(
+        max_length=50,
+        help_text="Type of condition (equals, contains, greater_than, etc.)"
+    )
+    condition_value = models.TextField(help_text="Value to compare against")
+    background_color = models.CharField(
+        max_length=7,
+        blank=True,
+        help_text="Background color in hex format (e.g., #FF0000)"
+    )
+    text_color = models.CharField(
+        max_length=7,
+        blank=True,
+        help_text="Text color in hex format (e.g., #FFFFFF)"
+    )
+    is_active = models.BooleanField(default=True, help_text="Whether this rule is active")
+    order = models.PositiveIntegerField(default=0, help_text="Order of rule application")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        unique_together = ['grid_view', 'name']
+
+
+class GridViewFilterPreset(models.Model):
+    """
+    Model for storing saved filter configurations for grid views.
+    """
+    grid_view = models.ForeignKey(GridView, on_delete=models.CASCADE, related_name='filter_presets')
+    name = models.CharField(max_length=255, help_text="Name of the filter preset")
+    filters = models.JSONField(help_text="Saved filter configuration")
+    is_default = models.BooleanField(default=False, help_text="Whether this is the default preset")
+    created_by = models.ForeignKey(
+        'auth.User',
+        on_delete=models.CASCADE,
+        help_text="User who created this preset"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        unique_together = ['grid_view', 'name']
+
+
+class GridViewColumnGroup(models.Model):
+    """
+    Model for storing column grouping configuration for grid views.
+    """
+    grid_view = models.ForeignKey(GridView, on_delete=models.CASCADE, related_name='column_groups')
+    name = models.CharField(max_length=255, help_text="Name of the column group")
+    fields = models.ManyToManyField(Field, help_text="Fields included in this group")
+    is_collapsed = models.BooleanField(default=False, help_text="Whether the group is collapsed")
+    order = models.PositiveIntegerField(default=0, help_text="Order of the group")
+    color = models.CharField(
+        max_length=7,
+        blank=True,
+        help_text="Group header color in hex format"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        unique_together = ['grid_view', 'name']
+
+
+class CalendarView(View):
+    """
+    Calendar view model that extends the base View class with calendar-specific functionality.
+    Supports multiple display modes and external calendar integration.
+    """
+    field_options = models.ManyToManyField(Field, through="CalendarViewFieldOptions")
+    date_field = models.ForeignKey(
+        Field,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="calendar_view_date_field",
+        help_text="Date field used to position events on the calendar",
+    )
+    # Calendar display configuration
+    display_mode = models.CharField(
+        max_length=20,
+        choices=[
+            ('month', 'Monthly'),
+            ('week', 'Weekly'),
+            ('day', 'Daily'),
+        ],
+        default='month',
+        help_text="Default display mode for the calendar view",
+    )
+    # Event configuration
+    event_title_field = models.ForeignKey(
+        Field,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="calendar_view_title_field",
+        help_text="Field used as the event title",
+    )
+    event_color_field = models.ForeignKey(
+        Field,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="calendar_view_color_field",
+        help_text="Field used to determine event colors",
+    )
+    # Recurring events support
+    enable_recurring_events = models.BooleanField(
+        default=False,
+        help_text="Whether recurring event patterns are enabled",
+    )
+    recurring_pattern_field = models.ForeignKey(
+        Field,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="calendar_view_recurring_pattern_field",
+        help_text="Field containing recurring event pattern configuration",
+    )
+    # External calendar integration
+    external_calendar_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Configuration for external calendar integrations (Google Calendar, Outlook)",
+    )
+    enable_external_sync = models.BooleanField(
+        default=False,
+        help_text="Whether bi-directional sync with external calendars is enabled",
+    )
+
+
+class CalendarViewFieldOptionsManager(models.Manager):
+    """
+    Manager for the CalendarViewFieldOptions model.
+    The View can be trashed and the field options are not deleted, therefore
+    we need to filter out the trashed views.
+    """
+
+    def get_queryset(self):
+        trashed_Q = Q(calendar_view__trashed=True) | Q(field__trashed=True)
+        return super().get_queryset().filter(~trashed_Q)
+
+
+class CalendarViewFieldOptions(HierarchicalModelMixin, models.Model):
+    """
+    Field options for Calendar view that control how fields are displayed in events.
+    """
+    objects = CalendarViewFieldOptionsManager()
+    objects_and_trash = models.Manager()
+
+    calendar_view = models.ForeignKey(CalendarView, on_delete=models.CASCADE)
+    field = models.ForeignKey(Field, on_delete=models.CASCADE)
+    hidden = models.BooleanField(
+        default=True,
+        help_text="Whether or not the field should be hidden in the event display.",
+    )
+    # The default value is the maximum value of the small integer field because a newly
+    # created field must always be last.
+    order = models.SmallIntegerField(
+        default=32767,
+        help_text="The order that the field has in the event display. Lower value is first.",
+    )
+    # Calendar-specific field options
+    show_in_event = models.BooleanField(
+        default=False,
+        help_text="Whether the field should be visible in the event popup/details.",
+    )
+    event_display_style = models.CharField(
+        max_length=50,
+        default="default",
+        help_text="How the field should be displayed in the event (default, compact, badge).",
+    )
+
+    def get_parent(self):
+        return self.calendar_view
+
+    class Meta:
+        ordering = ("order", "field_id")
+        unique_together = ("calendar_view", "field")
+
+
+class CalendarRecurringPattern(models.Model):
+    """
+    Model for storing recurring event patterns for calendar views.
+    """
+    calendar_view = models.ForeignKey(CalendarView, on_delete=models.CASCADE, related_name='recurring_patterns')
+    row_id = models.PositiveIntegerField(help_text="ID of the row this pattern applies to")
+    pattern_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('daily', 'Daily'),
+            ('weekly', 'Weekly'),
+            ('monthly', 'Monthly'),
+            ('yearly', 'Yearly'),
+            ('custom', 'Custom'),
+        ],
+        help_text="Type of recurring pattern"
+    )
+    interval = models.PositiveIntegerField(
+        default=1,
+        help_text="Interval between recurrences (e.g., every 2 weeks)"
+    )
+    days_of_week = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Days of week for weekly patterns (0=Monday, 6=Sunday)"
+    )
+    end_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="End date for the recurring pattern"
+    )
+    max_occurrences = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Maximum number of occurrences"
+    )
+    exceptions = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of dates to exclude from the pattern"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['calendar_view', 'row_id']
+
+
+class CalendarExternalSync(models.Model):
+    """
+    Model for managing external calendar synchronization.
+    """
+    calendar_view = models.ForeignKey(CalendarView, on_delete=models.CASCADE, related_name='external_syncs')
+    provider = models.CharField(
+        max_length=50,
+        choices=[
+            ('google', 'Google Calendar'),
+            ('outlook', 'Microsoft Outlook'),
+            ('ical', 'iCal/CalDAV'),
+        ],
+        help_text="External calendar provider"
+    )
+    external_calendar_id = models.CharField(
+        max_length=255,
+        help_text="ID of the external calendar"
+    )
+    sync_token = models.TextField(
+        blank=True,
+        help_text="Token for incremental sync"
+    )
+    last_sync = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Last successful sync timestamp"
+    )
+    sync_direction = models.CharField(
+        max_length=20,
+        choices=[
+            ('import', 'Import Only'),
+            ('export', 'Export Only'),
+            ('bidirectional', 'Bi-directional'),
+        ],
+        default='bidirectional',
+        help_text="Direction of synchronization"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this sync is active"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['calendar_view', 'provider', 'external_calendar_id']
+
+
+class TimelineView(View):
+    """
+    Enhanced Timeline/Gantt view with dependency management and milestone support.
+    """
+    class TIMESCALE_OPTIONS(models.TextChoices):
+        DAY = "day"
+        WEEK = "week"
+        MONTH = "month"
+        YEAR = "year"
+
+    field_options = models.ManyToManyField(Field, through="TimelineViewFieldOptions")
+    start_date_field = models.ForeignKey(
+        Field,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="timeline_views_start_date_field",
+        help_text="Date field used as start date for timeline items"
+    )
+    end_date_field = models.ForeignKey(
+        Field,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="timeline_views_end_date_field",
+        help_text="Date field used as end date for timeline items"
+    )
+    timescale = models.CharField(
+        max_length=32,
+        choices=TIMESCALE_OPTIONS.choices,
+        default=TIMESCALE_OPTIONS.MONTH,
+        help_text="The timescale that the timeline should be displayed in"
+    )
+    # Enhanced features for dependency management
+    enable_dependencies = models.BooleanField(
+        default=False,
+        help_text="Whether dependency tracking is enabled for this timeline view"
+    )
+    auto_reschedule = models.BooleanField(
+        default=True,
+        help_text="Whether dependent tasks should be automatically rescheduled when dependencies change"
+    )
+    # Milestone support
+    enable_milestones = models.BooleanField(
+        default=False,
+        help_text="Whether milestone management is enabled for this timeline view"
+    )
+
+
+class TimelineViewFieldOptionsManager(models.Manager):
+    """
+    Manager for the TimelineViewFieldOptions model.
+    """
+    def get_queryset(self):
+        trashed_Q = Q(timeline_view__trashed=True) | Q(field__trashed=True)
+        return super().get_queryset().filter(~trashed_Q)
+
+
+class TimelineViewFieldOptions(HierarchicalModelMixin, models.Model):
+    """
+    Field options for timeline view.
+    """
+    objects = TimelineViewFieldOptionsManager()
+    objects_and_trash = models.Manager()
+
+    timeline_view = models.ForeignKey(TimelineView, on_delete=models.CASCADE)
+    field = models.ForeignKey(Field, on_delete=models.CASCADE)
+    hidden = models.BooleanField(
+        default=True,
+        help_text="Whether or not the field should be hidden in the timeline item"
+    )
+    order = models.SmallIntegerField(
+        default=32767,
+        help_text="The order that the field has in the timeline item"
+    )
+    # Enhanced display options
+    show_in_timeline = models.BooleanField(
+        default=True,
+        help_text="Whether the field should be displayed in the timeline bar"
+    )
+    color_field = models.BooleanField(
+        default=False,
+        help_text="Whether this field should be used for color coding timeline items"
+    )
+
+    def get_parent(self):
+        return self.timeline_view
+
+    class Meta:
+        ordering = ("order", "field_id")
+        unique_together = ("timeline_view", "field")
+
+
+class TimelineDependency(models.Model):
+    """
+    Model for tracking dependencies between timeline items (rows).
+    """
+    class DEPENDENCY_TYPE_CHOICES(models.TextChoices):
+        FINISH_TO_START = "finish_to_start"  # Task B starts when Task A finishes
+        START_TO_START = "start_to_start"    # Task B starts when Task A starts
+        FINISH_TO_FINISH = "finish_to_finish"  # Task B finishes when Task A finishes
+        START_TO_FINISH = "start_to_finish"   # Task B finishes when Task A starts
+
+    timeline_view = models.ForeignKey(
+        TimelineView, 
+        on_delete=models.CASCADE,
+        related_name='dependencies'
+    )
+    predecessor_row_id = models.PositiveIntegerField(
+        help_text="ID of the row that must be completed first"
+    )
+    successor_row_id = models.PositiveIntegerField(
+        help_text="ID of the row that depends on the predecessor"
+    )
+    dependency_type = models.CharField(
+        max_length=20,
+        choices=DEPENDENCY_TYPE_CHOICES.choices,
+        default=DEPENDENCY_TYPE_CHOICES.FINISH_TO_START,
+        help_text="Type of dependency relationship"
+    )
+    lag_days = models.IntegerField(
+        default=0,
+        help_text="Number of days to wait after dependency is met (can be negative for overlap)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('timeline_view', 'predecessor_row_id', 'successor_row_id')
+        indexes = [
+            models.Index(fields=['timeline_view', 'predecessor_row_id']),
+            models.Index(fields=['timeline_view', 'successor_row_id']),
+        ]
+
+
+class TimelineMilestone(models.Model):
+    """
+    Model for managing milestones in timeline views.
+    """
+    timeline_view = models.ForeignKey(
+        TimelineView,
+        on_delete=models.CASCADE,
+        related_name='milestones'
+    )
+    name = models.CharField(
+        max_length=255,
+        help_text="Name of the milestone"
+    )
+    date_field = models.ForeignKey(
+        Field,
+        on_delete=models.CASCADE,
+        help_text="Date field that determines the milestone date"
+    )
+    row_id = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Optional row ID if milestone is tied to a specific row"
+    )
+    color = models.CharField(
+        max_length=7,
+        default="#FF0000",
+        help_text="Color for the milestone indicator in hex format"
+    )
+    icon = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Icon name for the milestone indicator"
+    )
+    description = models.TextField(
+        blank=True,
+        help_text="Optional description for the milestone"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this milestone is currently active"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        unique_together = ['timeline_view', 'name']
 
 
 class GalleryViewFieldOptionsManager(models.Manager):
@@ -780,6 +1278,27 @@ class FormView(View):
         User,
         help_text="The users that must be notified when the form is submitted.",
     )
+    # Enhanced form features
+    custom_branding = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Custom branding configuration including logos, colors, and thank-you messages",
+    )
+    access_control = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Access control settings for public and internal form access",
+    )
+    validation_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Comprehensive field validation configuration with custom error messages",
+    )
+    shareable_links = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Secure shareable link configurations with access controls",
+    )
 
     @property
     def active_field_options(self):
@@ -878,6 +1397,17 @@ class FormViewFieldOptions(HierarchicalModelMixin, models.Model):
     order = models.SmallIntegerField(
         default=32767,
         help_text="The order that the field has in the form. Lower value is first.",
+    )
+    # Enhanced conditional logic
+    conditional_logic = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Advanced conditional field logic for showing/hiding fields based on answers",
+    )
+    validation_rules = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Custom validation rules with error messages for this field",
     )
 
     def get_parent(self):
@@ -1031,3 +1561,95 @@ class ViewSubscription(models.Model):
 
     class Meta:
         unique_together = ("view", "subscriber_content_type", "subscriber_id")
+
+
+class KanbanView(View):
+    """
+    Kanban view model that extends the base View class with Kanban-specific functionality.
+    """
+    field_options = models.ManyToManyField(Field, through="KanbanViewFieldOptions")
+    single_select_field = models.ForeignKey(
+        Field,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="kanban_view_single_select_field",
+        help_text="References a single select field that determines the Kanban columns.",
+    )
+    card_cover_image_field = models.ForeignKey(
+        Field,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="kanban_view_card_cover_image_field",
+        help_text="References a file field of which the first image must be shown as card cover image.",
+    )
+    # Kanban-specific configuration
+    stack_by_field = models.ForeignKey(
+        Field,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="kanban_view_stack_by_field",
+        help_text="Field used to stack cards in columns (typically a single select field).",
+    )
+    card_configuration = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Configuration for card display including visible fields and colors.",
+    )
+    column_configuration = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Configuration for column display and behavior.",
+    )
+
+
+class KanbanViewFieldOptionsManager(models.Manager):
+    """
+    Manager for the KanbanViewFieldOptions model.
+    The View can be trashed and the field options are not deleted, therefore
+    we need to filter out the trashed views.
+    """
+
+    def get_queryset(self):
+        trashed_Q = Q(kanban_view__trashed=True) | Q(field__trashed=True)
+        return super().get_queryset().filter(~trashed_Q)
+
+
+class KanbanViewFieldOptions(HierarchicalModelMixin, models.Model):
+    """
+    Field options for Kanban view that control how fields are displayed on cards.
+    """
+    objects = KanbanViewFieldOptionsManager()
+    objects_and_trash = models.Manager()
+
+    kanban_view = models.ForeignKey(KanbanView, on_delete=models.CASCADE)
+    field = models.ForeignKey(Field, on_delete=models.CASCADE)
+    hidden = models.BooleanField(
+        default=True,
+        help_text="Whether or not the field should be hidden on the card.",
+    )
+    # The default value is the maximum value of the small integer field because a newly
+    # created field must always be last.
+    order = models.SmallIntegerField(
+        default=32767,
+        help_text="The order that the field has on the card. Lower value is first.",
+    )
+    # Kanban-specific field options
+    show_in_card = models.BooleanField(
+        default=False,
+        help_text="Whether the field should be visible on the card.",
+    )
+    card_display_style = models.CharField(
+        max_length=50,
+        default="default",
+        help_text="How the field should be displayed on the card (default, compact, badge).",
+    )
+
+    def get_parent(self):
+        return self.kanban_view
+
+    class Meta:
+        ordering = ("order", "field_id")
+        unique_together = ("kanban_view", "field")

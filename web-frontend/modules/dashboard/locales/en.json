@@ -1,6 +1,9 @@
 {
   "dashboard": {
-    "descriptionPlaceholder": "Description"
+    "descriptionPlaceholder": "Description",
+    "addFirstWidget": "Add your first widget",
+    "addFirstWidgetDescription": "Start building your dashboard by adding widgets to visualize your data.",
+    "addWidget": "Add widget"
   },
   "dashboardHeader": {
     "doneEditing": "Done editing"
@@ -21,6 +24,48 @@
   },
   "summaryWidget": {
     "name": "Summary"
+  },
+  "kpiWidget": {
+    "name": "KPI",
+    "number": "Number KPI",
+    "gauge": "Gauge KPI",
+    "progress": "Progress Bar KPI",
+    "sparkline": "Sparkline KPI",
+    "percentage": "Percentage KPI",
+    "currency": "Currency KPI",
+    "duration": "Duration KPI"
+  },
+  "enhancedChartWidget": {
+    "name": "Enhanced Chart",
+    "bar": "Bar Chart",
+    "stackedBar": "Stacked Bar Chart",
+    "horizontalBar": "Horizontal Bar Chart",
+    "line": "Line Chart",
+    "area": "Area Chart",
+    "pie": "Pie Chart",
+    "donut": "Donut Chart",
+    "polar": "Polar Area Chart",
+    "radar": "Radar Chart",
+    "scatter": "Scatter Plot",
+    "bubble": "Bubble Chart",
+    "combo": "Combo Chart",
+    "mixed": "Mixed Chart"
+  },
+  "heatmapWidget": {
+    "name": "Heatmap",
+    "standard": "Standard Heatmap",
+    "noData": "No data available for heatmap"
+  },
+  "gaugeWidget": {
+    "name": "Gauge Chart",
+    "standard": "Standard Gauge"
+  },
+  "enhancedChart": {
+    "noData": "No data available",
+    "loading": "Loading chart data..."
+  },
+  "heatmapChart": {
+    "noData": "No data available for heatmap"
   },
   "emptyDashboardSidebar": {
     "title": "No element selected",
@@ -43,5 +88,96 @@
   },
   "trashType": {
     "widget": "widget"
+  },
+  "dashboardSharing": {
+    "title": "Dashboard Sharing",
+    "currentSettings": "Current Settings",
+    "actions": "Sharing Actions",
+    "widgetEmbedding": "Widget Embedding",
+    "permissions": "Permissions",
+    "publicUrl": "Public URL",
+    "embedUrl": "Embed URL",
+    "createPublicLink": "Create Public Link",
+    "createEmbedLink": "Create Embed Link",
+    "revokeAccess": "Revoke Access",
+    "embedWidget": "Embed Widget",
+    "addUser": "Add User",
+    "userEmail": "User Email",
+    "add": "Add",
+    "permissionLevel": {
+      "private": "Private",
+      "workspace": "Workspace Members",
+      "public": "Public"
+    },
+    "permissionView": "View",
+    "permissionEdit": "Edit",
+    "permissionAdmin": "Admin",
+    "permissionType": {
+      "view": "View",
+      "edit": "Edit",
+      "admin": "Admin"
+    },
+    "widgetEmbeddingDescription": "Generate embed codes for individual widgets to use in external applications.",
+    "publicLinkCreated": "Public link created successfully",
+    "embedLinkCreated": "Embed link created successfully",
+    "widgetEmbedLinkCreated": "Widget embed link copied to clipboard",
+    "accessRevoked": "Public access revoked successfully",
+    "permissionAdded": "Permission added successfully",
+    "permissionRemoved": "Permission removed successfully",
+    "copiedToClipboard": "Copied to clipboard"
+  },
+  "dashboardExport": {
+    "title": "Dashboard Export",
+    "exportOptions": "Export Options",
+    "deliveryOptions": "Delivery Options",
+    "schedulingOptions": "Scheduling Options",
+    "exportHistory": "Export History",
+    "format": "Format",
+    "formatPdf": "PDF Document",
+    "formatPng": "PNG Image",
+    "formatCsv": "CSV Data",
+    "pageSize": "Page Size",
+    "orientation": "Orientation",
+    "portrait": "Portrait",
+    "landscape": "Landscape",
+    "resolution": "Resolution",
+    "resolution1x": "Standard (1x)",
+    "resolution2x": "High (2x)",
+    "resolution3x": "Ultra High (3x)",
+    "includeTitle": "Include Dashboard Title",
+    "includeTimestamp": "Include Timestamp",
+    "sendEmail": "Send via Email",
+    "emailAddress": "Email Address",
+    "emailPlaceholder": "Enter email address",
+    "scheduleExport": "Schedule Recurring Export",
+    "frequency": "Frequency",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "deliveryEmailRequired": "Delivery Email (Required for Scheduling)",
+    "noExports": "No exports yet. Create your first export above.",
+    "download": "Download",
+    "cancel": "Cancel",
+    "startExport": "Start Export",
+    "exportScheduled": "Export scheduled successfully",
+    "exportStarted": "Export started successfully",
+    "exportCancelled": "Export cancelled successfully",
+    "exportDeleted": "Export deleted successfully",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed"
+    }
+  },
+  "dashboardEmbed": {
+    "loading": "Loading dashboard...",
+    "error": "Error Loading Dashboard",
+    "loadError": "Failed to load dashboard. Please check the link and try again.",
+    "refresh": "Refresh",
+    "poweredBy": "Powered by Baserow",
+    "widgetError": "Error loading widget",
+    "widgetNotSupported": "This widget type is not supported in embed mode",
+    "calendarPlaceholder": "Calendar view"
   }
 }

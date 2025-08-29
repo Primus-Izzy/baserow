@@ -1,5 +1,8 @@
 <template>
-  <div class="grid-view__head">
+  <div 
+    class="grid-view__head"
+    :class="{ 'grid-view__head--sticky': view.sticky_header }"
+  >
     <div
       v-for="groupBy in includeGroupBy ? activeGroupBys : []"
       :key="'field-group-' + groupBy.field"

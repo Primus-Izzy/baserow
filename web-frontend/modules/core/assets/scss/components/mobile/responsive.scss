@@ -1,0 +1,211 @@
+// Mobile-responsive layout framework
+// Breakpoints following mobile-first approach
+$mobile-small: 320px;
+$mobile-medium: 375px;
+$mobile-large: 414px;
+$tablet-small: 768px;
+$tablet-large: 1024px;
+$desktop: 1200px;
+
+// Touch-friendly target sizes
+$touch-target-min: 44px;
+$touch-target-comfortable: 48px;
+$touch-target-large: 56px;
+
+// Mobile spacing system
+$mobile-spacing-xs: 4px;
+$mobile-spacing-sm: 8px;
+$mobile-spacing-md: 16px;
+$mobile-spacing-lg: 24px;
+$mobile-spacing-xl: 32px;
+
+// Mobile typography
+$mobile-font-size-xs: 12px;
+$mobile-font-size-sm: 14px;
+$mobile-font-size-md: 16px;
+$mobile-font-size-lg: 18px;
+$mobile-font-size-xl: 20px;
+
+// Responsive mixins
+@mixin mobile-only {
+  @media (max-width: #{$tablet-small - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media (min-width: #{$tablet-small}) and (max-width: #{$desktop - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: #{$desktop}) {
+    @content;
+  }
+}
+
+@mixin touch-friendly {
+  min-height: $touch-target-min;
+  min-width: $touch-target-min;
+  padding: $mobile-spacing-sm;
+  
+  &:focus, &:active {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+@mixin mobile-container {
+  padding: 0 $mobile-spacing-md;
+  max-width: 100%;
+  
+  @include tablet-only {
+    padding: 0 $mobile-spacing-lg;
+  }
+  
+  @include desktop-up {
+    padding: 0 $mobile-spacing-xl;
+  }
+}
+
+// Mobile navigation patterns
+.mobile-nav {
+  @include mobile-only {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-neutral-50);
+    border-top: 1px solid var(--color-neutral-200);
+    padding: $mobile-spacing-sm;
+    z-index: 1000;
+    
+    .nav-item {
+      @include touch-friendly;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      font-size: $mobile-font-size-xs;
+      color: var(--color-neutral-600);
+      
+      &.active {
+        color: var(--color-primary);
+      }
+      
+      .icon {
+        margin-bottom: 2px;
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+// Mobile header patterns
+.mobile-header {
+  @include mobile-only {
+    position: sticky;
+    top: 0;
+    background: var(--color-neutral-50);
+    border-bottom: 1px solid var(--color-neutral-200);
+    padding: $mobile-spacing-sm $mobile-spacing-md;
+    z-index: 999;
+    
+    .header-title {
+      font-size: $mobile-font-size-lg;
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    .header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .action-button {
+        @include touch-friendly;
+        background: none;
+        border: none;
+        color: var(--color-primary);
+        font-size: $mobile-font-size-md;
+      }
+    }
+  }
+}
+
+// Mobile content area
+.mobile-content {
+  @include mobile-only {
+    padding-bottom: 80px; // Space for bottom navigation
+    min-height: calc(100vh - 120px);
+  }
+}
+
+// Swipe gesture indicators
+.swipe-indicator {
+  @include mobile-only {
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: $mobile-spacing-sm;
+      width: 6px;
+      height: 6px;
+      border-right: 2px solid var(--color-neutral-400);
+      border-bottom: 2px solid var(--color-neutral-400);
+      transform: translateY(-50%) rotate(-45deg);
+    }
+  }
+}
+
+// Touch interaction feedback
+.touch-feedback {
+  transition: all 0.15s ease;
+  
+  &:active {
+    transform: scale(0.98);
+    background-color: var(--color-neutral-100);
+  }
+}
+
+// Mobile modal patterns
+.mobile-modal {
+  @include mobile-only {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--color-neutral-50);
+    z-index: 1001;
+    
+    .modal-header {
+      padding: $mobile-spacing-md;
+      border-bottom: 1px solid var(--color-neutral-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .modal-title {
+        font-size: $mobile-font-size-lg;
+        font-weight: 600;
+      }
+      
+      .close-button {
+        @include touch-friendly;
+        background: none;
+        border: none;
+        font-size: $mobile-font-size-lg;
+      }
+    }
+    
+    .modal-content {
+      padding: $mobile-spacing-md;
+      height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+  }
+}

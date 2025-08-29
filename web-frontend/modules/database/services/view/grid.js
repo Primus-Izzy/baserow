@@ -217,5 +217,56 @@ export default (client) => {
         config
       )
     },
+
+    // Conditional Formatting methods
+    getConditionalFormatting(gridId) {
+      return client.get(`/database/views/grid/${gridId}/conditional-formatting/`)
+    },
+
+    createConditionalFormatting(gridId, data) {
+      return client.post(`/database/views/grid/${gridId}/conditional-formatting/`, data)
+    },
+
+    updateConditionalFormatting(gridId, ruleId, data) {
+      return client.patch(`/database/views/grid/${gridId}/conditional-formatting/${ruleId}/`, data)
+    },
+
+    deleteConditionalFormatting(gridId, ruleId) {
+      return client.delete(`/database/views/grid/${gridId}/conditional-formatting/${ruleId}/`)
+    },
+
+    // Filter Presets methods
+    getFilterPresets(gridId) {
+      return client.get(`/database/views/grid/${gridId}/filter-presets/`)
+    },
+
+    createFilterPreset(gridId, data) {
+      return client.post(`/database/views/grid/${gridId}/filter-presets/`, data)
+    },
+
+    updateFilterPreset(gridId, presetId, data) {
+      return client.patch(`/database/views/grid/${gridId}/filter-presets/${presetId}/`, data)
+    },
+
+    deleteFilterPreset(gridId, presetId) {
+      return client.delete(`/database/views/grid/${gridId}/filter-presets/${presetId}/`)
+    },
+
+    // Column Groups methods
+    getColumnGroups(gridId) {
+      return client.get(`/database/views/grid/${gridId}/column-groups/`)
+    },
+
+    createColumnGroup(gridId, data) {
+      return client.post(`/database/views/grid/${gridId}/column-groups/`, data)
+    },
+
+    updateColumnGroup(gridId, groupId, data) {
+      return client.patch(`/database/views/grid/${gridId}/column-groups/${groupId}/`, data)
+    },
+
+    deleteColumnGroup(gridId, groupId) {
+      return client.delete(`/database/views/grid/${gridId}/column-groups/${groupId}/`)
+    },
   }
 }

@@ -368,6 +368,11 @@
   "rowEditFieldMultipleCollaborators": {
     "addCollaborator": "Choose a collaborator"
   },
+  "rowEditFieldPeople": {
+    "addPerson": "Add person",
+    "changePerson": "Change person",
+    "selectPerson": "Select person"
+  },
   "rowEditFieldFile": {
     "addFile": "Add a file",
     "sizes": {
@@ -648,6 +653,11 @@
   "galleryViewHeader": {
     "customizeCards": "Customize cards"
   },
+  "kanbanViewHeader": {
+    "statusField": "Status Field",
+    "cardColorField": "Card Color Field",
+    "configureFields": "Configure Fields"
+  },
   "gridViewHide": {
     "hideField": "Hide Fields | 1 hidden field | {count} hidden fields"
   },
@@ -686,7 +696,90 @@
     "tooManyItemsTitle": "Too many items",
     "tooManyItemsDescription": "It's not possible to update more than {limit} rows at once, so we've only updated the first.",
     "AIValuesGenerationErrorTitle": "AI value generation failed",
-    "AIValuesGenerationErrorMessage": "Please check your API_KEY and verify the selected model."
+    "AIValuesGenerationErrorMessage": "Please check your API_KEY and verify the selected model.",
+    "conditionalFormatting": {
+      "title": "Conditional Formatting",
+      "addRule": "Add Rule",
+      "editRule": "Edit Rule",
+      "createRule": "Create Rule",
+      "noRules": "No conditional formatting rules yet",
+      "sampleText": "Sample",
+      "previewText": "Preview text",
+      "ruleName": "Rule Name",
+      "ruleNamePlaceholder": "Enter rule name",
+      "field": "Field",
+      "condition": "Condition",
+      "value": "Value",
+      "valuePlaceholder": "Enter value",
+      "backgroundColor": "Background Color",
+      "textColor": "Text Color",
+      "confirmDelete": "Are you sure you want to delete this rule?",
+      "conditions": {
+        "equals": "equals",
+        "notEquals": "does not equal",
+        "contains": "contains",
+        "notContains": "does not contain",
+        "startsWith": "starts with",
+        "endsWith": "ends with",
+        "greaterThan": "greater than",
+        "lessThan": "less than",
+        "isEmpty": "is empty",
+        "isNotEmpty": "is not empty"
+      }
+    },
+    "filterPresets": {
+      "title": "Filter Presets",
+      "saveCurrentFilters": "Save Current Filters",
+      "savePreset": "Save Filter Preset",
+      "noPresets": "No filter presets saved yet",
+      "createHint": "Apply some filters and save them as a preset for quick access",
+      "presetName": "Preset Name",
+      "presetNamePlaceholder": "Enter preset name",
+      "setAsDefault": "Set as default",
+      "default": "Default",
+      "apply": "Apply",
+      "currentFilters": "Current Filters",
+      "noFilters": "No filters",
+      "oneFilter": "1 filter",
+      "multipleFilters": "{count} filters",
+      "applied": "Preset Applied",
+      "appliedMessage": "Filter preset '{name}' has been applied",
+      "saved": "Preset Saved",
+      "savedMessage": "Filter preset '{name}' has been saved",
+      "deleted": "Preset Deleted",
+      "deletedMessage": "Filter preset '{name}' has been deleted",
+      "defaultSet": "Default Set",
+      "defaultSetMessage": "'{name}' is now the default filter preset",
+      "confirmDelete": "Are you sure you want to delete the preset '{name}'?"
+    },
+    "columnGroups": {
+      "title": "Column Groups",
+      "createGroup": "Create Group",
+      "editGroup": "Edit Group",
+      "noGroups": "No column groups created yet",
+      "createHint": "Group related columns together for better organization",
+      "groupName": "Group Name",
+      "groupNamePlaceholder": "Enter group name",
+      "groupColor": "Group Color",
+      "fields": "Fields",
+      "startCollapsed": "Start collapsed",
+      "noFields": "No fields",
+      "oneField": "1 field",
+      "multipleFields": "{count} fields",
+      "selectFields": "Please select at least one field for the group",
+      "created": "Group Created",
+      "createdMessage": "Column group '{name}' has been created",
+      "updated": "Group Updated",
+      "updatedMessage": "Column group '{name}' has been updated",
+      "deleted": "Group Deleted",
+      "deletedMessage": "Column group '{name}' has been deleted",
+      "confirmDelete": "Are you sure you want to delete the group '{name}'?"
+    },
+    "inlineDropdown": {
+      "search": "Search options...",
+      "noOptions": "No options available",
+      "createOption": "Create '{value}'"
+    }
   },
   "gridViewFieldFile": {
     "dropHere": "Drop here",
@@ -924,6 +1017,16 @@
   "fieldCollaboratorSubForm": {
     "notifyUserWhenAdded": "Notify user when added"
   },
+  "fieldPeopleSubForm": {
+    "multiplePeople": "Allow multiple people",
+    "showAvatar": "Show avatar",
+    "showEmail": "Show email address",
+    "notifications": "Notifications",
+    "notifyWhenAdded": "Notify when added to field",
+    "notifyWhenRemoved": "Notify when removed from field",
+    "defaultValue": "Default value",
+    "defaultValueDescription": "The default people to assign when creating new rows. Use 0 for current user."
+  },
   "collaboratorAddedToRowNotification": {
     "title": "{sender} assigned you to {fieldName} in row {rowId} in {tableName}",
     "deletedUser": "A deleted user"
@@ -1136,5 +1239,125 @@
   "viewOptionsGuidedTourStep": {
     "title": "View Options",
     "content": "Click on the three dots next to the view to export, import, duplicate, and configure a webhook."
+  },
+  "kanbanView": {
+    "statusField": "Status Field",
+    "cardColorField": "Card Color Field",
+    "noColorField": "No Color Field",
+    "configureFields": "Configure Fields",
+    "configureFieldsDescription": "Choose which fields to display on cards. Fields will appear in the order shown below.",
+    "addColumn": "Add Column",
+    "addCard": "Add Card",
+    "addFirstCard": "Add First Card",
+    "editCard": "Edit Card",
+    "noStatus": "No Status",
+    "noCards": "No cards in this column"
+  },
+  "fieldProgressBarSubForm": {
+    "sourceTypeLabel": "Value Source",
+    "sourceTypeManual": "Manual input",
+    "sourceTypeField": "Numeric field",
+    "sourceTypeFormula": "Formula (coming soon)",
+    "sourceFieldLabel": "Source Field",
+    "rangeLabel": "Value Range",
+    "minValuePlaceholder": "Min value",
+    "maxValuePlaceholder": "Max value",
+    "showPercentage": "Show percentage text",
+    "colorSchemeLabel": "Color Scheme",
+    "colorSchemeDefault": "Default (blue)",
+    "colorSchemeSuccess": "Success (green)",
+    "colorSchemeWarning": "Warning (yellow)",
+    "colorSchemeDanger": "Danger (red)",
+    "colorSchemeCustom": "Custom colors",
+    "customColorsLabel": "Custom Colors",
+    "startColor": "Start",
+    "endColor": "End",
+    "previewLabel": "Preview"
+  },
+  "rowEditFieldProgressBar": {
+    "placeholder": "Enter value ({min} - {max})"
+  },
+  "activityLog": {
+    "title": "Activity Log",
+    "filterByUser": "Filter by user",
+    "filterByAction": "Filter by action",
+    "allUsers": "All users",
+    "clearFilters": "Clear filters",
+    "noActivity": "No activity to display",
+    "loadMore": "Load more",
+    "loadError": "Failed to load activity log",
+    "system": "System",
+    "row": "Row",
+    "mentions": "{count} mention | {count} mentions",
+    "newEntries": "{count} new activity | {count} new activities",
+    "views": {
+      "simple": "Simple",
+      "timeline": "Timeline"
+    },
+    "timeline": {
+      "title": "Activity Timeline",
+      "timelineView": "Timeline",
+      "listView": "List",
+      "live": "Live",
+      "paused": "Paused",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "timeRange": "Time Range",
+      "changes": "Changes",
+      "empty": "empty",
+      "moreChanges": "and {count} more change | and {count} more changes",
+      "timeRanges": {
+        "all": "All time",
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "thisWeek": "This week",
+        "thisMonth": "This month",
+        "custom": "Custom range"
+      }
+    },
+    "filters": {
+      "toggle": "Filters",
+      "users": "Users",
+      "actions": "Actions",
+      "timeRange": "Time Range",
+      "search": "Search",
+      "searchPlaceholder": "Search activity...",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "savePreset": "Save Preset",
+      "presets": "Saved Presets",
+      "presetNamePrompt": "Enter a name for this filter preset:",
+      "presetSaved": "Filter preset saved",
+      "presetSavedMessage": "Filter preset '{name}' has been saved",
+      "presetApplied": "Filter preset applied",
+      "presetAppliedMessage": "Applied filter preset '{name}'",
+      "activeFilters": "{count} filter active | {count} filters active",
+      "resultCount": "{count} result | {count} results",
+      "categories": {
+        "rows": "Row Actions",
+        "fields": "Field Actions",
+        "views": "View Actions",
+        "comments": "Comment Actions",
+        "users": "User Actions"
+      }
+    },
+    "actions": {
+      "rowCreated": "created a row",
+      "rowUpdated": "updated a row",
+      "rowDeleted": "deleted a row",
+      "fieldCreated": "created a field",
+      "fieldUpdated": "updated a field",
+      "fieldDeleted": "deleted a field",
+      "viewCreated": "created a view",
+      "viewUpdated": "updated a view",
+      "viewDeleted": "deleted a view",
+      "commentCreated": "added a comment",
+      "commentUpdated": "updated a comment",
+      "commentDeleted": "deleted a comment",
+      "commentResolved": "resolved a comment",
+      "commentUnresolved": "unresolved a comment",
+      "userJoined": "joined the table",
+      "userLeft": "left the table"
+    }
   }
 }

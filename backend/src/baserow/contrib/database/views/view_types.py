@@ -37,6 +37,9 @@ from baserow.contrib.database.api.views.grid.errors import (
 from baserow.contrib.database.api.views.grid.serializers import (
     GridViewFieldOptionsSerializer,
 )
+from baserow.contrib.database.api.views.timeline.serializers import (
+    TimelineViewFieldOptionsSerializer,
+)
 from baserow.contrib.database.fields.exceptions import (
     FieldNotInTable,
     IncompatibleField,
@@ -59,6 +62,8 @@ from .exceptions import (
 )
 from .handler import ViewHandler
 from .models import (
+    CalendarView,
+    CalendarViewFieldOptions,
     FormView,
     FormViewFieldOptions,
     FormViewFieldOptionsAllowedSelectOptions,
@@ -68,6 +73,10 @@ from .models import (
     GalleryViewFieldOptions,
     GridView,
     GridViewFieldOptions,
+    TimelineView,
+    TimelineViewFieldOptions,
+    TimelineDependency,
+    TimelineMilestone,
     View,
 )
 from .registries import ViewType, form_view_mode_registry, view_filter_type_registry
@@ -84,15 +93,30 @@ class GridViewType(ViewType):
     has_public_info = True
     can_group_by = True
     when_shared_publicly_requires_realtime_events = True
-    allowed_fields = ["row_identifier_type", "row_height_size"]
+    allowed_fields = [
+        "row_identifier_type", 
+        "row_height_size",
+        "sticky_header",
+        "conditional_formatting",
+        "column_groups",
+        "filter_presets",
+    ]
     field_options_allowed_fields = [
         "width",
         "hidden",
         "order",
         "aggregation_type",
         "aggregation_raw_type",
+        "inline_editing_config",
     ]
-    serializer_field_names = ["row_identifier_type", "row_height_size"]
+    serializer_field_names = [
+        "row_identifier_type", 
+        "row_height_size",
+        "sticky_header",
+        "conditional_formatting",
+        "column_groups",
+        "filter_presets",
+    ]
 
     api_exceptions_map = {
         GridViewAggregationDoesNotSupportField: ERROR_AGGREGATION_DOES_NOT_SUPPORTED_FIELD,
@@ -564,6 +588,274 @@ class GalleryViewType(ViewType):
             GalleryView.objects.filter(card_cover_image_field_id=field.id).update(
                 card_cover_image_field_id=None
             )
+
+
+class TimelineViewType(ViewType):
+    type = "timeline"
+    model_class = TimelineView
+    field_options_model_class = TimelineViewFieldOptions
+    field_options_serializer_class = TimelineViewFieldOptionsSerializer
+    allowed_fields = [
+        "start_date_field", 
+        "end_date_field", 
+        "timescale",
+        "enable_dependencies",
+        "auto_reschedule",
+        "enable_milestones"
+    ]
+    field_options_allowed_fields = [
+        "hidden", 
+        "order", 
+        "show_in_timeline", 
+        "color_field"
+    ]
+    serializer_field_names = [
+        "start_date_field", 
+        "end_date_field", 
+        "timescale",
+        "enable_dependencies",
+        "auto_reschedule", 
+        "enable_milestones"
+    ]
+    serializer_field_overrides = {
+        "start_date_field": serializers.PrimaryKeyRelatedField(
+            queryset=Field.objects.all(),
+            required=False,
+            default=None,
+            allow_null=True,
+            help_text="Date field used as start date for timeline items"
+        ),
+        "end_date_field": serializers.PrimaryKeyRelatedField(
+            queryset=Field.objects.all(),
+            required=False,
+            default=None,
+            allow_null=True,
+            help_text="Date field used as end date for timeline items"
+        ),
+    }
+    api_exceptions_map = {
+        FieldNotInTable: ERROR_FIELD_NOT_IN_TABLE,
+        IncompatibleField: ERROR_INCOMPATIBLE_FIELD,
+    }
+    can_decorate = True
+    can_share = True
+    has_public_info = True
+
+    def get_api_urls(self):
+        from baserow.contrib.database.api.views.timeline import urls as api_urls
+
+        return [
+            path("timeline/", include(api_urls, namespace=self.type)),
+        ]
+
+    def prepare_values(self, values, table, user):
+        """
+        Check if the provided date fields belong to the same table and are compatible.
+        """
+        start_date_field_value = values.get("start_date_field", None)
+        if start_date_field_value is not None:
+            if isinstance(start_date_field_value, int):
+                start_date_field_value = Field.objects.get(pk=start_date_field_value)
+                values["start_date_field"] = start_date_field_value
+
+            start_date_field_value = start_date_field_value.specific
+            field_type = field_type_registry.get_by_model(start_date_field_value)
+            if not field_type.can_represent_date(start_date_field_value):
+                raise IncompatibleField(
+                    "The provided field is not a date field and cannot be used as a start date field."
+                )
+
+            if start_date_field_value.table_id != table.id:
+                raise FieldNotInTable(
+                    "The provided start date field does not belong to the timeline view's table."
+                )
+
+        end_date_field_value = values.get("end_date_field", None)
+        if end_date_field_value is not None:
+            if isinstance(end_date_field_value, int):
+                end_date_field_value = Field.objects.get(pk=end_date_field_value)
+                values["end_date_field"] = end_date_field_value
+
+            end_date_field_value = end_date_field_value.specific
+            field_type = field_type_registry.get_by_model(end_date_field_value)
+            if not field_type.can_represent_date(end_date_field_value):
+                raise IncompatibleField(
+                    "The provided field is not a date field and cannot be used as an end date field."
+                )
+
+            if end_date_field_value.table_id != table.id:
+                raise FieldNotInTable(
+                    "The provided end date field does not belong to the timeline view's table."
+                )
+
+        return super().prepare_values(values, table, user)
+
+    def export_serialized(
+        self,
+        timeline: View,
+        cache: Optional[Dict] = None,
+        files_zip: Optional[ExportZipFile] = None,
+        storage: Optional[Storage] = None,
+    ):
+        """
+        Adds the serialized timeline view options to the exported dict.
+        """
+        serialized = super().export_serialized(timeline, cache, files_zip, storage)
+        
+        if timeline.start_date_field_id:
+            serialized["start_date_field_id"] = timeline.start_date_field_id
+        if timeline.end_date_field_id:
+            serialized["end_date_field_id"] = timeline.end_date_field_id
+            
+        serialized["timescale"] = timeline.timescale
+        serialized["enable_dependencies"] = timeline.enable_dependencies
+        serialized["auto_reschedule"] = timeline.auto_reschedule
+        serialized["enable_milestones"] = timeline.enable_milestones
+
+        serialized_field_options = []
+        for field_option in timeline.get_field_options():
+            serialized_field_options.append(
+                {
+                    "id": field_option.id,
+                    "field_id": field_option.field_id,
+                    "hidden": field_option.hidden,
+                    "order": field_option.order,
+                    "show_in_timeline": field_option.show_in_timeline,
+                    "color_field": field_option.color_field,
+                }
+            )
+
+        serialized["field_options"] = serialized_field_options
+        return serialized
+
+    def import_serialized(
+        self,
+        table: Table,
+        serialized_values: Dict[str, Any],
+        id_mapping: Dict[str, Any],
+        files_zip: Optional[ZipFile] = None,
+        storage: Optional[Storage] = None,
+    ) -> Optional[View]:
+        """
+        Imports the serialized timeline view field options.
+        """
+        serialized_copy = serialized_values.copy()
+        
+        if "start_date_field_id" in serialized_copy:
+            serialized_copy["start_date_field_id"] = id_mapping["database_fields"][
+                serialized_copy.pop("start_date_field_id")
+            ]
+        if "end_date_field_id" in serialized_copy:
+            serialized_copy["end_date_field_id"] = id_mapping["database_fields"][
+                serialized_copy.pop("end_date_field_id")
+            ]
+
+        field_options = serialized_copy.pop("field_options")
+        timeline_view = super().import_serialized(
+            table, serialized_copy, id_mapping, files_zip, storage
+        )
+
+        if timeline_view is not None:
+            if "database_timeline_view_field_options" not in id_mapping:
+                id_mapping["database_timeline_view_field_options"] = {}
+
+            for field_option in field_options:
+                field_option_copy = field_option.copy()
+                field_option_id = field_option_copy.pop("id")
+                field_option_copy["field_id"] = id_mapping["database_fields"][
+                    field_option["field_id"]
+                ]
+                field_option_object = TimelineViewFieldOptions.objects.create(
+                    timeline_view=timeline_view, **field_option_copy
+                )
+                id_mapping["database_timeline_view_field_options"][
+                    field_option_id
+                ] = field_option_object.id
+
+        return timeline_view
+
+    def view_created(self, view: View):
+        """
+        When a timeline view is created, we want to set the first field as visible.
+        """
+        field_options = view.get_field_options(create_if_missing=True).order_by(
+            "-field__primary", "field__id"
+        )
+        ids_to_update = [f.id for f in field_options[:1]]
+
+        if len(ids_to_update) > 0:
+            TimelineViewFieldOptions.objects.filter(id__in=ids_to_update).update(
+                hidden=False
+            )
+
+    def export_prepared_values(self, view: TimelineView) -> Dict[str, Any]:
+        values = super().export_prepared_values(view)
+        values["start_date_field"] = view.start_date_field_id
+        values["end_date_field"] = view.end_date_field_id
+        values["timescale"] = view.timescale
+        values["enable_dependencies"] = view.enable_dependencies
+        values["auto_reschedule"] = view.auto_reschedule
+        values["enable_milestones"] = view.enable_milestones
+        return values
+
+    def get_visible_field_options_in_order(self, timeline_view: TimelineView):
+        return (
+            timeline_view.get_field_options(create_if_missing=True)
+            .filter(
+                Q(hidden=False)
+                # Always expose start and end date fields as they're required
+                | Q(field_id=timeline_view.start_date_field_id)
+                | Q(field_id=timeline_view.end_date_field_id)
+            )
+            .order_by("order", "field__id")
+        )
+
+    def get_hidden_fields(
+        self,
+        view: TimelineView,
+        field_ids_to_check: Optional[List[int]] = None,
+    ) -> Set[int]:
+        hidden_field_ids = set()
+        fields = view.table.field_set.all()
+        field_options = view.timelineviewfieldoptions_set.all()
+
+        if field_ids_to_check is not None:
+            fields = [f for f in fields if f.id in field_ids_to_check]
+
+        for field in fields:
+            # Always expose start and end date fields as they're required
+            if field.id in [view.start_date_field_id, view.end_date_field_id]:
+                continue
+
+            field_option_matching = None
+            for field_option in field_options:
+                if field_option.field_id == field.id:
+                    field_option_matching = field_option
+
+            # A field is considered hidden if it is explicitly hidden
+            # or if the field options don't exist
+            if field_option_matching is None or field_option_matching.hidden:
+                hidden_field_ids.add(field.id)
+
+        return hidden_field_ids
+
+    def enhance_queryset(self, queryset):
+        return queryset.prefetch_related(
+            "timelineviewfieldoptions_set",
+            "dependencies",
+            "milestones"
+        )
+
+    def after_field_delete(self, field: Field) -> None:
+        # Clean up timeline views that reference the deleted field
+        TimelineView.objects.filter(start_date_field_id=field.id).update(
+            start_date_field_id=None
+        )
+        TimelineView.objects.filter(end_date_field_id=field.id).update(
+            end_date_field_id=None
+        )
+        # Clean up milestones that reference the deleted field
+        TimelineMilestone.objects.filter(date_field_id=field.id).delete()
 
 
 class FormViewType(ViewType):
@@ -1428,3 +1720,707 @@ class FormViewType(ViewType):
                 return
 
         return super().check_view_update_permissions(user, view, data)
+
+
+class KanbanViewType(ViewType):
+    type = "kanban"
+    model_class = None  # Will be set after import
+    field_options_model_class = None  # Will be set after import
+    field_options_serializer_class = None  # Will be set after import
+    allowed_fields = [
+        "single_select_field",
+        "card_cover_image_field", 
+        "stack_by_field",
+        "card_configuration",
+        "column_configuration",
+    ]
+    field_options_allowed_fields = [
+        "hidden",
+        "order",
+        "show_in_card",
+        "card_display_style",
+    ]
+    serializer_field_names = [
+        "single_select_field",
+        "card_cover_image_field",
+        "stack_by_field", 
+        "card_configuration",
+        "column_configuration",
+    ]
+    serializer_field_overrides = {
+        "single_select_field": serializers.PrimaryKeyRelatedField(
+            queryset=Field.objects.all(),
+            required=False,
+            default=None,
+            allow_null=True,
+            help_text="References a single select field that determines the Kanban columns.",
+        ),
+        "card_cover_image_field": serializers.PrimaryKeyRelatedField(
+            queryset=Field.objects.all(),
+            required=False,
+            default=None,
+            allow_null=True,
+            help_text="References a file field of which the first image must be shown as card cover image.",
+        ),
+        "stack_by_field": serializers.PrimaryKeyRelatedField(
+            queryset=Field.objects.all(),
+            required=False,
+            default=None,
+            allow_null=True,
+            help_text="Field used to stack cards in columns.",
+        ),
+    }
+    api_exceptions_map = {
+        FieldNotInTable: ERROR_FIELD_NOT_IN_TABLE,
+        IncompatibleField: ERROR_INCOMPATIBLE_FIELD,
+    }
+    can_decorate = True
+    can_share = True
+    has_public_info = True
+
+    def __init__(self):
+        # Import here to avoid circular imports
+        from .models import KanbanView, KanbanViewFieldOptions
+        
+        self.model_class = KanbanView
+        self.field_options_model_class = KanbanViewFieldOptions
+        
+        # Set the serializer class dynamically to avoid circular imports
+        try:
+            from baserow.contrib.database.api.views.kanban.serializers import KanbanViewFieldOptionsSerializer
+            self.field_options_serializer_class = KanbanViewFieldOptionsSerializer
+        except ImportError:
+            # Fallback if serializer is not available yet
+            self.field_options_serializer_class = None
+
+    def get_api_urls(self):
+        from baserow.contrib.database.api.views.kanban import urls as api_urls
+
+        return [
+            path("kanban/", include(api_urls, namespace=self.type)),
+        ]
+
+    def prepare_values(self, values, table, user):
+        """
+        Check if the provided fields belong to the same table and are compatible.
+        """
+        
+        # Check single_select_field
+        if values.get("single_select_field", None) is not None:
+            if isinstance(values["single_select_field"], int):
+                values["single_select_field"] = Field.objects.get(pk=values["single_select_field"])
+            
+            field_type = field_type_registry.get_by_model(values["single_select_field"].specific)
+            if field_type.type != "single_select":
+                raise IncompatibleField(
+                    "The provided field cannot be used as a single select field for Kanban columns."
+                )
+            elif values["single_select_field"].table_id != table.id:
+                raise FieldNotInTable(
+                    "The provided single select field does not belong to the Kanban view's table."
+                )
+
+        # Check card_cover_image_field
+        if values.get("card_cover_image_field", None) is not None:
+            if isinstance(values["card_cover_image_field"], int):
+                values["card_cover_image_field"] = Field.objects.get(pk=values["card_cover_image_field"])
+
+            field_type = field_type_registry.get_by_model(values["card_cover_image_field"].specific)
+            if not field_type.can_represent_files(values["card_cover_image_field"]):
+                raise IncompatibleField(
+                    "The provided field cannot be used as a card cover image field."
+                )
+            elif values["card_cover_image_field"].table_id != table.id:
+                raise FieldNotInTable(
+                    "The provided file field does not belong to the Kanban view's table."
+                )
+
+        # Check stack_by_field
+        if values.get("stack_by_field", None) is not None:
+            if isinstance(values["stack_by_field"], int):
+                values["stack_by_field"] = Field.objects.get(pk=values["stack_by_field"])
+            
+            if values["stack_by_field"].table_id != table.id:
+                raise FieldNotInTable(
+                    "The provided stack by field does not belong to the Kanban view's table."
+                )
+
+        return super().prepare_values(values, table, user)
+
+    def after_fields_type_change(self, fields):
+        """
+        Handle field type changes that might affect Kanban view configuration.
+        """
+        from .models import KanbanView
+        
+        # Handle single_select_field changes
+        fields_not_single_select = [
+            field for field in fields
+            if field_type_registry.get_by_model(field.specific_class).type != "single_select"
+        ]
+        if len(fields_not_single_select) > 0:
+            KanbanView.objects.filter(
+                single_select_field_id__in=[f.id for f in fields_not_single_select]
+            ).update(single_select_field_id=None)
+
+        # Handle card_cover_image_field changes
+        fields_cannot_represent_files = [
+            field for field in fields
+            if not field_type_registry.get_by_model(field.specific_class).can_represent_files(field)
+        ]
+        if len(fields_cannot_represent_files) > 0:
+            KanbanView.objects.filter(
+                card_cover_image_field_id__in=[f.id for f in fields_cannot_represent_files]
+            ).update(card_cover_image_field_id=None)
+
+    def export_serialized(
+        self,
+        kanban: "KanbanView",
+        cache: Optional[Dict] = None,
+        files_zip: Optional[ExportZipFile] = None,
+        storage: Optional[Storage] = None,
+    ):
+        """
+        Adds the serialized kanban view options to the exported dict.
+        """
+
+        serialized = super().export_serialized(kanban, cache, files_zip, storage)
+
+        if kanban.single_select_field_id:
+            serialized["single_select_field_id"] = kanban.single_select_field_id
+        if kanban.card_cover_image_field_id:
+            serialized["card_cover_image_field_id"] = kanban.card_cover_image_field_id
+        if kanban.stack_by_field_id:
+            serialized["stack_by_field_id"] = kanban.stack_by_field_id
+        
+        serialized["card_configuration"] = kanban.card_configuration
+        serialized["column_configuration"] = kanban.column_configuration
+
+        serialized_field_options = []
+        for field_option in kanban.get_field_options():
+            serialized_field_options.append(
+                {
+                    "id": field_option.id,
+                    "field_id": field_option.field_id,
+                    "hidden": field_option.hidden,
+                    "order": field_option.order,
+                    "show_in_card": field_option.show_in_card,
+                    "card_display_style": field_option.card_display_style,
+                }
+            )
+
+        serialized["field_options"] = serialized_field_options
+        return serialized
+
+    def import_serialized(
+        self,
+        table: Table,
+        serialized_values: Dict[str, Any],
+        id_mapping: Dict[str, Any],
+        files_zip: Optional[ZipFile] = None,
+        storage: Optional[Storage] = None,
+    ) -> Optional["KanbanView"]:
+        """
+        Imports the serialized kanban view field options.
+        """
+        from .models import KanbanView, KanbanViewFieldOptions
+
+        serialized_copy = serialized_values.copy()
+
+        # Map field references
+        if serialized_copy.get("single_select_field_id", None):
+            serialized_copy["single_select_field_id"] = id_mapping["database_fields"][
+                serialized_copy["single_select_field_id"]
+            ]
+        if serialized_copy.get("card_cover_image_field_id", None):
+            serialized_copy["card_cover_image_field_id"] = id_mapping["database_fields"][
+                serialized_copy["card_cover_image_field_id"]
+            ]
+        if serialized_copy.get("stack_by_field_id", None):
+            serialized_copy["stack_by_field_id"] = id_mapping["database_fields"][
+                serialized_copy["stack_by_field_id"]
+            ]
+
+        field_options = serialized_copy.pop("field_options")
+
+        kanban_view = super().import_serialized(
+            table, serialized_copy, id_mapping, files_zip, storage
+        )
+
+        if kanban_view is not None:
+            if "database_kanban_view_field_options" not in id_mapping:
+                id_mapping["database_kanban_view_field_options"] = {}
+
+            for field_option in field_options:
+                field_option_copy = field_option.copy()
+                field_option_id = field_option_copy.pop("id")
+                field_option_copy["field_id"] = id_mapping["database_fields"][
+                    field_option["field_id"]
+                ]
+                field_option_object = KanbanViewFieldOptions.objects.create(
+                    kanban_view=kanban_view, **field_option_copy
+                )
+                id_mapping["database_kanban_view_field_options"][
+                    field_option_id
+                ] = field_option_object.id
+
+        return kanban_view
+
+    def view_created(self, view):
+        """
+        When a kanban view is created, we want to set the first few fields as visible on cards.
+        """
+        from .models import KanbanViewFieldOptions
+        
+        field_options = view.get_field_options(create_if_missing=True).order_by(
+            "-field__primary", "field__id"
+        )
+        ids_to_update = [f.id for f in field_options[0:3]]
+
+        if ids_to_update:
+            KanbanViewFieldOptions.objects.filter(id__in=ids_to_update).update(
+                hidden=False, show_in_card=True
+            )
+
+    def export_prepared_values(self, view: "KanbanView") -> Dict[str, Any]:
+        """
+        Add kanban-specific fields to the exportable fields.
+        """
+
+        values = super().export_prepared_values(view)
+        values["single_select_field"] = view.single_select_field_id
+        values["card_cover_image_field"] = view.card_cover_image_field_id
+        values["stack_by_field"] = view.stack_by_field_id
+        values["card_configuration"] = view.card_configuration
+        values["column_configuration"] = view.column_configuration
+
+        return values
+
+    def get_visible_field_options_in_order(self, kanban_view: "KanbanView"):
+        """
+        Returns field options that should be visible on cards.
+        """
+        return (
+            kanban_view.get_field_options(create_if_missing=True)
+            .filter(
+                Q(show_in_card=True) | Q(field__id=kanban_view.card_cover_image_field_id)
+            )
+            .order_by("order", "field__id")
+        )
+
+    def get_hidden_fields(
+        self,
+        view: "KanbanView", 
+        field_ids_to_check: Optional[List[int]] = None,
+    ) -> Set[int]:
+        """
+        Returns the set of field IDs that should be hidden in this view.
+        """
+        hidden_field_ids = set()
+        fields = view.table.field_set.all()
+        field_options = view.kanbanviewfieldoptions_set.all()
+
+        if field_ids_to_check is not None:
+            fields = [f for f in fields if f.id in field_ids_to_check]
+
+        for field in fields:
+            # The card cover image field is always visible
+            if field.id == view.card_cover_image_field_id:
+                continue
+
+            # Find corresponding field option
+            field_option_matching = None
+            for field_option in field_options:
+                if field_option.field_id == field.id:
+                    field_option_matching = field_option
+
+            # A field is considered hidden if it's explicitly hidden or if field options don't exist
+            if field_option_matching is None or field_option_matching.hidden:
+                hidden_field_ids.add(field.id)
+
+        return hidden_field_ids
+
+    def enhance_queryset(self, queryset):
+        return queryset.prefetch_related("kanbanviewfieldoptions_set")
+
+    def after_field_delete(self, field: Field) -> None:
+        """
+        Clean up field references when a field is deleted.
+        """
+        from .models import KanbanView
+        from baserow.contrib.database.fields.models import FileField, SingleSelectField
+        
+        if isinstance(field, FileField):
+            KanbanView.objects.filter(card_cover_image_field_id=field.id).update(
+                card_cover_image_field_id=None
+            )
+        
+        if isinstance(field, SingleSelectField):
+            KanbanView.objects.filter(single_select_field_id=field.id).update(
+                single_select_field_id=None
+            )
+            KanbanView.objects.filter(stack_by_field_id=field.id).update(
+                stack_by_field_id=None
+            )
+
+
+class CalendarViewType(ViewType):
+    type = "calendar"
+    model_class = None  # Will be set after import
+    field_options_model_class = None  # Will be set after import
+    field_options_serializer_class = None  # Will be set after import
+    allowed_fields = [
+        "date_field",
+        "display_mode",
+        "event_title_field",
+        "event_color_field",
+        "enable_recurring_events",
+        "recurring_pattern_field",
+        "external_calendar_config",
+        "enable_external_sync",
+    ]
+    field_options_allowed_fields = [
+        "hidden",
+        "order",
+        "show_in_event",
+        "event_display_style",
+    ]
+    serializer_field_names = [
+        "date_field",
+        "display_mode",
+        "event_title_field",
+        "event_color_field",
+        "enable_recurring_events",
+        "recurring_pattern_field",
+        "external_calendar_config",
+        "enable_external_sync",
+    ]
+    serializer_field_overrides = {
+        "date_field": serializers.PrimaryKeyRelatedField(
+            queryset=Field.objects.all(),
+            required=False,
+            default=None,
+            allow_null=True,
+            help_text="Date field used to position events on the calendar",
+        ),
+        "event_title_field": serializers.PrimaryKeyRelatedField(
+            queryset=Field.objects.all(),
+            required=False,
+            default=None,
+            allow_null=True,
+            help_text="Field used as the event title",
+        ),
+        "event_color_field": serializers.PrimaryKeyRelatedField(
+            queryset=Field.objects.all(),
+            required=False,
+            default=None,
+            allow_null=True,
+            help_text="Field used to determine event colors",
+        ),
+        "recurring_pattern_field": serializers.PrimaryKeyRelatedField(
+            queryset=Field.objects.all(),
+            required=False,
+            default=None,
+            allow_null=True,
+            help_text="Field containing recurring event pattern configuration",
+        ),
+    }
+    api_exceptions_map = {
+        FieldNotInTable: ERROR_FIELD_NOT_IN_TABLE,
+        IncompatibleField: ERROR_INCOMPATIBLE_FIELD,
+    }
+    can_decorate = True
+    can_share = True
+    has_public_info = True
+
+    def __init__(self):
+        # Import here to avoid circular imports
+        from .models import CalendarView, CalendarViewFieldOptions
+        
+        self.model_class = CalendarView
+        self.field_options_model_class = CalendarViewFieldOptions
+        
+        # Set the serializer class dynamically to avoid circular imports
+        try:
+            from baserow.contrib.database.api.views.calendar.serializers import CalendarViewFieldOptionsSerializer
+            self.field_options_serializer_class = CalendarViewFieldOptionsSerializer
+        except ImportError:
+            # Fallback if serializer is not available yet
+            self.field_options_serializer_class = None
+
+    def get_api_urls(self):
+        from baserow.contrib.database.api.views.calendar import urls as api_urls
+
+        return [
+            path("calendar/", include(api_urls, namespace=self.type)),
+        ]
+
+    def prepare_values(self, values, table, user):
+        """
+        Check if the provided fields belong to the same table and are compatible.
+        """
+        
+        # Check date_field
+        if values.get("date_field", None) is not None:
+            if isinstance(values["date_field"], int):
+                values["date_field"] = Field.objects.get(pk=values["date_field"])
+            
+            field_type = field_type_registry.get_by_model(values["date_field"].specific)
+            if not field_type.can_represent_date(values["date_field"]):
+                raise IncompatibleField(
+                    "The provided field is not a date field and cannot be used as a calendar date field."
+                )
+            elif values["date_field"].table_id != table.id:
+                raise FieldNotInTable(
+                    "The provided date field does not belong to the calendar view's table."
+                )
+
+        # Check event_title_field
+        if values.get("event_title_field", None) is not None:
+            if isinstance(values["event_title_field"], int):
+                values["event_title_field"] = Field.objects.get(pk=values["event_title_field"])
+            
+            if values["event_title_field"].table_id != table.id:
+                raise FieldNotInTable(
+                    "The provided event title field does not belong to the calendar view's table."
+                )
+
+        # Check event_color_field
+        if values.get("event_color_field", None) is not None:
+            if isinstance(values["event_color_field"], int):
+                values["event_color_field"] = Field.objects.get(pk=values["event_color_field"])
+            
+            if values["event_color_field"].table_id != table.id:
+                raise FieldNotInTable(
+                    "The provided event color field does not belong to the calendar view's table."
+                )
+
+        # Check recurring_pattern_field
+        if values.get("recurring_pattern_field", None) is not None:
+            if isinstance(values["recurring_pattern_field"], int):
+                values["recurring_pattern_field"] = Field.objects.get(pk=values["recurring_pattern_field"])
+            
+            if values["recurring_pattern_field"].table_id != table.id:
+                raise FieldNotInTable(
+                    "The provided recurring pattern field does not belong to the calendar view's table."
+                )
+
+        return super().prepare_values(values, table, user)
+
+    def after_fields_type_change(self, fields):
+        """
+        Handle field type changes that might affect Calendar view configuration.
+        """
+        from .models import CalendarView
+        
+        # Handle date_field changes
+        fields_not_date = [
+            field for field in fields
+            if not field_type_registry.get_by_model(field.specific_class).can_represent_date(field)
+        ]
+        if len(fields_not_date) > 0:
+            CalendarView.objects.filter(
+                date_field_id__in=[f.id for f in fields_not_date]
+            ).update(date_field_id=None)
+
+    def export_serialized(
+        self,
+        calendar: "CalendarView",
+        cache: Optional[Dict] = None,
+        files_zip: Optional[ExportZipFile] = None,
+        storage: Optional[Storage] = None,
+    ):
+        """
+        Adds the serialized calendar view options to the exported dict.
+        """
+
+        serialized = super().export_serialized(calendar, cache, files_zip, storage)
+
+        if calendar.date_field_id:
+            serialized["date_field_id"] = calendar.date_field_id
+        if calendar.event_title_field_id:
+            serialized["event_title_field_id"] = calendar.event_title_field_id
+        if calendar.event_color_field_id:
+            serialized["event_color_field_id"] = calendar.event_color_field_id
+        if calendar.recurring_pattern_field_id:
+            serialized["recurring_pattern_field_id"] = calendar.recurring_pattern_field_id
+        
+        serialized["display_mode"] = calendar.display_mode
+        serialized["enable_recurring_events"] = calendar.enable_recurring_events
+        serialized["external_calendar_config"] = calendar.external_calendar_config
+        serialized["enable_external_sync"] = calendar.enable_external_sync
+
+        serialized_field_options = []
+        for field_option in calendar.get_field_options():
+            serialized_field_options.append(
+                {
+                    "id": field_option.id,
+                    "field_id": field_option.field_id,
+                    "hidden": field_option.hidden,
+                    "order": field_option.order,
+                    "show_in_event": field_option.show_in_event,
+                    "event_display_style": field_option.event_display_style,
+                }
+            )
+
+        serialized["field_options"] = serialized_field_options
+        return serialized
+
+    def import_serialized(
+        self,
+        table: Table,
+        serialized_values: Dict[str, Any],
+        id_mapping: Dict[str, Any],
+        files_zip: Optional[ZipFile] = None,
+        storage: Optional[Storage] = None,
+    ) -> Optional["CalendarView"]:
+        """
+        Imports the serialized calendar view field options.
+        """
+        from .models import CalendarView, CalendarViewFieldOptions
+
+        serialized_copy = serialized_values.copy()
+
+        # Map field references
+        if serialized_copy.get("date_field_id", None):
+            serialized_copy["date_field_id"] = id_mapping["database_fields"][
+                serialized_copy["date_field_id"]
+            ]
+        if serialized_copy.get("event_title_field_id", None):
+            serialized_copy["event_title_field_id"] = id_mapping["database_fields"][
+                serialized_copy["event_title_field_id"]
+            ]
+        if serialized_copy.get("event_color_field_id", None):
+            serialized_copy["event_color_field_id"] = id_mapping["database_fields"][
+                serialized_copy["event_color_field_id"]
+            ]
+        if serialized_copy.get("recurring_pattern_field_id", None):
+            serialized_copy["recurring_pattern_field_id"] = id_mapping["database_fields"][
+                serialized_copy["recurring_pattern_field_id"]
+            ]
+
+        field_options = serialized_copy.pop("field_options")
+
+        calendar_view = super().import_serialized(
+            table, serialized_copy, id_mapping, files_zip, storage
+        )
+
+        if calendar_view is not None:
+            if "database_calendar_view_field_options" not in id_mapping:
+                id_mapping["database_calendar_view_field_options"] = {}
+
+            for field_option in field_options:
+                field_option_copy = field_option.copy()
+                field_option_id = field_option_copy.pop("id")
+                field_option_copy["field_id"] = id_mapping["database_fields"][
+                    field_option["field_id"]
+                ]
+                field_option_object = CalendarViewFieldOptions.objects.create(
+                    calendar_view=calendar_view, **field_option_copy
+                )
+                id_mapping["database_calendar_view_field_options"][
+                    field_option_id
+                ] = field_option_object.id
+
+        return calendar_view
+
+    def view_created(self, view):
+        """
+        When a calendar view is created, we want to set the first few fields as visible in events.
+        """
+        from .models import CalendarViewFieldOptions
+        
+        field_options = view.get_field_options(create_if_missing=True).order_by(
+            "-field__primary", "field__id"
+        )
+        ids_to_update = [f.id for f in field_options[0:3]]
+
+        if ids_to_update:
+            CalendarViewFieldOptions.objects.filter(id__in=ids_to_update).update(
+                hidden=False, show_in_event=True
+            )
+
+    def export_prepared_values(self, view: "CalendarView") -> Dict[str, Any]:
+        """
+        Add calendar-specific fields to the exportable fields.
+        """
+
+        values = super().export_prepared_values(view)
+        values["date_field"] = view.date_field_id
+        values["display_mode"] = view.display_mode
+        values["event_title_field"] = view.event_title_field_id
+        values["event_color_field"] = view.event_color_field_id
+        values["enable_recurring_events"] = view.enable_recurring_events
+        values["recurring_pattern_field"] = view.recurring_pattern_field_id
+        values["external_calendar_config"] = view.external_calendar_config
+        values["enable_external_sync"] = view.enable_external_sync
+
+        return values
+
+    def get_visible_field_options_in_order(self, calendar_view: "CalendarView"):
+        """
+        Returns field options that should be visible in events.
+        """
+        return (
+            calendar_view.get_field_options(create_if_missing=True)
+            .filter(
+                Q(show_in_event=True) 
+                | Q(field__id=calendar_view.date_field_id)
+                | Q(field__id=calendar_view.event_title_field_id)
+            )
+            .order_by("order", "field__id")
+        )
+
+    def get_hidden_fields(
+        self,
+        view: "CalendarView", 
+        field_ids_to_check: Optional[List[int]] = None,
+    ) -> Set[int]:
+        """
+        Returns the set of field IDs that should be hidden in this view.
+        """
+        hidden_field_ids = set()
+        fields = view.table.field_set.all()
+        field_options = view.calendarviewfieldoptions_set.all()
+
+        if field_ids_to_check is not None:
+            fields = [f for f in fields if f.id in field_ids_to_check]
+
+        for field in fields:
+            # The date field and event title field are always visible
+            if field.id in [view.date_field_id, view.event_title_field_id]:
+                continue
+
+            # Find corresponding field option
+            field_option_matching = None
+            for field_option in field_options:
+                if field_option.field_id == field.id:
+                    field_option_matching = field_option
+
+            # A field is considered hidden if it's explicitly hidden or if field options don't exist
+            if field_option_matching is None or field_option_matching.hidden:
+                hidden_field_ids.add(field.id)
+
+        return hidden_field_ids
+
+    def enhance_queryset(self, queryset):
+        return queryset.prefetch_related("calendarviewfieldoptions_set")
+
+    def after_field_delete(self, field: Field) -> None:
+        """
+        Clean up field references when a field is deleted.
+        """
+        from .models import CalendarView
+        
+        CalendarView.objects.filter(date_field_id=field.id).update(
+            date_field_id=None
+        )
+        CalendarView.objects.filter(event_title_field_id=field.id).update(
+            event_title_field_id=None
+        )
+        CalendarView.objects.filter(event_color_field_id=field.id).update(
+            event_color_field_id=None
+        )
+        CalendarView.objects.filter(recurring_pattern_field_id=field.id).update(
+            recurring_pattern_field_id=None
+        )

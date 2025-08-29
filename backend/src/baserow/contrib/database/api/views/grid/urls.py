@@ -6,6 +6,9 @@ from .views import (
     GridViewView,
     PublicGridViewFieldAggregationsView,
     PublicGridViewRowsView,
+    GridViewConditionalFormattingView,
+    GridViewFilterPresetView,
+    GridViewColumnGroupView,
 )
 
 app_name = "baserow.contrib.database.api.views.grid"
@@ -31,5 +34,20 @@ urlpatterns = [
         r"(?P<slug>[-\w]+)/public/rows/$",
         PublicGridViewRowsView.as_view(),
         name="public_rows",
+    ),
+    re_path(
+        r"(?P<view_id>[0-9]+)/conditional-formatting/$",
+        GridViewConditionalFormattingView.as_view(),
+        name="conditional-formatting",
+    ),
+    re_path(
+        r"(?P<view_id>[0-9]+)/filter-presets/$",
+        GridViewFilterPresetView.as_view(),
+        name="filter-presets",
+    ),
+    re_path(
+        r"(?P<view_id>[0-9]+)/column-groups/$",
+        GridViewColumnGroupView.as_view(),
+        name="column-groups",
     ),
 ]
