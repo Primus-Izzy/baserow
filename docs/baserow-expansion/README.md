@@ -12,6 +12,7 @@ This directory contains comprehensive documentation for the Baserow expansion th
 - [Collaboration API](./api/collaboration.md) - Real-time collaboration API
 - [Dashboard API](./api/dashboard.md) - Dashboard and reporting API
 - [Integration API](./api/integrations.md) - External integrations API
+- [Permissions API](./api/permissions.md) - Enhanced permission system API
 
 ### User Guides
 - [User Guide Overview](./user-guides/README.md) - Getting started with new features

@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  baserow-expansion:
+    build:
+      context: ../../
+      dockerfile: deploy/baserow-expansion/Dockerfile.expansion
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - BASEROW_PUBLIC_URL=${BASEROW_PUBLIC_URL}
+      - FEATURE_FLAGS=${FEATURE_FLAGS:-}
+      - MONITORING_ENABLED=${MONITORING_ENABLED:-true}
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - PROMETHEUS_ENABLED=${PROMETHEUS_ENABLED:-true}
+    volumes:
+      - baserow_data:/baserow/data
+      - ./monitoring:/baserow/monitoring
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - postgres
+      - prometheus
+      - grafana
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-baserow}
+      - POSTGRES_USER=${POSTGRES_USER:-baserow}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-baserow}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093"
+    restart: unless-stopped
+
+volumes:
+  baserow_data:
+  redis_data:
+  postgres_data:
+  prometheus_data:
+  grafana_data:

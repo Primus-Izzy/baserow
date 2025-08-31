@@ -1,0 +1,42 @@
+FROM baserow/baserow:latest
+
+# Install additional dependencies for expansion features
+RUN apt-get update && apt-get install -y \
+    curl \
+    postgresql-client \
+    redis-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy expansion-specific configuration
+COPY deploy/baserow-expansion/config/ /baserow/config/
+COPY deploy/baserow-expansion/scripts/ /baserow/scripts/
+
+# Install Python monitoring dependencies
+RUN pip install \
+    prometheus-client==0.17.1 \
+    sentry-sdk==1.32.0 \
+    celery-prometheus-exporter==1.9.0
+
+# Copy expansion backend code
+COPY backend/src/baserow/contrib/database/expansion/ /baserow/backend/src/baserow/contrib/database/expansion/
+COPY backend/src/baserow/contrib/database/performance/ /baserow/backend/src/baserow/contrib/database/performance/
+
+# Copy expansion frontend code
+COPY web-frontend/modules/expansion/ /baserow/web-frontend/modules/expansion/
+
+# Set up monitoring and health checks
+COPY deploy/baserow-expansion/health-check.sh /baserow/health-check.sh
+RUN chmod +x /baserow/health-check.sh /baserow/scripts/*.sh
+
+# Environment variables for expansion features
+ENV BASEROW_EXPANSION_ENABLED=true
+ENV MONITORING_ENABLED=true
+ENV FEATURE_FLAGS_ENABLED=true
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD /baserow/health-check.sh
+
+EXPOSE 8000
+
+CMD ["/baserow/scripts/start-expansion.sh"]

@@ -1,0 +1,229 @@
+{
+  "security_tests": {
+    "authentication": {
+      "enabled": true,
+      "weak_passwords": [
+        "123",
+        "password",
+        "admin",
+        "test",
+        "123456",
+        "qwerty",
+        "abc123",
+        "password123"
+      ],
+      "session_timeout_seconds": 3600,
+      "max_login_attempts": 5
+    },
+    "permissions": {
+      "enabled": true,
+      "test_unauthorized_access": true,
+      "test_field_level_permissions": true,
+      "test_row_level_permissions": true,
+      "test_api_key_permissions": true
+    },
+    "data_protection": {
+      "enabled": true,
+      "sql_injection_payloads": [
+        "'; DROP TABLE users; --",
+        "1' OR '1'='1",
+        "admin'/*",
+        "1; DELETE FROM users WHERE 1=1; --",
+        "' UNION SELECT * FROM users --",
+        "1'; EXEC xp_cmdshell('dir'); --"
+      ],
+      "xss_payloads": [
+        "<script>alert('xss')</script>",
+        "javascript:alert('xss')",
+        "<img src=x onerror=alert('xss')>",
+        "';alert('xss');//",
+        "<svg onload=alert('xss')>",
+        "javascript:void(0)/*-/*`/*\\`/*'/*\"/**/(/* */onerror=alert('xss') )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--!>\\x3csVg/<sVg/oNloAd=alert('xss')//>"
+      ]
+    },
+    "api_security": {
+      "enabled": true,
+      "rate_limiting": {
+        "test_enabled": true,
+        "requests_per_minute": 60,
+        "burst_requests": 20
+      },
+      "cors_testing": true,
+      "csrf_protection": true,
+      "content_type_validation": true
+    }
+  },
+  "accessibility_tests": {
+    "wcag_compliance": {
+      "enabled": true,
+      "level": "AA",
+      "version": "2.1",
+      "rules": [
+        "color-contrast",
+        "keyboard-navigation",
+        "focus-management",
+        "alt-text",
+        "form-labels",
+        "heading-structure",
+        "landmark-roles"
+      ]
+    },
+    "keyboard_navigation": {
+      "enabled": true,
+      "test_tab_order": true,
+      "test_focus_indicators": true,
+      "test_skip_links": true,
+      "test_keyboard_shortcuts": true
+    },
+    "screen_reader": {
+      "enabled": true,
+      "test_aria_labels": true,
+      "test_semantic_markup": true,
+      "test_live_regions": true,
+      "test_form_validation": true
+    }
+  },
+  "browser_compatibility": {
+    "enabled": true,
+    "browsers": [
+      {
+        "name": "chrome",
+        "versions": ["latest"],
+        "enabled": true
+      },
+      {
+        "name": "firefox",
+        "versions": ["latest"],
+        "enabled": true
+      },
+      {
+        "name": "edge",
+        "versions": ["latest"],
+        "enabled": false
+      },
+      {
+        "name": "safari",
+        "versions": ["latest"],
+        "enabled": false
+      }
+    ]
+  },
+  "mobile_responsiveness": {
+    "enabled": true,
+    "devices": [
+      {
+        "name": "iPhone X",
+        "width": 375,
+        "height": 812,
+        "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1"
+      },
+      {
+        "name": "iPad",
+        "width": 768,
+        "height": 1024,
+        "user_agent": "Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1"
+      },
+      {
+        "name": "Samsung Galaxy S20",
+        "width": 360,
+        "height": 800,
+        "user_agent": "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Mobile Safari/537.36"
+      },
+      {
+        "name": "Desktop",
+        "width": 1920,
+        "height": 1080,
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+      }
+    ],
+    "touch_targets": {
+      "minimum_size": 44,
+      "recommended_size": 48
+    }
+  },
+  "test_pages": [
+    {
+      "path": "/",
+      "name": "Home Page",
+      "critical": true,
+      "auth_required": false
+    },
+    {
+      "path": "/login",
+      "name": "Login Page",
+      "critical": true,
+      "auth_required": false
+    },
+    {
+      "path": "/register",
+      "name": "Registration Page",
+      "critical": true,
+      "auth_required": false
+    },
+    {
+      "path": "/database/1/table/1",
+      "name": "Table View",
+      "critical": true,
+      "auth_required": true
+    },
+    {
+      "path": "/database/1/table/1/kanban",
+      "name": "Kanban View",
+      "critical": true,
+      "auth_required": true
+    },
+    {
+      "path": "/database/1/table/1/timeline",
+      "name": "Timeline View",
+      "critical": true,
+      "auth_required": true
+    },
+    {
+      "path": "/database/1/table/1/calendar",
+      "name": "Calendar View",
+      "critical": true,
+      "auth_required": true
+    },
+    {
+      "path": "/database/1/table/1/form",
+      "name": "Form View",
+      "critical": true,
+      "auth_required": true
+    },
+    {
+      "path": "/dashboard",
+      "name": "Dashboard",
+      "critical": true,
+      "auth_required": true
+    },
+    {
+      "path": "/settings",
+      "name": "Settings",
+      "critical": false,
+      "auth_required": true
+    }
+  ],
+  "reporting": {
+    "formats": ["markdown", "json", "html"],
+    "include_screenshots": true,
+    "include_performance_metrics": true,
+    "severity_levels": ["critical", "high", "medium", "low", "info"]
+  },
+  "thresholds": {
+    "security": {
+      "critical_failures": 0,
+      "high_failures": 2,
+      "medium_failures": 5
+    },
+    "accessibility": {
+      "wcag_violations": 0,
+      "keyboard_navigation_failures": 0,
+      "screen_reader_issues": 2
+    },
+    "performance": {
+      "page_load_time_ms": 3000,
+      "time_to_interactive_ms": 5000,
+      "cumulative_layout_shift": 0.1
+    }
+  }
+}
