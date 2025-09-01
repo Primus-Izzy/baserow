@@ -3,6 +3,8 @@
  * Provides lazy loading, code splitting, and mobile-specific optimizations
  */
 
+import logger from './logger'
+
 // Bundle size optimization utilities
 export const bundleOptimization = {
   /**
@@ -112,12 +114,7 @@ export const performanceOptimization = {
    * Measure and log performance metrics
    */
   measurePerformance(name, fn) {
-    const start = performance.now()
-    const result = fn()
-    const end = performance.now()
-    
-    console.log(`${name} took ${end - start} milliseconds`)
-    return result
+    return logger.performance(name, fn)
   },
 
   /**

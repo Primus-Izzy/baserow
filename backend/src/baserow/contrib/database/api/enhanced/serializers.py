@@ -1,12 +1,14 @@
 """
 Serializers for enhanced API endpoints.
 """
+import logging
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from baserow.core.models import Group
 from baserow.contrib.database.models import Database, Table
 from baserow.contrib.database.views.models import View
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -113,7 +115,8 @@ class EnhancedTableSerializer(serializers.ModelSerializer):
         """Get count of rows in table."""
         try:
             return obj.get_model().objects.count()
-        except:
+        except (AttributeError, Exception) as e:
+            logger.warning(f"Failed to get rows count for table {obj.id}: {e}")
             return 0
 
 

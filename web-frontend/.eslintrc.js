@@ -21,8 +21,8 @@ module.exports = {
   ],
   plugins: ['prettier', 'jest'],
   rules: {
-    'no-console': 0,
-    'vue/no-mutating-props': 0,
+    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
+    'vue/no-mutating-props': 'warn',
     'prettier/prettier': ['error'],
     'import/order': 'off',
     'vue/html-self-closing': 'off',

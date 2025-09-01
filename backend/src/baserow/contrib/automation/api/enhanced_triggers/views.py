@@ -404,8 +404,9 @@ class WebhookEndpointView(APIView):
             try:
                 result = task_result.get(timeout=5)  # 5 second timeout
                 return JsonResponse(result, status=result.get('status', 200))
-            except:
+            except (TimeoutError, Exception) as e:
                 # If async processing takes too long, return accepted
+                logger.info(f"Webhook processing timeout or error: {e}")
                 return JsonResponse(
                     {'message': 'Webhook received and processing'},
                     status=202

@@ -46,9 +46,9 @@ export default function ({ app, store, $axios, isDev }, inject) {
         await setupServiceWorker()
       }
 
-      console.log('Mobile services initialized successfully')
+      if (isDev) console.log('Mobile services initialized successfully')
     } catch (error) {
-      console.error('Failed to initialize mobile services:', error)
+      if (isDev) console.error('Failed to initialize mobile services:', error)
     }
   }
 
@@ -83,9 +83,9 @@ export default function ({ app, store, $axios, isDev }, inject) {
         }
       })
 
-      console.log('Service worker registered successfully')
+      if (isDev) console.log('Service worker registered successfully')
     } catch (error) {
-      console.error('Service worker registration failed:', error)
+      if (isDev) console.error('Service worker registration failed:', error)
     }
   }
 
@@ -328,7 +328,7 @@ export const mobileStore = {
             commit('UPDATE_SETTINGS', settings)
           }
         } catch (error) {
-          console.error('Failed to load mobile settings:', error)
+          if (isDev) console.error('Failed to load mobile settings:', error)
         }
       }
     }
