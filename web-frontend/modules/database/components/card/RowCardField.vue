@@ -75,10 +75,10 @@ export default {
      */
     canEdit() {
       if (this.readOnly) return false
-      
+
       const inlineEditableTypes = [
         'text',
-        'long_text', 
+        'long_text',
         'number',
         'rating',
         'boolean',
@@ -87,7 +87,7 @@ export default {
         'date',
         'url',
         'email',
-        'phone_number'
+        'phone_number',
       ]
       return inlineEditableTypes.includes(this.field.type)
     },
@@ -112,11 +112,11 @@ export default {
      */
     startEditing() {
       if (!this.canEdit) return
-      
+
       this.originalValue = this.value
       this.editValue = this.value
       this.isEditing = true
-      
+
       this.$nextTick(() => {
         if (this.$refs.fieldComponent && this.$refs.fieldComponent.focus) {
           this.$refs.fieldComponent.focus()
@@ -134,12 +134,12 @@ export default {
      */
     finishEditing() {
       if (!this.isEditing) return
-      
+
       const newValue = this.editValue
       const oldValue = this.originalValue
-      
+
       this.isEditing = false
-      
+
       if (newValue !== oldValue) {
         this.$emit('updated', {
           field: this.field,
@@ -171,7 +171,7 @@ export default {
   &__display {
     cursor: pointer;
     min-height: 20px;
-    
+
     &:hover {
       background-color: rgba(0, 0, 0, 0.05);
       border-radius: 4px;
@@ -190,7 +190,7 @@ export default {
         padding: 4px 8px;
         font-size: 13px;
         width: 100%;
-        
+
         &:focus {
           outline: none;
           box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);

@@ -14,10 +14,16 @@
       <div class="comment__header">
         <div class="comment__author">
           <span class="comment__author-name">{{ comment.user_name }}</span>
-          <span class="comment__timestamp" :title="formatFullDate(comment.created_at)">
+          <span
+            class="comment__timestamp"
+            :title="formatFullDate(comment.created_at)"
+          >
             {{ formatRelativeTime(comment.created_at) }}
           </span>
-          <span v-if="comment.updated_at !== comment.created_at" class="comment__edited">
+          <span
+            v-if="comment.updated_at !== comment.created_at"
+            class="comment__edited"
+          >
             (edited {{ formatRelativeTime(comment.updated_at) }})
           </span>
         </div>
@@ -27,9 +33,15 @@
             class="comment__action-btn"
             :class="{ active: comment.is_resolved }"
             @click="toggleResolution"
-            :title="comment.is_resolved ? 'Mark as unresolved' : 'Mark as resolved'"
+            :title="
+              comment.is_resolved ? 'Mark as unresolved' : 'Mark as resolved'
+            "
           >
-            <i :class="comment.is_resolved ? 'iconoir-check-circle' : 'iconoir-circle'"></i>
+            <i
+              :class="
+                comment.is_resolved ? 'iconoir-check-circle' : 'iconoir-circle'
+              "
+            ></i>
           </button>
           <button
             class="comment__action-btn"
@@ -59,7 +71,10 @@
 
       <div v-if="!isEditing" class="comment__body">
         <div class="comment__text" v-html="formattedContent"></div>
-        <div v-if="comment.mentions && comment.mentions.length > 0" class="comment__mentions">
+        <div
+          v-if="comment.mentions && comment.mentions.length > 0"
+          class="comment__mentions"
+        >
           <span class="comment__mentions-label">Mentioned:</span>
           <span
             v-for="mention in comment.mentions"
@@ -82,7 +97,10 @@
         class="comment__edit-form"
       />
 
-      <div v-if="comment.replies && comment.replies.length > 0" class="comment__replies">
+      <div
+        v-if="comment.replies && comment.replies.length > 0"
+        class="comment__replies"
+      >
         <Comment
           v-for="reply in comment.replies"
           :key="reply.id"
@@ -143,19 +161,21 @@ export default {
     },
     formattedContent() {
       let content = this.escapeHtml(this.comment.content)
-      
+
       // Convert @mentions to clickable links
       content = content.replace(/@(\d+)/g, (match, userId) => {
-        const mention = this.comment.mentions?.find(m => m.id === parseInt(userId))
+        const mention = this.comment.mentions?.find(
+          (m) => m.id === parseInt(userId)
+        )
         if (mention) {
           return `<span class="mention">@${mention.first_name}</span>`
         }
         return match
       })
-      
+
       // Convert line breaks to <br>
       content = content.replace(/\n/g, '<br>')
-      
+
       return content
     },
   },
@@ -164,14 +184,22 @@ export default {
       if (!name) return '?'
       return name
         .split(' ')
-        .map(part => part.charAt(0).toUpperCase())
+        .map((part) => part.charAt(0).toUpperCase())
         .join('')
         .substring(0, 2)
     },
     getUserColor(userId) {
       const colors = [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-        '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+        '#FF6B6B',
+        '#4ECDC4',
+        '#45B7D1',
+        '#96CEB4',
+        '#FFEAA7',
+        '#DDA0DD',
+        '#98D8C8',
+        '#F7DC6F',
+        '#BB8FCE',
+        '#85C1E9',
       ]
       return colors[userId % colors.length]
     },
@@ -179,7 +207,7 @@ export default {
       const date = new Date(dateString)
       const now = new Date()
       const diffInSeconds = Math.floor((now - date) / 1000)
-      
+
       if (diffInSeconds < 60) {
         return 'just now'
       } else if (diffInSeconds < 3600) {
@@ -235,10 +263,10 @@ export default {
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
-  
+
   &--resolved {
     opacity: 0.7;
-    
+
     .comment__content {
       background: #f8f9fa;
       border-left: 3px solid #28a745;
@@ -270,7 +298,7 @@ export default {
   border-radius: 8px;
   padding: 12px 16px;
   transition: all 0.2s ease;
-  
+
   &:hover {
     border-color: #dee2e6;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -311,7 +339,7 @@ export default {
   gap: 4px;
   opacity: 0;
   transition: opacity 0.2s ease;
-  
+
   .comment:hover & {
     opacity: 1;
   }
@@ -329,23 +357,23 @@ export default {
   color: #6c757d;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: #f8f9fa;
     color: #333;
   }
-  
+
   &.active {
     color: #28a745;
   }
-  
+
   &--danger {
     &:hover {
       background: #dc3545;
       color: white;
     }
   }
-  
+
   i {
     font-size: 14px;
   }
@@ -359,7 +387,7 @@ export default {
   color: #333;
   line-height: 1.5;
   word-wrap: break-word;
-  
+
   :deep(.mention) {
     background: #e3f2fd;
     color: #1976d2;

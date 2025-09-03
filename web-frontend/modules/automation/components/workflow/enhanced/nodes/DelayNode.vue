@@ -2,7 +2,7 @@
   <div
     :class="[
       'delay-node',
-      { 'selected': selected, 'error': hasError, 'configured': isConfigured }
+      { selected: selected, error: hasError, configured: isConfigured },
     ]"
   >
     <div class="node-header">
@@ -31,33 +31,49 @@
         </button>
       </div>
     </div>
-    
+
     <div class="node-content">
       <div v-if="delayConfig" class="delay-summary">
         <div class="delay-type">
           <span class="label">{{ $t('visualBuilder.delayType') }}:</span>
-          <span class="value">{{ formatDelayType(delayConfig.delay_type) }}</span>
+          <span class="value">{{
+            formatDelayType(delayConfig.delay_type)
+          }}</span>
         </div>
-        
+
         <div v-if="delayConfig.delay_type === 'fixed'" class="delay-duration">
           <span class="label">{{ $t('visualBuilder.duration') }}:</span>
-          <span class="value">{{ formatDuration(delayConfig.delay_duration) }}</span>
+          <span class="value">{{
+            formatDuration(delayConfig.delay_duration)
+          }}</span>
         </div>
-        
-        <div v-else-if="delayConfig.delay_type === 'until_date'" class="delay-until">
+
+        <div
+          v-else-if="delayConfig.delay_type === 'until_date'"
+          class="delay-until"
+        >
           <span class="label">{{ $t('visualBuilder.until') }}:</span>
-          <span class="value">{{ truncateText(delayConfig.delay_until_template, 25) }}</span>
+          <span class="value">{{
+            truncateText(delayConfig.delay_until_template, 25)
+          }}</span>
         </div>
-        
-        <div v-else-if="delayConfig.delay_type === 'until_condition'" class="delay-condition">
+
+        <div
+          v-else-if="delayConfig.delay_type === 'until_condition'"
+          class="delay-condition"
+        >
           <span class="label">{{ $t('visualBuilder.condition') }}:</span>
-          <span class="value">{{ truncateText(delayConfig.condition_template, 25) }}</span>
+          <span class="value">{{
+            truncateText(delayConfig.condition_template, 25)
+          }}</span>
           <div v-if="delayConfig.max_wait_duration" class="max-wait">
             <span class="label">{{ $t('visualBuilder.maxWait') }}:</span>
-            <span class="value">{{ formatDuration(delayConfig.max_wait_duration) }}</span>
+            <span class="value">{{
+              formatDuration(delayConfig.max_wait_duration)
+            }}</span>
           </div>
         </div>
-        
+
         <div class="delay-visualization">
           <div class="timeline">
             <div class="timeline-start">
@@ -80,7 +96,7 @@
         <span>{{ $t('visualBuilder.notConfigured') }}</span>
       </div>
     </div>
-    
+
     <div class="node-status">
       <div v-if="hasError" class="status-indicator error">
         <i class="iconoir-warning-triangle"></i>
@@ -95,7 +111,7 @@
         <span>{{ $t('visualBuilder.needsConfig') }}</span>
       </div>
     </div>
-    
+
     <!-- Connection Points -->
     <div class="connection-point input" data-connection="input">
       <div class="connection-dot"></div>
@@ -127,13 +143,15 @@ export default {
     delayConfig() {
       return this.data.service || null
     },
-    
+
     isConfigured() {
-      return this.delayConfig && 
-             this.delayConfig.delay_type &&
-             this.isDelayConfigValid()
+      return (
+        this.delayConfig &&
+        this.delayConfig.delay_type &&
+        this.isDelayConfigValid()
+      )
     },
-    
+
     hasError() {
       return this.delayConfig && !this.isDelayConfigValid()
     },
@@ -141,9 +159,14 @@ export default {
   methods: {
     isDelayConfigValid() {
       if (!this.delayConfig) return false
-      
-      const { delay_type, delay_duration, delay_until_template, condition_template } = this.delayConfig
-      
+
+      const {
+        delay_type,
+        delay_duration,
+        delay_until_template,
+        condition_template,
+      } = this.delayConfig
+
       switch (delay_type) {
         case 'fixed':
           return !!delay_duration
@@ -155,45 +178,52 @@ export default {
           return false
       }
     },
-    
+
     formatDelayType(type) {
       const typeMap = {
-        'fixed': this.$t('visualBuilder.fixedDuration'),
-        'until_date': this.$t('visualBuilder.untilDate'),
-        'until_condition': this.$t('visualBuilder.untilCondition'),
+        fixed: this.$t('visualBuilder.fixedDuration'),
+        until_date: this.$t('visualBuilder.untilDate'),
+        until_condition: this.$t('visualBuilder.untilCondition'),
       }
       return typeMap[type] || type
     },
-    
+
     formatDuration(duration) {
       if (!duration) return ''
-      
+
       // Parse ISO 8601 duration format (e.g., "PT1H30M" for 1 hour 30 minutes)
       const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/)
       if (!match) return duration
-      
+
       const hours = parseInt(match[1]) || 0
       const minutes = parseInt(match[2]) || 0
       const seconds = parseInt(match[3]) || 0
-      
+
       const parts = []
       if (hours > 0) parts.push(`${hours}h`)
       if (minutes > 0) parts.push(`${minutes}m`)
       if (seconds > 0) parts.push(`${seconds}s`)
-      
+
       return parts.join(' ') || '0s'
     },
-    
+
     truncateText(text, maxLength) {
       if (!text) return ''
-      return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
+      return text.length > maxLength
+        ? `${text.substring(0, maxLength)}...`
+        : text
     },
-    
+
     getDelayDisplayText() {
       if (!this.delayConfig) return ''
-      
-      const { delay_type, delay_duration, delay_until_template, condition_template } = this.delayConfig
-      
+
+      const {
+        delay_type,
+        delay_duration,
+        delay_until_template,
+        condition_template,
+      } = this.delayConfig
+
       switch (delay_type) {
         case 'fixed':
           return this.formatDuration(delay_duration)
@@ -220,21 +250,21 @@ export default {
   color: #333;
   position: relative;
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
-  
+
   &.selected {
     border-color: #ffd700;
     box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
   }
-  
+
   &.error {
     border-color: #ff6b6b;
   }
-  
+
   &.configured {
     border-color: #51cf66;
   }
@@ -256,7 +286,7 @@ export default {
   align-items: center;
   justify-content: center;
   margin-right: 0.75rem;
-  
+
   i {
     font-size: 1.5rem;
     color: #ff6b35;
@@ -265,14 +295,14 @@ export default {
 
 .node-title {
   flex: 1;
-  
+
   h4 {
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
     color: #333;
   }
-  
+
   .node-type {
     font-size: 0.75rem;
     opacity: 0.7;
@@ -299,16 +329,16 @@ export default {
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.5);
   }
-  
+
   &.delete-btn:hover {
     background: #ff6b6b;
     color: white;
   }
-  
+
   i {
     font-size: 0.9rem;
   }
@@ -328,12 +358,12 @@ export default {
     justify-content: space-between;
     margin-bottom: 0.75rem;
     font-size: 0.9rem;
-    
+
     .label {
       font-weight: 600;
       color: #666;
     }
-    
+
     .value {
       font-weight: 500;
       color: #333;
@@ -344,7 +374,7 @@ export default {
       white-space: nowrap;
     }
   }
-  
+
   .max-wait {
     margin-top: 0.5rem;
     padding-top: 0.5rem;
@@ -352,11 +382,11 @@ export default {
     display: flex;
     justify-content: space-between;
     font-size: 0.85rem;
-    
+
     .label {
       color: #888;
     }
-    
+
     .value {
       color: #666;
     }
@@ -374,7 +404,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -399,7 +429,7 @@ export default {
   justify-content: center;
   z-index: 2;
   position: relative;
-  
+
   i {
     font-size: 1rem;
     color: #ff6b35;
@@ -423,13 +453,13 @@ export default {
   align-items: center;
   gap: 0.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  
+
   i {
     font-size: 1rem;
     color: #ffa726;
     animation: pulse 2s infinite;
   }
-  
+
   span {
     font-size: 0.8rem;
     font-weight: 600;
@@ -438,7 +468,8 @@ export default {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -454,7 +485,7 @@ export default {
   opacity: 0.7;
   font-size: 0.9rem;
   color: #666;
-  
+
   i {
     font-size: 1.1rem;
   }
@@ -471,19 +502,19 @@ export default {
   gap: 0.5rem;
   font-size: 0.8rem;
   font-weight: 500;
-  
+
   &.success {
     color: #51cf66;
   }
-  
+
   &.error {
     color: #ff6b6b;
   }
-  
+
   &.warning {
     color: #ffa726;
   }
-  
+
   i {
     font-size: 0.9rem;
   }
@@ -493,13 +524,13 @@ export default {
   position: absolute;
   width: 16px;
   height: 16px;
-  
+
   &.input {
     top: -8px;
     left: 50%;
     transform: translateX(-50%);
   }
-  
+
   &.output {
     bottom: -8px;
     left: 50%;
@@ -514,7 +545,7 @@ export default {
   border: 2px solid #ff6b35;
   border-radius: 50%;
   transition: all 0.2s ease;
-  
+
   &:hover {
     transform: scale(1.2);
     box-shadow: 0 0 8px rgba(255, 107, 53, 0.6);

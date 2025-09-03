@@ -26,31 +26,34 @@ export default {
   },
   computed: {
     typingUsers() {
-      const indicators = this.$store.getters['database/collaboration/typingIndicatorsForField'](
-        this.fieldId,
-        this.rowId
-      )
+      const indicators = this.$store.getters[
+        'database/collaboration/typingIndicatorsForField'
+      ](this.fieldId, this.rowId)
       const now = Date.now()
-      
+
       // Filter out stale indicators (older than 5 seconds)
-      return indicators.filter(indicator => {
+      return indicators.filter((indicator) => {
         return now - indicator.timestamp < 5000
       })
     },
     typingText() {
-      const userNames = this.typingUsers.map(indicator => {
-        const presence = this.$store.getters['database/collaboration/userPresence'](indicator.userId)
+      const userNames = this.typingUsers.map((indicator) => {
+        const presence = this.$store.getters[
+          'database/collaboration/userPresence'
+        ](indicator.userId)
         return presence?.userName || 'Someone'
       })
-      
+
       if (userNames.length === 1) {
         return `${userNames[0]} is typing...`
       } else if (userNames.length === 2) {
         return `${userNames[0]} and ${userNames[1]} are typing...`
       } else if (userNames.length > 2) {
-        return `${userNames[0]} and ${userNames.length - 1} others are typing...`
+        return `${userNames[0]} and ${
+          userNames.length - 1
+        } others are typing...`
       }
-      
+
       return ''
     },
   },
@@ -81,18 +84,20 @@ export default {
   background: #666;
   border-radius: 50%;
   animation: typing 1.4s infinite ease-in-out;
-  
+
   &:nth-child(1) {
     animation-delay: -0.32s;
   }
-  
+
   &:nth-child(2) {
     animation-delay: -0.16s;
   }
 }
 
 @keyframes typing {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0.8);
     opacity: 0.5;
   }

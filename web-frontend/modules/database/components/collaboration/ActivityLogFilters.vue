@@ -79,7 +79,7 @@
             :value="range.value"
           />
         </Dropdown>
-        
+
         <div
           v-if="localFilters.timeRange === 'custom'"
           class="activity-log-filters__custom-date"
@@ -119,15 +119,11 @@
     </div>
 
     <div class="activity-log-filters__actions">
-      <Button
-        type="secondary"
-        size="small"
-        @click="clearAllFilters"
-      >
+      <Button type="secondary" size="small" @click="clearAllFilters">
         <i class="iconoir-refresh-double"></i>
         {{ $t('activityLog.clearFilters') }}
       </Button>
-      
+
       <Button
         v-if="hasActiveFilters"
         type="primary"
@@ -139,10 +135,7 @@
       </Button>
     </div>
 
-    <div
-      v-if="filterPresets.length > 0"
-      class="activity-log-filters__presets"
-    >
+    <div v-if="filterPresets.length > 0" class="activity-log-filters__presets">
       <label class="activity-log-filters__label">
         {{ $t('activityLog.filters.presets') }}
       </label>
@@ -153,7 +146,9 @@
           class="activity-log-filters__preset"
           @click="applyFilterPreset(preset)"
         >
-          <span class="activity-log-filters__preset-name">{{ preset.name }}</span>
+          <span class="activity-log-filters__preset-name">{{
+            preset.name
+          }}</span>
           <Button
             type="ghost"
             size="tiny"
@@ -167,7 +162,9 @@
 
     <div class="activity-log-filters__summary">
       <div class="activity-log-filters__active-count">
-        {{ $t('activityLog.filters.activeFilters', { count: activeFilterCount }) }}
+        {{
+          $t('activityLog.filters.activeFilters', { count: activeFilterCount })
+        }}
       </div>
       <div
         v-if="resultCount !== null"
@@ -215,11 +212,26 @@ export default {
     timeRanges() {
       return [
         { value: 'all', label: this.$t('activityLog.timeline.timeRanges.all') },
-        { value: 'today', label: this.$t('activityLog.timeline.timeRanges.today') },
-        { value: 'yesterday', label: this.$t('activityLog.timeline.timeRanges.yesterday') },
-        { value: 'week', label: this.$t('activityLog.timeline.timeRanges.thisWeek') },
-        { value: 'month', label: this.$t('activityLog.timeline.timeRanges.thisMonth') },
-        { value: 'custom', label: this.$t('activityLog.timeline.timeRanges.custom') },
+        {
+          value: 'today',
+          label: this.$t('activityLog.timeline.timeRanges.today'),
+        },
+        {
+          value: 'yesterday',
+          label: this.$t('activityLog.timeline.timeRanges.yesterday'),
+        },
+        {
+          value: 'week',
+          label: this.$t('activityLog.timeline.timeRanges.thisWeek'),
+        },
+        {
+          value: 'month',
+          label: this.$t('activityLog.timeline.timeRanges.thisMonth'),
+        },
+        {
+          value: 'custom',
+          label: this.$t('activityLog.timeline.timeRanges.custom'),
+        },
       ]
     },
 
@@ -228,43 +240,91 @@ export default {
         {
           category: this.$t('activityLog.filters.categories.rows'),
           actions: [
-            { value: 'row_created', label: this.$t('activityLog.actions.rowCreated') },
-            { value: 'row_updated', label: this.$t('activityLog.actions.rowUpdated') },
-            { value: 'row_deleted', label: this.$t('activityLog.actions.rowDeleted') },
-          ]
+            {
+              value: 'row_created',
+              label: this.$t('activityLog.actions.rowCreated'),
+            },
+            {
+              value: 'row_updated',
+              label: this.$t('activityLog.actions.rowUpdated'),
+            },
+            {
+              value: 'row_deleted',
+              label: this.$t('activityLog.actions.rowDeleted'),
+            },
+          ],
         },
         {
           category: this.$t('activityLog.filters.categories.fields'),
           actions: [
-            { value: 'field_created', label: this.$t('activityLog.actions.fieldCreated') },
-            { value: 'field_updated', label: this.$t('activityLog.actions.fieldUpdated') },
-            { value: 'field_deleted', label: this.$t('activityLog.actions.fieldDeleted') },
-          ]
+            {
+              value: 'field_created',
+              label: this.$t('activityLog.actions.fieldCreated'),
+            },
+            {
+              value: 'field_updated',
+              label: this.$t('activityLog.actions.fieldUpdated'),
+            },
+            {
+              value: 'field_deleted',
+              label: this.$t('activityLog.actions.fieldDeleted'),
+            },
+          ],
         },
         {
           category: this.$t('activityLog.filters.categories.views'),
           actions: [
-            { value: 'view_created', label: this.$t('activityLog.actions.viewCreated') },
-            { value: 'view_updated', label: this.$t('activityLog.actions.viewUpdated') },
-            { value: 'view_deleted', label: this.$t('activityLog.actions.viewDeleted') },
-          ]
+            {
+              value: 'view_created',
+              label: this.$t('activityLog.actions.viewCreated'),
+            },
+            {
+              value: 'view_updated',
+              label: this.$t('activityLog.actions.viewUpdated'),
+            },
+            {
+              value: 'view_deleted',
+              label: this.$t('activityLog.actions.viewDeleted'),
+            },
+          ],
         },
         {
           category: this.$t('activityLog.filters.categories.comments'),
           actions: [
-            { value: 'comment_created', label: this.$t('activityLog.actions.commentCreated') },
-            { value: 'comment_updated', label: this.$t('activityLog.actions.commentUpdated') },
-            { value: 'comment_deleted', label: this.$t('activityLog.actions.commentDeleted') },
-            { value: 'comment_resolved', label: this.$t('activityLog.actions.commentResolved') },
-            { value: 'comment_unresolved', label: this.$t('activityLog.actions.commentUnresolved') },
-          ]
+            {
+              value: 'comment_created',
+              label: this.$t('activityLog.actions.commentCreated'),
+            },
+            {
+              value: 'comment_updated',
+              label: this.$t('activityLog.actions.commentUpdated'),
+            },
+            {
+              value: 'comment_deleted',
+              label: this.$t('activityLog.actions.commentDeleted'),
+            },
+            {
+              value: 'comment_resolved',
+              label: this.$t('activityLog.actions.commentResolved'),
+            },
+            {
+              value: 'comment_unresolved',
+              label: this.$t('activityLog.actions.commentUnresolved'),
+            },
+          ],
         },
         {
           category: this.$t('activityLog.filters.categories.users'),
           actions: [
-            { value: 'user_joined', label: this.$t('activityLog.actions.userJoined') },
-            { value: 'user_left', label: this.$t('activityLog.actions.userLeft') },
-          ]
+            {
+              value: 'user_joined',
+              label: this.$t('activityLog.actions.userJoined'),
+            },
+            {
+              value: 'user_left',
+              label: this.$t('activityLog.actions.userLeft'),
+            },
+          ],
         },
       ]
     },
@@ -329,7 +389,7 @@ export default {
       const name = user.first_name || user.email
       return name
         .split(' ')
-        .map(word => word.charAt(0).toUpperCase())
+        .map((word) => word.charAt(0).toUpperCase())
         .slice(0, 2)
         .join('')
     },
@@ -358,7 +418,7 @@ export default {
         user_joined: 'iconoir-user-plus',
         user_left: 'iconoir-user-minus',
       }
-      
+
       return iconMap[actionType] || 'iconoir-info-circle'
     },
 
@@ -388,18 +448,22 @@ export default {
 
       this.$store.dispatch('toast/info', {
         title: this.$t('activityLog.filters.presetApplied'),
-        message: this.$t('activityLog.filters.presetAppliedMessage', { name: preset.name }),
+        message: this.$t('activityLog.filters.presetAppliedMessage', {
+          name: preset.name,
+        }),
       })
     },
 
     deleteFilterPreset(presetId) {
-      this.filterPresets = this.filterPresets.filter(p => p.id !== presetId)
+      this.filterPresets = this.filterPresets.filter((p) => p.id !== presetId)
       this.saveFilterPresets()
     },
 
     loadFilterPresets() {
       try {
-        const saved = localStorage.getItem('baserow_activity_log_filter_presets')
+        const saved = localStorage.getItem(
+          'baserow_activity_log_filter_presets'
+        )
         if (saved) {
           this.filterPresets = JSON.parse(saved)
         }
@@ -410,7 +474,10 @@ export default {
 
     saveFilterPresets() {
       try {
-        localStorage.setItem('baserow_activity_log_filter_presets', JSON.stringify(this.filterPresets))
+        localStorage.setItem(
+          'baserow_activity_log_filter_presets',
+          JSON.stringify(this.filterPresets)
+        )
       } catch (error) {
         console.error('Failed to save filter presets:', error)
       }
@@ -425,15 +492,15 @@ export default {
   background-color: var(--color-background-light);
   border-radius: 8px;
   border: 1px solid var(--color-border);
-  
+
   &__section {
     margin-bottom: 16px;
-    
+
     &:last-child {
       margin-bottom: 0;
     }
   }
-  
+
   &__label {
     display: block;
     font-size: 12px;
@@ -443,7 +510,7 @@ export default {
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  
+
   &__dropdown {
     width: 100%;
   }
@@ -467,18 +534,18 @@ export default {
     gap: 8px;
     padding-left: 16px;
   }
-  
+
   &__time-controls {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
-  
+
   &__custom-date {
     display: flex;
     gap: 8px;
   }
-  
+
   &__date-input {
     flex: 1;
     padding: 8px 12px;
@@ -486,18 +553,18 @@ export default {
     border-radius: 4px;
     font-size: 14px;
     background-color: var(--color-background);
-    
+
     &:focus {
       outline: none;
       border-color: var(--color-primary-500);
       box-shadow: 0 0 0 2px var(--color-primary-100);
     }
   }
-  
+
   &__search {
     position: relative;
   }
-  
+
   &__search-input {
     width: 100%;
     padding: 8px 12px 8px 36px;
@@ -505,14 +572,14 @@ export default {
     border-radius: 4px;
     font-size: 14px;
     background-color: var(--color-background);
-    
+
     &:focus {
       outline: none;
       border-color: var(--color-primary-500);
       box-shadow: 0 0 0 2px var(--color-primary-100);
     }
   }
-  
+
   &__search-icon {
     position: absolute;
     left: 12px;
@@ -521,7 +588,7 @@ export default {
     color: var(--color-text-muted);
     font-size: 16px;
   }
-  
+
   &__actions {
     display: flex;
     gap: 8px;
@@ -529,19 +596,19 @@ export default {
     padding-top: 16px;
     border-top: 1px solid var(--color-border);
   }
-  
+
   &__presets {
     margin-top: 16px;
     padding-top: 16px;
     border-top: 1px solid var(--color-border);
   }
-  
+
   &__preset-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
-  
+
   &__preset {
     display: flex;
     align-items: center;
@@ -552,18 +619,18 @@ export default {
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
-    
+
     &:hover {
       border-color: var(--color-primary-300);
       background-color: var(--color-primary-50);
     }
   }
-  
+
   &__preset-name {
     font-size: 13px;
     color: var(--color-text);
   }
-  
+
   &__summary {
     margin-top: 16px;
     padding-top: 16px;
@@ -572,13 +639,13 @@ export default {
     justify-content: space-between;
     align-items: center;
   }
-  
+
   &__active-count,
   &__result-count {
     font-size: 12px;
     color: var(--color-text-muted);
   }
-  
+
   &__active-count {
     font-weight: 600;
   }
@@ -589,11 +656,11 @@ export default {
     &__custom-date {
       flex-direction: column;
     }
-    
+
     &__actions {
       flex-direction: column;
     }
-    
+
     &__summary {
       flex-direction: column;
       align-items: flex-start;

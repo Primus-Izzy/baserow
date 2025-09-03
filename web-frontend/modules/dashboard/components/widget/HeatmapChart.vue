@@ -6,12 +6,15 @@
       :width="canvasWidth"
       :height="canvasHeight"
     ></canvas>
-    
+
     <div v-if="loading" class="heatmap-chart__loading">
       <div class="loading-spinner"></div>
     </div>
 
-    <div v-if="!loading && (!chartData || chartData.length === 0)" class="heatmap-chart__no-data">
+    <div
+      v-if="!loading && (!chartData || chartData.length === 0)"
+      class="heatmap-chart__no-data"
+    >
       <div class="heatmap-chart__no-data-content">
         <i class="fas fa-th heatmap-chart__no-data-icon"></i>
         <p class="heatmap-chart__no-data-text">
@@ -55,11 +58,11 @@ export default {
     },
     maxValue() {
       if (!this.chartData || this.chartData.length === 0) return 0
-      return Math.max(...this.chartData.map(d => d.value))
+      return Math.max(...this.chartData.map((d) => d.value))
     },
     minValue() {
       if (!this.chartData || this.chartData.length === 0) return 0
-      return Math.min(...this.chartData.map(d => d.value))
+      return Math.min(...this.chartData.map((d) => d.value))
     },
   },
   mounted() {
@@ -82,17 +85,17 @@ export default {
     initCanvas() {
       const canvas = this.$refs.heatmapCanvas
       if (!canvas) return
-      
+
       this.ctx = canvas.getContext('2d')
       this.updateCanvasSize()
     },
     updateCanvasSize() {
       const container = this.$el
       if (!container) return
-      
+
       this.canvasWidth = container.clientWidth
       this.canvasHeight = container.clientHeight
-      
+
       const canvas = this.$refs.heatmapCanvas
       if (canvas) {
         canvas.width = this.canvasWidth
@@ -101,31 +104,31 @@ export default {
     },
     drawHeatmap() {
       if (!this.ctx || !this.chartData || this.chartData.length === 0) return
-      
+
       // Clear canvas
       this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
-      
+
       // Calculate grid dimensions
-      const uniqueX = [...new Set(this.chartData.map(d => d.x))]
-      const uniqueY = [...new Set(this.chartData.map(d => d.y))]
-      
+      const uniqueX = [...new Set(this.chartData.map((d) => d.x))]
+      const uniqueY = [...new Set(this.chartData.map((d) => d.y))]
+
       const cellWidth = this.canvasWidth / uniqueX.length
       const cellHeight = this.canvasHeight / uniqueY.length
-      
+
       // Draw cells
-      this.chartData.forEach(dataPoint => {
+      this.chartData.forEach((dataPoint) => {
         const x = uniqueX.indexOf(dataPoint.x) * cellWidth
         const y = uniqueY.indexOf(dataPoint.y) * cellHeight
         const color = this.getColorForValue(dataPoint.value)
-        
+
         this.ctx.fillStyle = color
         this.ctx.fillRect(x, y, cellWidth, cellHeight)
-        
+
         // Draw border
         this.ctx.strokeStyle = '#fff'
         this.ctx.lineWidth = 1
         this.ctx.strokeRect(x, y, cellWidth, cellHeight)
-        
+
         // Draw value text if cell is large enough
         if (cellWidth > 30 && cellHeight > 20) {
           this.ctx.fillStyle = this.getTextColor(color)
@@ -142,32 +145,40 @@ export default {
     },
     getColorForValue(value) {
       const ratio = (value - this.minValue) / (this.maxValue - this.minValue)
-      return this.interpolateColor(this.colorScale[0], this.colorScale[1], ratio)
+      return this.interpolateColor(
+        this.colorScale[0],
+        this.colorScale[1],
+        ratio
+      )
     },
     interpolateColor(color1, color2, ratio) {
       const hex1 = color1.replace('#', '')
       const hex2 = color2.replace('#', '')
-      
+
       const r1 = parseInt(hex1.substr(0, 2), 16)
       const g1 = parseInt(hex1.substr(2, 2), 16)
       const b1 = parseInt(hex1.substr(4, 2), 16)
-      
+
       const r2 = parseInt(hex2.substr(0, 2), 16)
       const g2 = parseInt(hex2.substr(2, 2), 16)
       const b2 = parseInt(hex2.substr(4, 2), 16)
-      
+
       const r = Math.round(r1 + (r2 - r1) * ratio)
       const g = Math.round(g1 + (g2 - g1) * ratio)
       const b = Math.round(b1 + (b2 - b1) * ratio)
-      
+
       return `rgb(${r}, ${g}, ${b})`
     },
     getTextColor(backgroundColor) {
       // Simple contrast calculation
       const rgb = backgroundColor.match(/\d+/g)
       if (!rgb) return '#000'
-      
-      const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000
+
+      const brightness =
+        (parseInt(rgb[0]) * 299 +
+          parseInt(rgb[1]) * 587 +
+          parseInt(rgb[2]) * 114) /
+        1000
       return brightness > 128 ? '#000' : '#fff'
     },
     handleResize() {
@@ -242,12 +253,12 @@ export default {
   .heatmap-chart-container {
     min-height: 150px;
   }
-  
+
   .heatmap-chart__no-data-icon {
     font-size: 36px;
     margin-bottom: 12px;
   }
-  
+
   .heatmap-chart__no-data-text {
     font-size: 14px;
   }

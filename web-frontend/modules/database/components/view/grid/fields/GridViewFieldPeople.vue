@@ -26,7 +26,9 @@
               getPersonDisplayName(item)
             }}</span>
             <a
-              v-if="!readOnly && (!field.multiple_people || displayValue.length > 1)"
+              v-if="
+                !readOnly && (!field.multiple_people || displayValue.length > 1)
+              "
               class="field-people__remove"
               @click.prevent="removeValue($event, value, item.id)"
             >
@@ -77,17 +79,21 @@ export default {
       if (!this.value) {
         return []
       }
-      return this.field.multiple_people 
-        ? (Array.isArray(this.value) ? this.value : [])
-        : (this.value.id ? [this.value] : [])
+      return this.field.multiple_people
+        ? Array.isArray(this.value)
+          ? this.value
+          : []
+        : this.value.id
+        ? [this.value]
+        : []
     },
     canAddMore() {
       if (!this.field.multiple_people) {
         return !this.value || !this.value.id
       }
       return true
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -124,7 +130,7 @@ export default {
   border-radius: 4px;
   font-size: 12px;
   max-width: 120px;
-  
+
   &--no-avatar {
     padding-left: 8px;
   }
@@ -142,7 +148,7 @@ export default {
   font-size: 10px;
   cursor: pointer;
   flex-shrink: 0;
-  
+
   &:hover {
     color: #333;
   }
@@ -159,12 +165,12 @@ export default {
   color: #666;
   cursor: pointer;
   flex-shrink: 0;
-  
+
   &:hover {
     background-color: #e5e7eb;
     color: #333;
   }
-  
+
   i {
     font-size: 12px;
   }

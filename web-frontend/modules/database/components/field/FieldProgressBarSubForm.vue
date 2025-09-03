@@ -14,16 +14,16 @@
         :fixed-items="true"
         @hide="v$.values.source_type.$touch"
       >
-        <DropdownItem 
-          :name="$t('fieldProgressBarSubForm.sourceTypeManual')" 
+        <DropdownItem
+          :name="$t('fieldProgressBarSubForm.sourceTypeManual')"
           value="manual"
         />
-        <DropdownItem 
-          :name="$t('fieldProgressBarSubForm.sourceTypeField')" 
+        <DropdownItem
+          :name="$t('fieldProgressBarSubForm.sourceTypeField')"
           value="field"
         />
-        <DropdownItem 
-          :name="$t('fieldProgressBarSubForm.sourceTypeFormula')" 
+        <DropdownItem
+          :name="$t('fieldProgressBarSubForm.sourceTypeFormula')"
           value="formula"
           :disabled="true"
         />
@@ -82,9 +82,7 @@
 
     <!-- Display Configuration -->
     <FormGroup class="margin-bottom-2">
-      <Checkbox
-        v-model="v$.values.show_percentage.$model"
-      >
+      <Checkbox v-model="v$.values.show_percentage.$model">
         {{ $t('fieldProgressBarSubForm.showPercentage') }}
       </Checkbox>
     </FormGroup>
@@ -102,24 +100,24 @@
         :fixed-items="true"
         @hide="v$.values.color_scheme.$touch"
       >
-        <DropdownItem 
-          :name="$t('fieldProgressBarSubForm.colorSchemeDefault')" 
+        <DropdownItem
+          :name="$t('fieldProgressBarSubForm.colorSchemeDefault')"
           value="default"
         />
-        <DropdownItem 
-          :name="$t('fieldProgressBarSubForm.colorSchemeSuccess')" 
+        <DropdownItem
+          :name="$t('fieldProgressBarSubForm.colorSchemeSuccess')"
           value="success"
         />
-        <DropdownItem 
-          :name="$t('fieldProgressBarSubForm.colorSchemeWarning')" 
+        <DropdownItem
+          :name="$t('fieldProgressBarSubForm.colorSchemeWarning')"
           value="warning"
         />
-        <DropdownItem 
-          :name="$t('fieldProgressBarSubForm.colorSchemeDanger')" 
+        <DropdownItem
+          :name="$t('fieldProgressBarSubForm.colorSchemeDanger')"
           value="danger"
         />
-        <DropdownItem 
-          :name="$t('fieldProgressBarSubForm.colorSchemeCustom')" 
+        <DropdownItem
+          :name="$t('fieldProgressBarSubForm.colorSchemeCustom')"
           value="custom"
         />
       </Dropdown>
@@ -159,10 +157,7 @@
     </div>
 
     <!-- Preview -->
-    <FormGroup
-      small-label
-      :label="$t('fieldProgressBarSubForm.previewLabel')"
-    >
+    <FormGroup small-label :label="$t('fieldProgressBarSubForm.previewLabel')">
       <div class="progress-bar-preview">
         <ProgressBarDisplay
           :value="previewValue"
@@ -224,10 +219,20 @@ export default {
       if (!this.table || !this.table.fields) {
         return []
       }
-      
-      return this.table.fields.filter(field => {
-        const numericTypes = ['number', 'rating', 'autonumber', 'formula', 'count', 'rollup']
-        return numericTypes.includes(field.type) && field.id !== this.defaultValues.id
+
+      return this.table.fields.filter((field) => {
+        const numericTypes = [
+          'number',
+          'rating',
+          'autonumber',
+          'formula',
+          'count',
+          'rollup',
+        ]
+        return (
+          numericTypes.includes(field.type) &&
+          field.id !== this.defaultValues.id
+        )
       })
     },
     /**
@@ -244,7 +249,7 @@ export default {
      */
     previewValue() {
       const range = this.values.max_value - this.values.min_value
-      return this.values.min_value + (range * 0.65) // Show 65% progress
+      return this.values.min_value + range * 0.65 // Show 65% progress
     },
   },
   validations() {
@@ -256,14 +261,14 @@ export default {
             return this.values.source_type !== 'field' || value !== null
           },
         },
-        min_value: { 
+        min_value: {
           required,
           minValue: minValue(-999999),
           maxValue: (value) => {
             return value < this.values.max_value
           },
         },
-        max_value: { 
+        max_value: {
           required,
           minValue: (value) => {
             return value > this.values.min_value
@@ -274,12 +279,18 @@ export default {
         color_scheme: { required },
         custom_color_start: {
           required: (value) => {
-            return this.values.color_scheme !== 'custom' || (value && value.length > 0)
+            return (
+              this.values.color_scheme !== 'custom' ||
+              (value && value.length > 0)
+            )
           },
         },
         custom_color_end: {
           required: (value) => {
-            return this.values.color_scheme !== 'custom' || (value && value.length > 0)
+            return (
+              this.values.color_scheme !== 'custom' ||
+              (value && value.length > 0)
+            )
           },
         },
       },
@@ -311,24 +322,24 @@ export default {
   flex-direction: column;
   align-items: center;
   margin: 0 8px;
-  
+
   .progress-bar-color-label {
     font-size: 12px;
     color: #666;
     margin-bottom: 4px;
   }
-  
+
   .progress-bar-color-picker {
     width: 40px;
     height: 30px;
     border: 1px solid #ddd;
     border-radius: 4px;
     cursor: pointer;
-    
+
     &::-webkit-color-swatch-wrapper {
       padding: 0;
     }
-    
+
     &::-webkit-color-swatch {
       border: none;
       border-radius: 3px;

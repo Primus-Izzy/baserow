@@ -7,7 +7,7 @@
       size="small"
       @click="handleCommentClick"
     />
-    
+
     <!-- Comment sidebar -->
     <CommentSidebar
       :visible="showComments && selectedRowId === row.id"
@@ -48,14 +48,14 @@ export default {
     handleCommentClick(data) {
       this.selectedRowId = data.rowId
       this.showComments = true
-      
+
       // Emit event to parent component
       this.$emit('show-comments', data)
     },
     handleCloseSidebar() {
       this.showComments = false
       this.selectedRowId = null
-      
+
       // Emit event to parent component
       this.$emit('hide-comments')
     },

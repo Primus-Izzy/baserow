@@ -4,8 +4,8 @@
     <div v-if="!isOnline" class="offline-indicator">
       <i class="fas fa-wifi-slash"></i>
       <span>{{ $t('mobileFeatures.offlineMode') }}</span>
-      <button 
-        v-if="hasPendingSync" 
+      <button
+        v-if="hasPendingSync"
         @click="syncNow"
         class="sync-button"
         :disabled="syncInProgress"
@@ -28,16 +28,16 @@
           playsinline
           class="camera-preview"
         ></video>
-        
+
         <div class="camera-controls">
           <button @click="switchCamera" class="camera-switch">
             <i class="fas fa-camera-rotate"></i>
           </button>
-          
+
           <button @click="capturePhoto" class="capture-button">
             <i class="fas fa-camera"></i>
           </button>
-          
+
           <button @click="accessPhotoLibrary" class="gallery-button">
             <i class="fas fa-images"></i>
           </button>
@@ -48,40 +48,40 @@
     <!-- Push Notification Settings -->
     <div v-if="showNotificationSettings" class="notification-settings">
       <h3>{{ $t('mobileFeatures.notificationSettings') }}</h3>
-      
+
       <div class="setting-item">
         <label>
           <input
             type="checkbox"
             v-model="notificationPreferences.enabled"
             @change="updateNotificationSettings"
-          >
+          />
           {{ $t('mobileFeatures.enableNotifications') }}
         </label>
       </div>
-      
+
       <div class="setting-item" v-if="notificationPreferences.enabled">
         <label>
           <input
             type="checkbox"
             v-model="notificationPreferences.comments"
             @change="updateNotificationSettings"
-          >
+          />
           {{ $t('mobileFeatures.commentNotifications') }}
         </label>
       </div>
-      
+
       <div class="setting-item" v-if="notificationPreferences.enabled">
         <label>
           <input
             type="checkbox"
             v-model="notificationPreferences.mentions"
             @change="updateNotificationSettings"
-          >
+          />
           {{ $t('mobileFeatures.mentionNotifications') }}
         </label>
       </div>
-      
+
       <button @click="testNotification" class="test-button">
         {{ $t('mobileFeatures.testNotification') }}
       </button>
@@ -90,47 +90,47 @@
     <!-- Accessibility Settings -->
     <div v-if="showAccessibilitySettings" class="accessibility-settings">
       <h3>{{ $t('mobileFeatures.accessibilitySettings') }}</h3>
-      
+
       <div class="setting-item">
         <label>
           <input
             type="checkbox"
             v-model="accessibilitySettings.highContrast"
             @change="updateAccessibilitySettings"
-          >
+          />
           {{ $t('mobileFeatures.highContrast') }}
         </label>
       </div>
-      
+
       <div class="setting-item">
         <label>
           <input
             type="checkbox"
             v-model="accessibilitySettings.largeText"
             @change="updateAccessibilitySettings"
-          >
+          />
           {{ $t('mobileFeatures.largeText') }}
         </label>
       </div>
-      
+
       <div class="setting-item">
         <label>
           <input
             type="checkbox"
             v-model="accessibilitySettings.reducedMotion"
             @change="updateAccessibilitySettings"
-          >
+          />
           {{ $t('mobileFeatures.reducedMotion') }}
         </label>
       </div>
-      
+
       <div class="setting-item">
         <label>
           <input
             type="checkbox"
             v-model="accessibilitySettings.screenReaderAnnouncements"
             @change="updateAccessibilitySettings"
-          >
+          />
           {{ $t('mobileFeatures.screenReaderAnnouncements') }}
         </label>
       </div>
@@ -142,10 +142,12 @@
         <span class="sync-label">{{ $t('mobileFeatures.lastSync') }}:</span>
         <span class="sync-time">{{ formattedLastSyncTime }}</span>
       </div>
-      
+
       <div v-if="pendingOperations > 0" class="pending-operations">
         <i class="fas fa-clock"></i>
-        {{ $t('mobileFeatures.pendingOperations', { count: pendingOperations }) }}
+        {{
+          $t('mobileFeatures.pendingOperations', { count: pendingOperations })
+        }}
       </div>
     </div>
   </div>
@@ -159,7 +161,7 @@ import MobileAccessibilityService from '~/modules/core/services/mobileAccessibil
 
 export default {
   name: 'MobileFeatures',
-  
+
   data() {
     return {
       isOnline: navigator.onLine,
@@ -167,48 +169,48 @@ export default {
       hasPendingSync: false,
       pendingOperations: 0,
       lastSyncTime: null,
-      
+
       showCameraModal: false,
       showNotificationSettings: false,
       showAccessibilitySettings: false,
       showSyncStatus: false,
-      
+
       cameraStream: null,
       facingMode: 'environment',
-      
+
       notificationPreferences: {
         enabled: false,
         comments: true,
         mentions: true,
-        updates: false
+        updates: false,
       },
-      
+
       accessibilitySettings: {
         highContrast: false,
         largeText: false,
         reducedMotion: false,
-        screenReaderAnnouncements: true
-      }
+        screenReaderAnnouncements: true,
+      },
     }
   },
-  
+
   computed: {
     formattedLastSyncTime() {
       if (!this.lastSyncTime) return this.$t('mobileFeatures.never')
       return new Date(this.lastSyncTime).toLocaleString()
-    }
+    },
   },
-  
+
   async mounted() {
     await this.initializeMobileServices()
     this.setupEventListeners()
     this.loadSettings()
   },
-  
+
   beforeDestroy() {
     this.cleanup()
   },
-  
+
   methods: {
     /**
      * Initialize mobile services
@@ -217,26 +219,25 @@ export default {
       try {
         // Initialize offline sync
         this.offlineSync = new OfflineSyncService()
-        
+
         // Initialize camera access
         this.cameraAccess = new CameraAccessService()
-        
+
         // Initialize push notifications
         this.pushNotifications = new PushNotificationService()
         await this.pushNotifications.initialize()
-        
+
         // Initialize accessibility
         this.accessibility = new MobileAccessibilityService()
-        
+
         // Update sync status
         this.updateSyncStatus()
-        
       } catch (error) {
         console.error('Failed to initialize mobile services:', error)
         this.$toast.error(this.$t('mobileFeatures.initializationError'))
       }
     },
-    
+
     /**
      * Setup event listeners
      */
@@ -244,11 +245,11 @@ export default {
       // Network status
       window.addEventListener('online', this.handleOnline)
       window.addEventListener('offline', this.handleOffline)
-      
+
       // Visibility change for sync
       document.addEventListener('visibilitychange', this.handleVisibilityChange)
     },
-    
+
     /**
      * Handle online event
      */
@@ -257,7 +258,7 @@ export default {
       this.syncNow()
       this.accessibility?.announce(this.$t('mobileFeatures.backOnline'))
     },
-    
+
     /**
      * Handle offline event
      */
@@ -265,7 +266,7 @@ export default {
       this.isOnline = false
       this.accessibility?.announce(this.$t('mobileFeatures.nowOffline'))
     },
-    
+
     /**
      * Handle visibility change
      */
@@ -274,15 +275,15 @@ export default {
         this.syncNow()
       }
     },
-    
+
     /**
      * Sync pending operations
      */
     async syncNow() {
       if (this.syncInProgress || !this.isOnline) return
-      
+
       this.syncInProgress = true
-      
+
       try {
         await this.offlineSync.syncPendingOperations()
         this.updateSyncStatus()
@@ -294,7 +295,7 @@ export default {
         this.syncInProgress = false
       }
     },
-    
+
     /**
      * Update sync status
      */
@@ -306,7 +307,7 @@ export default {
         this.lastSyncTime = status.lastSyncTime
       }
     },
-    
+
     /**
      * Open camera modal
      */
@@ -314,7 +315,7 @@ export default {
       try {
         this.showCameraModal = true
         this.cameraStream = await this.cameraAccess.requestCameraPermission()
-        
+
         this.$nextTick(() => {
           if (this.$refs.videoElement) {
             this.$refs.videoElement.srcObject = this.cameraStream
@@ -326,7 +327,7 @@ export default {
         this.closeCameraModal()
       }
     },
-    
+
     /**
      * Close camera modal
      */
@@ -335,15 +336,17 @@ export default {
       this.cameraAccess?.stopCamera()
       this.cameraStream = null
     },
-    
+
     /**
      * Switch camera (front/back)
      */
     async switchCamera() {
       try {
         this.facingMode = this.facingMode === 'user' ? 'environment' : 'user'
-        this.cameraStream = await this.cameraAccess.switchCamera(this.facingMode)
-        
+        this.cameraStream = await this.cameraAccess.switchCamera(
+          this.facingMode
+        )
+
         if (this.$refs.videoElement) {
           this.$refs.videoElement.srcObject = this.cameraStream
         }
@@ -352,31 +355,37 @@ export default {
         this.$toast.error(this.$t('mobileFeatures.cameraSwitchError'))
       }
     },
-    
+
     /**
      * Capture photo from camera
      */
     async capturePhoto() {
       try {
-        const blob = await this.cameraAccess.capturePhoto(this.$refs.videoElement)
-        const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' })
-        
+        const blob = await this.cameraAccess.capturePhoto(
+          this.$refs.videoElement
+        )
+        const file = new File([blob], `photo-${Date.now()}.jpg`, {
+          type: 'image/jpeg',
+        })
+
         this.$emit('file-captured', file)
         this.closeCameraModal()
-        
+
         this.accessibility?.announce(this.$t('mobileFeatures.photoCaptured'))
       } catch (error) {
         console.error('Photo capture failed:', error)
         this.$toast.error(this.$t('mobileFeatures.captureError'))
       }
     },
-    
+
     /**
      * Access photo library
      */
     async accessPhotoLibrary() {
       try {
-        const files = await this.cameraAccess.accessPhotoLibrary({ multiple: true })
+        const files = await this.cameraAccess.accessPhotoLibrary({
+          multiple: true,
+        })
         this.$emit('files-selected', files)
         this.closeCameraModal()
       } catch (error) {
@@ -384,7 +393,7 @@ export default {
         this.$toast.error(this.$t('mobileFeatures.libraryError'))
       }
     },
-    
+
     /**
      * Update notification settings
      */
@@ -393,11 +402,14 @@ export default {
         if (this.notificationPreferences.enabled) {
           await this.pushNotifications.requestPermission()
           const subscription = await this.pushNotifications.subscribe()
-          await this.pushNotifications.sendSubscriptionToServer(subscription, this.$store.getters['auth/getUserId'])
+          await this.pushNotifications.sendSubscriptionToServer(
+            subscription,
+            this.$store.getters['auth/getUserId']
+          )
         } else {
           await this.pushNotifications.unsubscribe()
         }
-        
+
         this.saveSettings()
         this.$toast.success(this.$t('mobileFeatures.settingsUpdated'))
       } catch (error) {
@@ -405,7 +417,7 @@ export default {
         this.$toast.error(error.message)
       }
     },
-    
+
     /**
      * Test notification
      */
@@ -417,19 +429,23 @@ export default {
         this.$toast.error(error.message)
       }
     },
-    
+
     /**
      * Update accessibility settings
      */
     updateAccessibilitySettings() {
-      this.accessibility?.setHighContrastMode(this.accessibilitySettings.highContrast)
+      this.accessibility?.setHighContrastMode(
+        this.accessibilitySettings.highContrast
+      )
       this.accessibility?.setLargeTextMode(this.accessibilitySettings.largeText)
-      this.accessibility?.setReducedMotionMode(this.accessibilitySettings.reducedMotion)
-      
+      this.accessibility?.setReducedMotionMode(
+        this.accessibilitySettings.reducedMotion
+      )
+
       this.saveSettings()
       this.$toast.success(this.$t('mobileFeatures.accessibilityUpdated'))
     },
-    
+
     /**
      * Load settings from localStorage
      */
@@ -438,9 +454,15 @@ export default {
         const saved = localStorage.getItem('baserow-mobile-settings')
         if (saved) {
           const settings = JSON.parse(saved)
-          this.notificationPreferences = { ...this.notificationPreferences, ...settings.notifications }
-          this.accessibilitySettings = { ...this.accessibilitySettings, ...settings.accessibility }
-          
+          this.notificationPreferences = {
+            ...this.notificationPreferences,
+            ...settings.notifications,
+          }
+          this.accessibilitySettings = {
+            ...this.accessibilitySettings,
+            ...settings.accessibility,
+          }
+
           // Apply accessibility settings
           this.updateAccessibilitySettings()
         }
@@ -448,7 +470,7 @@ export default {
         console.error('Failed to load settings:', error)
       }
     },
-    
+
     /**
      * Save settings to localStorage
      */
@@ -456,25 +478,31 @@ export default {
       try {
         const settings = {
           notifications: this.notificationPreferences,
-          accessibility: this.accessibilitySettings
+          accessibility: this.accessibilitySettings,
         }
-        localStorage.setItem('baserow-mobile-settings', JSON.stringify(settings))
+        localStorage.setItem(
+          'baserow-mobile-settings',
+          JSON.stringify(settings)
+        )
       } catch (error) {
         console.error('Failed to save settings:', error)
       }
     },
-    
+
     /**
      * Cleanup resources
      */
     cleanup() {
       window.removeEventListener('online', this.handleOnline)
       window.removeEventListener('offline', this.handleOffline)
-      document.removeEventListener('visibilitychange', this.handleVisibilityChange)
-      
+      document.removeEventListener(
+        'visibilitychange',
+        this.handleVisibilityChange
+      )
+
       this.cameraAccess?.stopCamera()
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -492,7 +520,7 @@ export default {
     align-items: center;
     gap: 8px;
     z-index: 1000;
-    
+
     .sync-button {
       margin-left: auto;
       background: rgba(255, 255, 255, 0.2);
@@ -501,13 +529,13 @@ export default {
       padding: 4px 8px;
       border-radius: 4px;
       font-size: 12px;
-      
+
       &:disabled {
         opacity: 0.6;
       }
     }
   }
-  
+
   .camera-modal {
     .camera-preview {
       width: 100%;
@@ -515,13 +543,13 @@ export default {
       object-fit: cover;
       border-radius: 8px;
     }
-    
+
     .camera-controls {
       display: flex;
       justify-content: center;
       gap: 16px;
       margin-top: 16px;
-      
+
       button {
         width: 60px;
         height: 60px;
@@ -531,7 +559,7 @@ export default {
         align-items: center;
         justify-content: center;
         font-size: 20px;
-        
+
         &.capture-button {
           background: #007bff;
           color: white;
@@ -539,7 +567,7 @@ export default {
           height: 80px;
           font-size: 24px;
         }
-        
+
         &.camera-switch,
         &.gallery-button {
           background: #6c757d;
@@ -548,32 +576,32 @@ export default {
       }
     }
   }
-  
+
   .notification-settings,
   .accessibility-settings {
     padding: 16px;
-    
+
     h3 {
       margin-bottom: 16px;
       color: #333;
     }
-    
+
     .setting-item {
       margin-bottom: 12px;
-      
+
       label {
         display: flex;
         align-items: center;
         gap: 8px;
         cursor: pointer;
-        
-        input[type="checkbox"] {
+
+        input[type='checkbox'] {
           width: 18px;
           height: 18px;
         }
       }
     }
-    
+
     .test-button {
       background: #28a745;
       color: white;
@@ -583,28 +611,28 @@ export default {
       margin-top: 16px;
     }
   }
-  
+
   .sync-status {
     padding: 12px 16px;
     background: #f8f9fa;
     border-radius: 8px;
     margin: 16px 0;
-    
+
     .sync-info {
       display: flex;
       justify-content: space-between;
       margin-bottom: 8px;
-      
+
       .sync-label {
         font-weight: 500;
       }
-      
+
       .sync-time {
         color: #6c757d;
         font-size: 14px;
       }
     }
-    
+
     .pending-operations {
       color: #ffc107;
       font-size: 14px;
@@ -622,13 +650,13 @@ export default {
       background: #000;
       border: 2px solid #fff;
     }
-    
+
     .notification-settings,
     .accessibility-settings {
       background: #000;
       color: #fff;
       border: 2px solid #fff;
-      
+
       h3 {
         color: #fff;
       }
@@ -640,11 +668,11 @@ export default {
 :global(.large-text) {
   .mobile-features {
     font-size: 18px;
-    
+
     .setting-item label {
       font-size: 16px;
     }
-    
+
     button {
       font-size: 16px;
       padding: 12px 20px;

@@ -213,6 +213,9 @@ export default class RealTimeUpdatesService {
    * @returns {string} WebSocket URL
    */
   getWebSocketUrl(widgetId) {
+    if (typeof window === 'undefined') {
+      return ''
+    }
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const host = window.location.host
     return `${protocol}//${host}/ws/dashboard/widgets/${widgetId}/`
@@ -224,6 +227,9 @@ export default class RealTimeUpdatesService {
    */
   getAuthToken() {
     // This should be implemented based on your authentication system
+    if (typeof localStorage === 'undefined') {
+      return ''
+    }
     return localStorage.getItem('authToken') || ''
   }
 
@@ -308,16 +314,20 @@ export default class RealTimeUpdatesService {
 // Create singleton instance
 export const realTimeUpdatesService = new RealTimeUpdatesService()
 
-// Handle page visibility changes to pause/resume updates
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    realTimeUpdatesService.pauseAll()
-  } else {
-    realTimeUpdatesService.resumeAll()
-  }
-})
+// Handle page visibility changes to pause/resume updates (client-side only)
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      realTimeUpdatesService.pauseAll()
+    } else {
+      realTimeUpdatesService.resumeAll()
+    }
+  })
+}
 
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-  realTimeUpdatesService.destroy()
-})
+// Cleanup on page unload (client-side only)
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    realTimeUpdatesService.destroy()
+  })
+}

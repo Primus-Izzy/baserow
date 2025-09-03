@@ -9,7 +9,7 @@
           {{ currentUserInitials }}
         </div>
       </div>
-      
+
       <div class="comment-form__input-wrapper">
         <RichTextEditor
           ref="editor"
@@ -22,7 +22,7 @@
           @blur="handleBlur"
           class="comment-form__editor"
         />
-        
+
         <div v-if="showMentionSuggestions" class="comment-form__mentions">
           <div
             v-for="(user, index) in filteredMentions"
@@ -38,7 +38,9 @@
               {{ getUserInitials(user.first_name) }}
             </div>
             <div class="comment-form__mention-info">
-              <div class="comment-form__mention-name">{{ user.first_name }}</div>
+              <div class="comment-form__mention-name">
+                {{ user.first_name }}
+              </div>
               <div class="comment-form__mention-email">{{ user.email }}</div>
             </div>
           </div>
@@ -116,7 +118,7 @@ export default {
       const name = this.$auth.user.first_name || this.$auth.user.email
       return name
         .split(' ')
-        .map(part => part.charAt(0).toUpperCase())
+        .map((part) => part.charAt(0).toUpperCase())
         .join('')
         .substring(0, 2)
     },
@@ -125,24 +127,24 @@ export default {
     },
     availableMentions() {
       // Get active users from the collaboration store
-      const activeUsers = this.$store.getters['database/collaboration/activeUsersForContext'](
-        this.tableId,
-        null
-      )
-      
+      const activeUsers = this.$store.getters[
+        'database/collaboration/activeUsersForContext'
+      ](this.tableId, null)
+
       // Filter out current user
-      return activeUsers.filter(user => user.user_id !== this.$auth.user.id)
+      return activeUsers.filter((user) => user.user_id !== this.$auth.user.id)
     },
     filteredMentions() {
       if (!this.mentionQuery) {
         return this.availableMentions.slice(0, 5)
       }
-      
+
       const query = this.mentionQuery.toLowerCase()
       return this.availableMentions
-        .filter(user => 
-          user.user_name.toLowerCase().includes(query) ||
-          user.user_email.toLowerCase().includes(query)
+        .filter(
+          (user) =>
+            user.user_name.toLowerCase().includes(query) ||
+            user.user_email.toLowerCase().includes(query)
         )
         .slice(0, 5)
     },
@@ -157,14 +159,22 @@ export default {
       if (!name) return '?'
       return name
         .split(' ')
-        .map(part => part.charAt(0).toUpperCase())
+        .map((part) => part.charAt(0).toUpperCase())
         .join('')
         .substring(0, 2)
     },
     getUserColor(userId) {
       const colors = [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-        '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+        '#FF6B6B',
+        '#4ECDC4',
+        '#45B7D1',
+        '#96CEB4',
+        '#FFEAA7',
+        '#DDA0DD',
+        '#98D8C8',
+        '#F7DC6F',
+        '#BB8FCE',
+        '#85C1E9',
       ]
       return colors[userId % colors.length]
     },
@@ -176,12 +186,14 @@ export default {
     },
     selectMention(user) {
       const beforeMention = this.content.substring(0, this.mentionStartPos)
-      const afterMention = this.content.substring(this.mentionStartPos + this.mentionQuery.length + 1)
-      
+      const afterMention = this.content.substring(
+        this.mentionStartPos + this.mentionQuery.length + 1
+      )
+
       this.content = `${beforeMention}@${user.user_id} ${afterMention}`
       this.showMentionSuggestions = false
       this.mentionQuery = ''
-      
+
       // Focus back to editor
       this.$nextTick(() => {
         this.$refs.editor.focus()
@@ -222,15 +234,15 @@ export default {
     },
     async handleSubmit() {
       if (!this.content.trim() || this.submitting) return
-      
+
       this.submitting = true
-      
+
       try {
         this.$emit('submit', {
           content: this.content.trim(),
           parentId: this.parentId,
         })
-        
+
         if (!this.isEditing) {
           this.content = ''
         }
@@ -296,13 +308,13 @@ export default {
   line-height: 1.5;
   resize: vertical;
   transition: border-color 0.2s ease;
-  
+
   &:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
   }
-  
+
   &::placeholder {
     color: #6c757d;
   }
@@ -329,7 +341,7 @@ export default {
   padding: 8px 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  
+
   &:hover,
   &.active {
     background: #f8f9fa;
@@ -387,26 +399,26 @@ export default {
   display: flex;
   align-items: center;
   gap: 4px;
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
-  
+
   &--primary {
     background: #007bff;
     color: white;
-    
+
     &:hover:not(:disabled) {
       background: #0056b3;
     }
   }
-  
+
   &--secondary {
     background: transparent;
     color: #6c757d;
     border-color: #dee2e6;
-    
+
     &:hover {
       background: #f8f9fa;
       color: #333;

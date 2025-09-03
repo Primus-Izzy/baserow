@@ -2,7 +2,7 @@
   <div
     :class="[
       'enhanced-action-node',
-      { 'selected': selected, 'error': hasError, 'configured': isConfigured }
+      { selected: selected, error: hasError, configured: isConfigured },
     ]"
   >
     <div class="node-header">
@@ -31,10 +31,14 @@
         </button>
       </div>
     </div>
-    
+
     <div class="node-content">
       <div v-if="actionConfig" class="action-summary">
-        <div class="config-item" v-for="(value, key) in displayConfig" :key="key">
+        <div
+          class="config-item"
+          v-for="(value, key) in displayConfig"
+          :key="key"
+        >
           <span class="config-label">{{ key }}:</span>
           <span class="config-value">{{ value }}</span>
         </div>
@@ -44,7 +48,7 @@
         <span>{{ $t('visualBuilder.notConfigured') }}</span>
       </div>
     </div>
-    
+
     <div class="node-status">
       <div v-if="hasError" class="status-indicator error">
         <i class="iconoir-warning-triangle"></i>
@@ -59,7 +63,7 @@
         <span>{{ $t('visualBuilder.needsConfig') }}</span>
       </div>
     </div>
-    
+
     <!-- Connection Points -->
     <div class="connection-point input" data-connection="input">
       <div class="connection-dot"></div>
@@ -89,39 +93,49 @@ export default {
   },
   computed: {
     nodeType() {
-      return this.$registry.get('node', this.data.type) || {
-        name: 'Unknown Action',
-        iconClass: 'iconoir-play',
-      }
+      return (
+        this.$registry.get('node', this.data.type) || {
+          name: 'Unknown Action',
+          iconClass: 'iconoir-play',
+        }
+      )
     },
-    
+
     actionConfig() {
       return this.data.service || null
     },
-    
+
     isConfigured() {
       return this.actionConfig && Object.keys(this.actionConfig).length > 0
     },
-    
+
     hasError() {
-      return this.nodeType.isInError && this.nodeType.isInError({ service: this.actionConfig })
+      return (
+        this.nodeType.isInError &&
+        this.nodeType.isInError({ service: this.actionConfig })
+      )
     },
-    
+
     displayConfig() {
       if (!this.actionConfig) return {}
-      
+
       const config = {}
-      
+
       // Display key configuration items based on action type
       if (this.data.type === 'notification_action') {
         if (this.actionConfig.notification_type) {
           config['Type'] = this.actionConfig.notification_type
         }
         if (this.actionConfig.recipient_users?.length) {
-          config['Recipients'] = `${this.actionConfig.recipient_users.length} users`
+          config[
+            'Recipients'
+          ] = `${this.actionConfig.recipient_users.length} users`
         }
         if (this.actionConfig.subject_template) {
-          config['Subject'] = this.truncateText(this.actionConfig.subject_template, 30)
+          config['Subject'] = this.truncateText(
+            this.actionConfig.subject_template,
+            30
+          )
         }
       } else if (this.data.type === 'webhook_action') {
         if (this.actionConfig.url) {
@@ -135,10 +149,13 @@ export default {
           config['Field'] = this.getFieldName(this.actionConfig.target_field_id)
         }
         if (this.actionConfig.new_value_template) {
-          config['New Value'] = this.truncateText(this.actionConfig.new_value_template, 20)
+          config['New Value'] = this.truncateText(
+            this.actionConfig.new_value_template,
+            20
+          )
         }
       }
-      
+
       return config
     },
   },
@@ -148,10 +165,12 @@ export default {
       // For now, return a placeholder
       return `Field ${fieldId}`
     },
-    
+
     truncateText(text, maxLength) {
       if (!text) return ''
-      return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
+      return text.length > maxLength
+        ? `${text.substring(0, maxLength)}...`
+        : text
     },
   },
 }
@@ -168,21 +187,21 @@ export default {
   color: white;
   position: relative;
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
-  
+
   &.selected {
     border-color: #ffd700;
     box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
   }
-  
+
   &.error {
     border-color: #ff6b6b;
   }
-  
+
   &.configured {
     border-color: #51cf66;
   }
@@ -204,7 +223,7 @@ export default {
   align-items: center;
   justify-content: center;
   margin-right: 0.75rem;
-  
+
   i {
     font-size: 1.5rem;
   }
@@ -212,13 +231,13 @@ export default {
 
 .node-title {
   flex: 1;
-  
+
   h4 {
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
   }
-  
+
   .node-type {
     font-size: 0.75rem;
     opacity: 0.8;
@@ -244,15 +263,15 @@ export default {
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.3);
   }
-  
+
   &.delete-btn:hover {
     background: #ff6b6b;
   }
-  
+
   i {
     font-size: 0.9rem;
   }
@@ -269,17 +288,17 @@ export default {
     justify-content: space-between;
     margin-bottom: 0.5rem;
     font-size: 0.85rem;
-    
+
     &:last-child {
       margin-bottom: 0;
     }
   }
-  
+
   .config-label {
     opacity: 0.8;
     font-weight: 500;
   }
-  
+
   .config-value {
     font-weight: 600;
     text-align: right;
@@ -297,7 +316,7 @@ export default {
   gap: 0.5rem;
   opacity: 0.7;
   font-size: 0.9rem;
-  
+
   i {
     font-size: 1.1rem;
   }
@@ -314,19 +333,19 @@ export default {
   gap: 0.5rem;
   font-size: 0.8rem;
   font-weight: 500;
-  
+
   &.success {
     color: #51cf66;
   }
-  
+
   &.error {
     color: #ff6b6b;
   }
-  
+
   &.warning {
     color: #ffd43b;
   }
-  
+
   i {
     font-size: 0.9rem;
   }
@@ -336,13 +355,13 @@ export default {
   position: absolute;
   width: 16px;
   height: 16px;
-  
+
   &.input {
     top: -8px;
     left: 50%;
     transform: translateX(-50%);
   }
-  
+
   &.output {
     bottom: -8px;
     left: 50%;
@@ -357,7 +376,7 @@ export default {
   border: 2px solid #4facfe;
   border-radius: 50%;
   transition: all 0.2s ease;
-  
+
   &:hover {
     transform: scale(1.2);
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);

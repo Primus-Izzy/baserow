@@ -127,7 +127,7 @@
   // Comment button styles
   .comment-button {
     display: inline-block;
-    
+
     &__btn {
       position: relative;
       display: flex;
@@ -155,7 +155,7 @@
         background: #e3f2fd;
         border-color: #2196f3;
         color: #1976d2;
-        
+
         &:hover {
           background: #bbdefb;
         }
@@ -165,27 +165,27 @@
         background: #fff3cd;
         border-color: #ffc107;
         color: #856404;
-        
+
         &:hover {
           background: #ffeaa7;
         }
-        
+
         &.comment-button__btn--active {
           background: #fff3cd;
           border-color: #ffc107;
           color: #856404;
-          
+
           &:hover {
             background: #ffeaa7;
           }
         }
       }
-      
+
       i {
         font-size: 14px;
       }
     }
-    
+
     &__count {
       font-weight: 600;
       font-size: 11px;
@@ -308,7 +308,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

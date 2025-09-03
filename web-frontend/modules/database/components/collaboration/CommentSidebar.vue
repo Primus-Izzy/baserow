@@ -1,15 +1,13 @@
 <template>
   <div class="comment-sidebar" :class="{ 'comment-sidebar--visible': visible }">
     <div class="comment-sidebar__overlay" @click="handleClose"></div>
-    
+
     <div class="comment-sidebar__panel">
       <div class="comment-sidebar__header">
         <div class="comment-sidebar__title">
           <i class="iconoir-chat-bubble"></i>
           <span>Row Comments</span>
-          <div class="comment-sidebar__row-info">
-            Row {{ rowId }}
-          </div>
+          <div class="comment-sidebar__row-info">Row {{ rowId }}</div>
         </div>
         <button
           class="comment-sidebar__close-btn"
@@ -19,7 +17,7 @@
           <i class="iconoir-xmark"></i>
         </button>
       </div>
-      
+
       <div class="comment-sidebar__content">
         <CommentThread
           v-if="tableId && rowId"
@@ -90,11 +88,11 @@ export default {
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
-  
+
   &--visible {
     opacity: 1;
     visibility: visible;
-    
+
     .comment-sidebar__panel {
       transform: translateX(0);
     }
@@ -116,7 +114,7 @@ export default {
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
   transform: translateX(100%);
   transition: transform 0.3s ease;
-  
+
   @media (max-width: 768px) {
     width: 100vw;
     max-width: none;
@@ -139,7 +137,7 @@ export default {
   font-size: 18px;
   font-weight: 600;
   color: #333;
-  
+
   i {
     font-size: 20px;
     color: #007bff;
@@ -168,12 +166,12 @@ export default {
   color: #6c757d;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: #e9ecef;
     color: #333;
   }
-  
+
   i {
     font-size: 16px;
   }
@@ -190,7 +188,7 @@ export default {
 @media (max-width: 768px) {
   .comment-sidebar__panel {
     transform: translateY(100%);
-    
+
     .comment-sidebar--visible & {
       transform: translateY(0);
     }

@@ -8,7 +8,7 @@
         <i :class="getActionIcon(entry.action_type)"></i>
       </div>
     </div>
-    
+
     <div class="activity-log-timeline-entry__content">
       <div class="activity-log-timeline-entry__card">
         <div class="activity-log-timeline-entry__header">
@@ -24,17 +24,21 @@
               class="iconoir-system-restart activity-log-timeline-entry__system-icon"
             ></i>
           </div>
-          
+
           <div class="activity-log-timeline-entry__info">
             <div class="activity-log-timeline-entry__user-action">
               <span class="activity-log-timeline-entry__user">
-                {{ entry.user ? (entry.user_name || entry.user_email) : $t('activityLog.system') }}
+                {{
+                  entry.user
+                    ? entry.user_name || entry.user_email
+                    : $t('activityLog.system')
+                }}
               </span>
               <span class="activity-log-timeline-entry__action">
                 {{ getActionDescription(entry.action_type, entry.details) }}
               </span>
             </div>
-            
+
             <div class="activity-log-timeline-entry__timestamp">
               {{ formatFullTime(entry.timestamp) }}
             </div>
@@ -51,11 +55,8 @@
             </Button>
           </div>
         </div>
-        
-        <div
-          v-if="hasDetails"
-          class="activity-log-timeline-entry__details"
-        >
+
+        <div v-if="hasDetails" class="activity-log-timeline-entry__details">
           <div
             v-if="entry.details.content_preview"
             class="activity-log-timeline-entry__preview"
@@ -63,7 +64,7 @@
             <i class="iconoir-quote"></i>
             <span>"{{ entry.details.content_preview }}"</span>
           </div>
-          
+
           <div class="activity-log-timeline-entry__metadata">
             <div
               v-if="entry.details.field_name"
@@ -72,7 +73,7 @@
               <i class="iconoir-db"></i>
               <span>{{ entry.details.field_name }}</span>
             </div>
-            
+
             <div
               v-if="entry.details.view_name"
               class="activity-log-timeline-entry__view"
@@ -80,21 +81,27 @@
               <i class="iconoir-eye-alt"></i>
               <span>{{ entry.details.view_name }}</span>
             </div>
-            
+
             <div
               v-if="entry.details.row_id"
               class="activity-log-timeline-entry__row"
             >
               <i class="iconoir-table-rows"></i>
-              <span>{{ $t('activityLog.row') }} #{{ entry.details.row_id }}</span>
+              <span
+                >{{ $t('activityLog.row') }} #{{ entry.details.row_id }}</span
+              >
             </div>
-            
+
             <div
               v-if="entry.details.mentions_count > 0"
               class="activity-log-timeline-entry__mentions"
             >
               <i class="iconoir-at-sign"></i>
-              <span>{{ $tc('activityLog.mentions', entry.details.mentions_count, { count: entry.details.mentions_count }) }}</span>
+              <span>{{
+                $tc('activityLog.mentions', entry.details.mentions_count, {
+                  count: entry.details.mentions_count,
+                })
+              }}</span>
             </div>
           </div>
 
@@ -112,16 +119,26 @@
                 :key="change.field"
                 class="activity-log-timeline-entry__change"
               >
-                <span class="activity-log-timeline-entry__change-field">{{ change.field }}:</span>
-                <span class="activity-log-timeline-entry__change-from">{{ change.from || $t('activityLog.timeline.empty') }}</span>
+                <span class="activity-log-timeline-entry__change-field"
+                  >{{ change.field }}:</span
+                >
+                <span class="activity-log-timeline-entry__change-from">{{
+                  change.from || $t('activityLog.timeline.empty')
+                }}</span>
                 <i class="iconoir-arrow-right"></i>
-                <span class="activity-log-timeline-entry__change-to">{{ change.to || $t('activityLog.timeline.empty') }}</span>
+                <span class="activity-log-timeline-entry__change-to">{{
+                  change.to || $t('activityLog.timeline.empty')
+                }}</span>
               </div>
               <div
                 v-if="entry.details.changes.length > 3"
                 class="activity-log-timeline-entry__change-more"
               >
-                {{ $t('activityLog.timeline.moreChanges', { count: entry.details.changes.length - 3 }) }}
+                {{
+                  $t('activityLog.timeline.moreChanges', {
+                    count: entry.details.changes.length - 3,
+                  })
+                }}
               </div>
             </div>
           </div>
@@ -149,29 +166,31 @@ export default {
   computed: {
     userInitials() {
       if (!this.entry.user) return 'SY'
-      
+
       const name = this.entry.user_name || this.entry.user_email
       return name
         .split(' ')
-        .map(word => word.charAt(0).toUpperCase())
+        .map((word) => word.charAt(0).toUpperCase())
         .slice(0, 2)
         .join('')
     },
-    
+
     userColor() {
       if (!this.entry.user) return 'gray'
-      
+
       // Generate a consistent color based on user ID
       const colors = ['blue', 'green', 'purple', 'orange', 'red', 'teal']
       return colors[this.entry.user % colors.length]
     },
-    
+
     hasDetails() {
       return this.entry.details && Object.keys(this.entry.details).length > 0
     },
-    
+
     canNavigateToRow() {
-      return this.entry.details?.row_id && this.isRowAction(this.entry.action_type)
+      return (
+        this.entry.details?.row_id && this.isRowAction(this.entry.action_type)
+      )
     },
   },
   methods: {
@@ -194,7 +213,7 @@ export default {
         user_joined: this.$t('activityLog.actions.userJoined'),
         user_left: this.$t('activityLog.actions.userLeft'),
       }
-      
+
       return actionMap[actionType] || actionType
     },
 
@@ -217,10 +236,10 @@ export default {
         user_joined: 'iconoir-user-plus',
         user_left: 'iconoir-user-minus',
       }
-      
+
       return iconMap[actionType] || 'iconoir-info-circle'
     },
-    
+
     formatTime(timestamp) {
       const date = new Date(timestamp)
       return date.toLocaleTimeString(this.$i18n.locale, {
@@ -233,7 +252,7 @@ export default {
       const date = new Date(timestamp)
       const now = new Date()
       const diffInHours = (now - date) / (1000 * 60 * 60)
-      
+
       if (diffInHours < 1) {
         return getHumanPeriodAgoCount(date, now)
       } else if (diffInHours < 24) {
@@ -250,14 +269,20 @@ export default {
         })
       }
     },
-    
+
     isRowAction(actionType) {
-      return ['row_created', 'row_updated', 'row_deleted', 'comment_created', 'comment_updated'].includes(actionType)
+      return [
+        'row_created',
+        'row_updated',
+        'row_deleted',
+        'comment_created',
+        'comment_updated',
+      ].includes(actionType)
     },
-    
+
     navigateToRow() {
       if (!this.canNavigateToRow) return
-      
+
       // Navigate to the row in the table view
       const rowId = this.entry.details.row_id
       this.$emit('navigate-to-row', rowId)
@@ -271,11 +296,11 @@ export default {
   display: flex;
   margin-bottom: 24px;
   position: relative;
-  
+
   &:last-child {
     margin-bottom: 0;
   }
-  
+
   &__time-marker {
     display: flex;
     flex-direction: column;
@@ -284,7 +309,7 @@ export default {
     position: relative;
     z-index: 1;
   }
-  
+
   &__time {
     font-size: 12px;
     color: var(--color-text-muted);
@@ -295,7 +320,7 @@ export default {
     padding: 2px 6px;
     border-radius: 4px;
   }
-  
+
   &__dot {
     width: 32px;
     height: 32px;
@@ -308,7 +333,7 @@ export default {
     color: var(--color-primary-600);
     font-size: 14px;
     position: relative;
-    
+
     &::before {
       content: '';
       position: absolute;
@@ -322,12 +347,12 @@ export default {
       z-index: -1;
     }
   }
-  
+
   &__content {
     flex: 1;
     min-width: 0;
   }
-  
+
   &__card {
     background-color: var(--color-background);
     border: 1px solid var(--color-border);
@@ -335,24 +360,24 @@ export default {
     padding: 16px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     transition: all 0.2s ease;
-    
+
     &:hover {
       border-color: var(--color-border-hover);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
   }
-  
+
   &__header {
     display: flex;
     align-items: flex-start;
     gap: 12px;
     margin-bottom: 12px;
   }
-  
+
   &__avatar {
     flex-shrink: 0;
   }
-  
+
   &__system-icon {
     width: 32px;
     height: 32px;
@@ -364,12 +389,12 @@ export default {
     color: var(--color-neutral-600);
     font-size: 16px;
   }
-  
+
   &__info {
     flex: 1;
     min-width: 0;
   }
-  
+
   &__user-action {
     display: flex;
     align-items: center;
@@ -377,39 +402,39 @@ export default {
     margin-bottom: 4px;
     flex-wrap: wrap;
   }
-  
+
   &__user {
     font-weight: 600;
     color: var(--color-text);
     white-space: nowrap;
   }
-  
+
   &__action {
     color: var(--color-text-muted);
     font-size: 14px;
   }
-  
+
   &__timestamp {
     color: var(--color-text-muted);
     font-size: 12px;
   }
-  
+
   &__actions {
     flex-shrink: 0;
     opacity: 0;
     transition: opacity 0.2s ease;
   }
-  
+
   &__card:hover &__actions {
     opacity: 1;
   }
-  
+
   &__details {
     border-top: 1px solid var(--color-border);
     padding-top: 12px;
     margin-top: 12px;
   }
-  
+
   &__preview {
     display: flex;
     align-items: flex-start;
@@ -422,20 +447,20 @@ export default {
     border-radius: 6px;
     border-left: 3px solid var(--color-primary-200);
     margin-bottom: 12px;
-    
+
     i {
       margin-top: 2px;
       opacity: 0.7;
     }
   }
-  
+
   &__metadata {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 12px;
   }
-  
+
   &__field,
   &__view,
   &__row,
@@ -448,7 +473,7 @@ export default {
     padding: 4px 8px;
     background-color: var(--color-neutral-50);
     border-radius: 4px;
-    
+
     i {
       font-size: 14px;
       opacity: 0.7;
@@ -546,7 +571,7 @@ export default {
     &__card {
       padding: 12px;
     }
-    
+
     &__user-action {
       flex-direction: column;
       align-items: flex-start;

@@ -7,7 +7,7 @@
       <!-- Calendar navigation -->
       <div class="calendar-view__navigation">
         <div class="calendar-view__nav-controls">
-          <button 
+          <button
             class="calendar-view__nav-btn"
             @click="navigatePrevious"
             :disabled="loading"
@@ -17,7 +17,7 @@
           <div class="calendar-view__current-period">
             {{ currentPeriodLabel }}
           </div>
-          <button 
+          <button
             class="calendar-view__nav-btn"
             @click="navigateNext"
             :disabled="loading"
@@ -25,31 +25,33 @@
             <i class="iconoir-nav-arrow-right"></i>
           </button>
         </div>
-        
+
         <div class="calendar-view__view-modes">
           <button
             v-for="mode in viewModes"
             :key="mode.value"
             class="calendar-view__mode-btn"
-            :class="{ 'calendar-view__mode-btn--active': displayMode === mode.value }"
+            :class="{
+              'calendar-view__mode-btn--active': displayMode === mode.value,
+            }"
             @click="setDisplayMode(mode.value)"
           >
             {{ mode.label }}
           </button>
         </div>
-        
+
         <div class="calendar-view__actions">
-          <button 
-            class="calendar-view__today-btn"
-            @click="goToToday"
-          >
+          <button class="calendar-view__today-btn" @click="goToToday">
             {{ $t('calendarView.today') }}
           </button>
         </div>
       </div>
 
       <!-- Calendar grid -->
-      <div class="calendar-view__grid" :class="`calendar-view__grid--${displayMode}`">
+      <div
+        class="calendar-view__grid"
+        :class="`calendar-view__grid--${displayMode}`"
+      >
         <!-- Month view -->
         <CalendarMonthView
           v-if="displayMode === 'month'"
@@ -66,7 +68,7 @@
           @date-click="handleDateClick"
           @event-create="handleEventCreate"
         />
-        
+
         <!-- Week view -->
         <CalendarWeekView
           v-else-if="displayMode === 'week'"
@@ -83,7 +85,7 @@
           @date-click="handleDateClick"
           @event-create="handleEventCreate"
         />
-        
+
         <!-- Day view -->
         <CalendarDayView
           v-else-if="displayMode === 'day'"
@@ -105,7 +107,14 @@
 
     <!-- Row create modal -->
     <RowCreateModal
-      v-if="!readOnly && $hasPermission('database.table.create_row', table, database.workspace.id)"
+      v-if="
+        !readOnly &&
+        $hasPermission(
+          'database.table.create_row',
+          table,
+          database.workspace.id
+        )
+      "
       ref="rowCreateModal"
       :database="database"
       :table="table"
@@ -215,29 +224,31 @@ export default {
       events: 'view/calendar/getEvents',
       allFields: 'field/getAll',
     }),
-    
+
     visibleFields() {
-      return this.fields.filter(field => {
-        const fieldOptions = this.$store.getters[
-          this.storePrefix + 'view/calendar/getFieldOptions'
-        ](field)
+      return this.fields.filter((field) => {
+        const fieldOptions =
+          this.$store.getters[
+            this.storePrefix + 'view/calendar/getFieldOptions'
+          ](field)
         return fieldOptions ? !fieldOptions.hidden : true
       })
     },
-    
+
     hiddenFields() {
-      return this.fields.filter(field => {
-        const fieldOptions = this.$store.getters[
-          this.storePrefix + 'view/calendar/getFieldOptions'
-        ](field)
+      return this.fields.filter((field) => {
+        const fieldOptions =
+          this.$store.getters[
+            this.storePrefix + 'view/calendar/getFieldOptions'
+          ](field)
         return fieldOptions ? fieldOptions.hidden : false
       })
     },
-    
+
     showHiddenFieldsInRowModal() {
       return this.$store.getters['view/getShowHiddenFieldsInRowModal']
     },
-    
+
     currentPeriodLabel() {
       const options = { year: 'numeric', month: 'long' }
       if (this.displayMode === 'day') {
@@ -271,10 +282,10 @@ export default {
     if (this.view.display_mode) {
       this.displayMode = this.view.display_mode
     }
-    
+
     // Add keyboard shortcuts
     this.addKeyboardShortcuts()
-    
+
     // Add touch event listeners for mobile
     this.addTouchListeners()
   },
@@ -287,9 +298,9 @@ export default {
       if (!this.view.date_field) {
         return
       }
-      
+
       const { startDate, endDate } = this.getDateRange()
-      
+
       try {
         await this.$store.dispatch(
           this.storePrefix + 'view/calendar/fetchEvents',
@@ -304,14 +315,22 @@ export default {
         notifyIf(error, 'view')
       }
     },
-    
+
     getDateRange() {
       let startDate, endDate
-      
+
       switch (this.displayMode) {
         case 'month':
-          startDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1)
-          endDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0)
+          startDate = new Date(
+            this.currentDate.getFullYear(),
+            this.currentDate.getMonth(),
+            1
+          )
+          endDate = new Date(
+            this.currentDate.getFullYear(),
+            this.currentDate.getMonth() + 1,
+            0
+          )
           // Extend to show full weeks
           startDate = this.getStartOfWeek(startDate)
           endDate = this.getEndOfWeek(endDate)
@@ -325,10 +344,10 @@ export default {
           endDate = new Date(this.currentDate)
           break
       }
-      
+
       return { startDate, endDate }
     },
-    
+
     getStartOfWeek(date) {
       const start = new Date(date)
       const day = start.getDay()
@@ -337,7 +356,7 @@ export default {
       start.setHours(0, 0, 0, 0)
       return start
     },
-    
+
     getEndOfWeek(date) {
       const end = new Date(date)
       const day = end.getDay()
@@ -346,10 +365,10 @@ export default {
       end.setHours(23, 59, 59, 999)
       return end
     },
-    
+
     navigatePrevious() {
       const newDate = new Date(this.currentDate)
-      
+
       switch (this.displayMode) {
         case 'month':
           newDate.setMonth(newDate.getMonth() - 1)
@@ -361,13 +380,13 @@ export default {
           newDate.setDate(newDate.getDate() - 1)
           break
       }
-      
+
       this.currentDate = newDate
     },
-    
+
     navigateNext() {
       const newDate = new Date(this.currentDate)
-      
+
       switch (this.displayMode) {
         case 'month':
           newDate.setMonth(newDate.getMonth() + 1)
@@ -379,14 +398,14 @@ export default {
           newDate.setDate(newDate.getDate() + 1)
           break
       }
-      
+
       this.currentDate = newDate
     },
-    
+
     goToToday() {
       this.currentDate = new Date()
     },
-    
+
     setDisplayMode(mode) {
       this.displayMode = mode
       // Update view configuration
@@ -395,12 +414,12 @@ export default {
         values: { display_mode: mode },
       })
     },
-    
+
     handleEventClick(event) {
       if (this.readOnly) {
         return
       }
-      
+
       if (event.is_recurring) {
         this.selectedEvent = event
         this.showRecurringModal = true
@@ -408,12 +427,12 @@ export default {
         this.$refs.rowEditModal.show(event.id)
       }
     },
-    
+
     async handleEventMove(event, newDate) {
       if (this.readOnly) {
         return
       }
-      
+
       try {
         await this.$store.dispatch(
           this.storePrefix + 'view/calendar/moveEvent',
@@ -424,54 +443,57 @@ export default {
             updateEndDate: true,
           }
         )
-        
+
         // Refresh events to show the updated position
         await this.fetchEvents()
       } catch (error) {
         notifyIf(error, 'view')
       }
     },
-    
+
     handleDateClick(date) {
       if (this.readOnly || !this.view.date_field) {
         return
       }
-      
+
       // Set default date value for new event
       this.defaultValues = {
         [`field_${this.view.date_field}`]: date.toISOString().split('T')[0],
       }
-      
+
       this.$refs.rowCreateModal.show()
     },
-    
+
     handleEventCreate(date) {
       this.handleDateClick(date)
     },
-    
+
     handleRecurringEventUpdate() {
       this.showRecurringModal = false
       this.fetchEvents()
     },
-    
+
     rowCreated() {
       this.fetchEvents()
     },
-    
+
     rowUpdated() {
       this.fetchEvents()
     },
-    
+
     rowDeleted() {
       this.fetchEvents()
     },
-    
+
     addKeyboardShortcuts() {
       this.keyboardHandler = (event) => {
-        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        if (
+          event.target.tagName === 'INPUT' ||
+          event.target.tagName === 'TEXTAREA'
+        ) {
           return
         }
-        
+
         switch (event.key) {
           case 'ArrowLeft':
             event.preventDefault()
@@ -499,36 +521,36 @@ export default {
             break
         }
       }
-      
+
       document.addEventListener('keydown', this.keyboardHandler)
     },
-    
+
     removeKeyboardShortcuts() {
       if (this.keyboardHandler) {
         document.removeEventListener('keydown', this.keyboardHandler)
       }
     },
-    
+
     addTouchListeners() {
       // Add swipe gestures for mobile navigation
       let startX = 0
       let startY = 0
-      
+
       this.touchStartHandler = (event) => {
         startX = event.touches[0].clientX
         startY = event.touches[0].clientY
       }
-      
+
       this.touchEndHandler = (event) => {
         if (!startX || !startY) {
           return
         }
-        
+
         const endX = event.changedTouches[0].clientX
         const endY = event.changedTouches[0].clientY
         const diffX = startX - endX
         const diffY = startY - endY
-        
+
         // Only handle horizontal swipes
         if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
           if (diffX > 0) {
@@ -539,15 +561,19 @@ export default {
             this.navigatePrevious()
           }
         }
-        
+
         startX = 0
         startY = 0
       }
-      
-      this.$el.addEventListener('touchstart', this.touchStartHandler, { passive: true })
-      this.$el.addEventListener('touchend', this.touchEndHandler, { passive: true })
+
+      this.$el.addEventListener('touchstart', this.touchStartHandler, {
+        passive: true,
+      })
+      this.$el.addEventListener('touchend', this.touchEndHandler, {
+        passive: true,
+      })
     },
-    
+
     removeTouchListeners() {
       if (this.touchStartHandler) {
         this.$el.removeEventListener('touchstart', this.touchStartHandler)

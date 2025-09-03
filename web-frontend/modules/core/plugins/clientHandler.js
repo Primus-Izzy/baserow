@@ -637,3 +637,9 @@ export default function ({ app, store, error }, inject) {
 
   inject('client', client)
 }
+
+export function registerRealtimeEvents(events) {
+  // Placeholder for realtime event registration functionality
+  // This would normally handle WebSocket event registration
+  return events
+}

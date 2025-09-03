@@ -1,5 +1,8 @@
 <template>
-  <g class="timeline-dependency-line" @click="$emit('dependency-clicked', dependency)">
+  <g
+    class="timeline-dependency-line"
+    @click="$emit('dependency-clicked', dependency)"
+  >
     <!-- Main dependency line -->
     <path
       :d="pathData"
@@ -9,14 +12,14 @@
       :stroke-dasharray="isDashed ? '5,5' : 'none'"
       class="timeline-dependency-line__path"
     />
-    
+
     <!-- Arrow head -->
     <polygon
       :points="arrowPoints"
       :fill="lineColor"
       class="timeline-dependency-line__arrow"
     />
-    
+
     <!-- Hover area for better interaction -->
     <path
       :d="pathData"
@@ -27,7 +30,7 @@
       @mouseover="showTooltip = true"
       @mouseleave="showTooltip = false"
     />
-    
+
     <!-- Tooltip -->
     <foreignObject
       v-if="showTooltip"
@@ -80,18 +83,27 @@ export default {
   },
   computed: {
     predecessorRow() {
-      return this.rows.find(row => row.id === this.dependency.predecessor_row_id)
+      return this.rows.find(
+        (row) => row.id === this.dependency.predecessor_row_id
+      )
     },
     successorRow() {
-      return this.rows.find(row => row.id === this.dependency.successor_row_id)
+      return this.rows.find(
+        (row) => row.id === this.dependency.successor_row_id
+      )
     },
     lineColor() {
       switch (this.dependency.dependency_type) {
-        case 'finish_to_start': return '#3B82F6' // Blue
-        case 'start_to_start': return '#10B981' // Green
-        case 'finish_to_finish': return '#F59E0B' // Yellow
-        case 'start_to_finish': return '#EF4444' // Red
-        default: return '#6B7280' // Gray
+        case 'finish_to_start':
+          return '#3B82F6' // Blue
+        case 'start_to_start':
+          return '#10B981' // Green
+        case 'finish_to_finish':
+          return '#F59E0B' // Yellow
+        case 'start_to_finish':
+          return '#EF4444' // Red
+        default:
+          return '#6B7280' // Gray
       }
     },
     lineWidth() {
@@ -103,25 +115,33 @@ export default {
     },
     pixelsPerDay() {
       switch (this.zoomLevel) {
-        case 'day': return 100
-        case 'week': return 20
-        case 'month': return 5
-        case 'year': return 1
-        default: return 20
+        case 'day':
+          return 100
+        case 'week':
+          return 20
+        case 'month':
+          return 5
+        case 'year':
+          return 1
+        default:
+          return 20
       }
     },
     pathData() {
       if (!this.predecessorRow || !this.successorRow) return ''
-      
+
       const startPoint = this.getConnectionPoint(this.predecessorRow, 'end')
       const endPoint = this.getConnectionPoint(this.successorRow, 'start')
-      
+
       if (!startPoint || !endPoint) return ''
-      
+
       // Create a curved path for better visual appeal
       const midX = (startPoint.x + endPoint.x) / 2
-      const controlOffset = Math.min(50, Math.abs(endPoint.x - startPoint.x) / 4)
-      
+      const controlOffset = Math.min(
+        50,
+        Math.abs(endPoint.x - startPoint.x) / 4
+      )
+
       return `M ${startPoint.x} ${startPoint.y} 
               C ${startPoint.x + controlOffset} ${startPoint.y}, 
                 ${endPoint.x - controlOffset} ${endPoint.y}, 
@@ -129,24 +149,24 @@ export default {
     },
     arrowPoints() {
       if (!this.predecessorRow || !this.successorRow) return ''
-      
+
       const endPoint = this.getConnectionPoint(this.successorRow, 'start')
       if (!endPoint) return ''
-      
+
       // Create arrow pointing to the right
       const arrowSize = 6
       return `${endPoint.x},${endPoint.y} 
-              ${endPoint.x - arrowSize},${endPoint.y - arrowSize/2} 
-              ${endPoint.x - arrowSize},${endPoint.y + arrowSize/2}`
+              ${endPoint.x - arrowSize},${endPoint.y - arrowSize / 2} 
+              ${endPoint.x - arrowSize},${endPoint.y + arrowSize / 2}`
     },
     tooltipPosition() {
       if (!this.predecessorRow || !this.successorRow) return { x: 0, y: 0 }
-      
+
       const startPoint = this.getConnectionPoint(this.predecessorRow, 'end')
       const endPoint = this.getConnectionPoint(this.successorRow, 'start')
-      
+
       if (!startPoint || !endPoint) return { x: 0, y: 0 }
-      
+
       return {
         x: (startPoint.x + endPoint.x) / 2 - 100,
         y: (startPoint.y + endPoint.y) / 2 - 30,
@@ -156,25 +176,26 @@ export default {
   methods: {
     getConnectionPoint(row, side) {
       if (!row) return null
-      
+
       // Find the row's position in the timeline
-      const rowIndex = this.rows.findIndex(r => r.id === row.id)
+      const rowIndex = this.rows.findIndex((r) => r.id === row.id)
       if (rowIndex === -1) return null
-      
-      const rowY = (rowIndex * 48) + 24 // 48px row height, center vertically
-      
+
+      const rowY = rowIndex * 48 + 24 // 48px row height, center vertically
+
       // Get the row's date range
       const startDate = this.getRowDate(row, 'start')
       const endDate = this.getRowDate(row, 'end')
-      
+
       if (!startDate && !endDate) return null
-      
+
       const timelineStart = this.visibleDateRange.start
       let connectionDate
-      
+
       switch (this.dependency.dependency_type) {
         case 'finish_to_start':
-          connectionDate = side === 'end' ? (endDate || startDate) : (startDate || endDate)
+          connectionDate =
+            side === 'end' ? endDate || startDate : startDate || endDate
           break
         case 'start_to_start':
           connectionDate = startDate || endDate
@@ -183,16 +204,21 @@ export default {
           connectionDate = endDate || startDate
           break
         case 'start_to_finish':
-          connectionDate = side === 'end' ? (startDate || endDate) : (endDate || startDate)
+          connectionDate =
+            side === 'end' ? startDate || endDate : endDate || startDate
           break
         default:
-          connectionDate = side === 'end' ? (endDate || startDate) : (startDate || endDate)
+          connectionDate =
+            side === 'end' ? endDate || startDate : startDate || endDate
       }
-      
+
       if (!connectionDate) return null
-      
-      const connectionX = ((connectionDate - timelineStart) / (1000 * 60 * 60 * 24)) * this.pixelsPerDay + 200 // 200px for label column
-      
+
+      const connectionX =
+        ((connectionDate - timelineStart) / (1000 * 60 * 60 * 24)) *
+          this.pixelsPerDay +
+        200 // 200px for label column
+
       return {
         x: connectionX,
         y: rowY,
@@ -203,7 +229,7 @@ export default {
       // For now, assume we have access to the field IDs
       const startFieldId = this.$parent.view?.start_date_field
       const endFieldId = this.$parent.view?.end_date_field
-      
+
       if (type === 'start' && startFieldId) {
         const value = row[`field_${startFieldId}`]
         return value ? new Date(value) : null
@@ -211,38 +237,43 @@ export default {
         const value = row[`field_${endFieldId}`]
         return value ? new Date(value) : null
       }
-      
+
       return null
     },
     getDependencyTypeLabel(type) {
       switch (type) {
-        case 'finish_to_start': return 'Finish to Start'
-        case 'start_to_start': return 'Start to Start'
-        case 'finish_to_finish': return 'Finish to Finish'
-        case 'start_to_finish': return 'Start to Finish'
-        default: return 'Dependency'
+        case 'finish_to_start':
+          return 'Finish to Start'
+        case 'start_to_start':
+          return 'Start to Start'
+        case 'finish_to_finish':
+          return 'Finish to Finish'
+        case 'start_to_finish':
+          return 'Start to Finish'
+        default:
+          return 'Dependency'
       }
     },
     getPredecessorTitle() {
       if (!this.predecessorRow) return 'Unknown'
-      
+
       // Get the primary field or first text field
-      const primaryField = this.$parent.fields?.find(f => f.primary)
+      const primaryField = this.$parent.fields?.find((f) => f.primary)
       if (primaryField) {
         return this.predecessorRow[`field_${primaryField.id}`] || 'Untitled'
       }
-      
+
       return `Row ${this.predecessorRow.id}`
     },
     getSuccessorTitle() {
       if (!this.successorRow) return 'Unknown'
-      
+
       // Get the primary field or first text field
-      const primaryField = this.$parent.fields?.find(f => f.primary)
+      const primaryField = this.$parent.fields?.find((f) => f.primary)
       if (primaryField) {
         return this.successorRow[`field_${primaryField.id}`] || 'Untitled'
       }
-      
+
       return `Row ${this.successorRow.id}`
     },
   },

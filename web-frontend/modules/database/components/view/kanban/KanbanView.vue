@@ -23,10 +23,10 @@
           @row-clicked="rowClick"
           @add-card="handleAddCard"
         />
-        
+
         <!-- Add new column button (if single-select field allows) -->
         <div v-if="canAddColumns" class="kanban-view__add-column">
-          <button 
+          <button
             class="kanban-view__add-column-btn"
             @click="showAddColumnModal = true"
           >
@@ -39,7 +39,14 @@
 
     <!-- Row create modal -->
     <RowCreateModal
-      v-if="!readOnly && $hasPermission('database.table.create_row', table, database.workspace.id)"
+      v-if="
+        !readOnly &&
+        $hasPermission(
+          'database.table.create_row',
+          table,
+          database.workspace.id
+        )
+      "
       ref="rowCreateModal"
       :database="database"
       :table="table"
@@ -49,7 +56,9 @@
       :hidden-fields="hiddenFields"
       :show-hidden-fields="showHiddenFieldsInRowModal"
       :all-fields-in-table="fields"
-      @toggle-hidden-fields-visibility="showHiddenFieldsInRowModal = !showHiddenFieldsInRowModal"
+      @toggle-hidden-fields-visibility="
+        showHiddenFieldsInRowModal = !showHiddenFieldsInRowModal
+      "
       @created="createRow"
       @order-fields="orderFields"
       @toggle-field-visibility="toggleFieldVisibility"
@@ -69,10 +78,19 @@
       :visible-fields="cardFields"
       :hidden-fields="hiddenFields"
       :rows="allRows"
-      :read-only="readOnly || !$hasPermission('database.table.update_row', table, database.workspace.id)"
+      :read-only="
+        readOnly ||
+        !$hasPermission(
+          'database.table.update_row',
+          table,
+          database.workspace.id
+        )
+      "
       :show-hidden-fields="showHiddenFieldsInRowModal"
       @hidden="$emit('selected-row', undefined)"
-      @toggle-hidden-fields-visibility="showHiddenFieldsInRowModal = !showHiddenFieldsInRowModal"
+      @toggle-hidden-fields-visibility="
+        showHiddenFieldsInRowModal = !showHiddenFieldsInRowModal
+      "
       @update="updateValue"
       @order-fields="orderFields"
       @toggle-field-visibility="toggleFieldVisibility"
@@ -87,7 +105,15 @@
 
     <!-- Floating add button -->
     <ButtonFloating
-      v-if="!readOnly && !table.data_sync && $hasPermission('database.table.create_row', table, database.workspace.id)"
+      v-if="
+        !readOnly &&
+        !table.data_sync &&
+        $hasPermission(
+          'database.table.create_row',
+          table,
+          database.workspace.id
+        )
+      "
       icon="iconoir-plus"
       position="fixed"
       @click="$refs.rowCreateModal.show()"
@@ -185,16 +211,16 @@ export default {
       if (!this.statusField || !this.statusField.select_options) {
         return []
       }
-      
+
       // Create columns for each select option plus a null column for empty values
-      const columns = this.statusField.select_options.map(option => ({
+      const columns = this.statusField.select_options.map((option) => ({
         id: option.id,
         value: option.value,
         color: option.color,
         name: option.value,
         isNull: false,
       }))
-      
+
       // Add a column for rows with null/empty status
       columns.unshift({
         id: 'null',
@@ -203,7 +229,7 @@ export default {
         name: this.$t('kanbanView.noStatus'),
         isNull: true,
       })
-      
+
       return columns
     },
     /**
@@ -257,16 +283,16 @@ export default {
      */
     getRowsForColumn(column) {
       if (!this.statusField) return []
-      
-      return this.allRows.filter(row => {
+
+      return this.allRows.filter((row) => {
         if (!row) return false
-        
+
         const fieldValue = row[`field_${this.statusField.id}`]
-        
+
         if (column.isNull) {
           return fieldValue === null || fieldValue === undefined
         }
-        
+
         return fieldValue === column.value
       })
     },
@@ -315,12 +341,12 @@ export default {
      */
     async moveRowToColumn({ row, targetColumn }) {
       if (!this.statusField) return
-      
+
       const newValue = targetColumn.isNull ? null : targetColumn.value
       const oldValue = row[`field_${this.statusField.id}`]
-      
+
       if (newValue === oldValue) return
-      
+
       await this.updateValue({
         field: this.statusField,
         row,
@@ -340,9 +366,9 @@ export default {
      */
     refreshRow(row) {
       if (this.refreshingRow) return
-      
+
       this.refreshingRow = true
-      
+
       this.$nextTick(async () => {
         try {
           await this.$store.dispatch(

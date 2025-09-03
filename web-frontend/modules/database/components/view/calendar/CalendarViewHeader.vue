@@ -140,8 +140,11 @@
               >
                 {{ $t('calendarViewHeader.enableExternalSync') }}
               </SwitchInput>
-              
-              <div v-if="view.enable_external_sync" class="calendar-config__external-options">
+
+              <div
+                v-if="view.enable_external_sync"
+                class="calendar-config__external-options"
+              >
                 <button
                   class="button button--small"
                   @click="showExternalSyncModal = true"
@@ -230,36 +233,42 @@ export default {
   },
   computed: {
     dateField() {
-      return this.fields.find(field => field.id === this.view.date_field)
+      return this.fields.find((field) => field.id === this.view.date_field)
     },
-    
+
     titleField() {
-      return this.fields.find(field => field.id === this.view.event_title_field)
+      return this.fields.find(
+        (field) => field.id === this.view.event_title_field
+      )
     },
-    
+
     colorField() {
-      return this.fields.find(field => field.id === this.view.event_color_field)
+      return this.fields.find(
+        (field) => field.id === this.view.event_color_field
+      )
     },
-    
+
     dateFields() {
-      return this.fields.filter(field => 
-        field.type === 'date' || field.type === 'datetime'
+      return this.fields.filter(
+        (field) => field.type === 'date' || field.type === 'datetime'
       )
     },
-    
+
     textFields() {
-      return this.fields.filter(field => 
-        field.type === 'text' || 
-        field.type === 'long_text' ||
-        field.type === 'rich_text'
+      return this.fields.filter(
+        (field) =>
+          field.type === 'text' ||
+          field.type === 'long_text' ||
+          field.type === 'rich_text'
       )
     },
-    
+
     colorFields() {
-      return this.fields.filter(field => 
-        field.type === 'single_select' || 
-        field.type === 'multiple_select' ||
-        field.type === 'color'
+      return this.fields.filter(
+        (field) =>
+          field.type === 'single_select' ||
+          field.type === 'multiple_select' ||
+          field.type === 'color'
       )
     },
   },
@@ -275,7 +284,7 @@ export default {
         notifyIf(error, 'view')
       }
     },
-    
+
     async updateTitleField(fieldId) {
       try {
         await this.$store.dispatch('view/update', {
@@ -287,7 +296,7 @@ export default {
         notifyIf(error, 'view')
       }
     },
-    
+
     async updateColorField(fieldId) {
       try {
         await this.$store.dispatch('view/update', {
@@ -299,7 +308,7 @@ export default {
         notifyIf(error, 'view')
       }
     },
-    
+
     async updateRecurringEvents(enabled) {
       try {
         await this.$store.dispatch('view/update', {
@@ -311,7 +320,7 @@ export default {
         notifyIf(error, 'view')
       }
     },
-    
+
     async updateExternalSync(enabled) {
       try {
         await this.$store.dispatch('view/update', {
@@ -323,7 +332,7 @@ export default {
         notifyIf(error, 'view')
       }
     },
-    
+
     handleExternalSyncUpdate() {
       this.showExternalSyncModal = false
       this.$emit('refresh')

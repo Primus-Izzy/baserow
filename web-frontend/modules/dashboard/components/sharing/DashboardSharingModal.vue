@@ -54,7 +54,7 @@
       <!-- Sharing Actions -->
       <div class="sharing-actions">
         <h3>{{ $t('dashboardSharing.actions') }}</h3>
-        
+
         <div class="action-buttons">
           <button
             v-if="!isPublic"
@@ -65,7 +65,7 @@
             <i class="fas fa-link"></i>
             {{ $t('dashboardSharing.createPublicLink') }}
           </button>
-          
+
           <button
             v-if="!hasEmbedToken"
             class="btn btn-secondary"
@@ -75,7 +75,7 @@
             <i class="fas fa-code"></i>
             {{ $t('dashboardSharing.createEmbedLink') }}
           </button>
-          
+
           <button
             v-if="isPublic || hasEmbedToken"
             class="btn btn-danger"
@@ -89,10 +89,15 @@
       </div>
 
       <!-- Widget Embedding -->
-      <div v-if="dashboard.widgets && dashboard.widgets.length > 0" class="widget-embedding">
+      <div
+        v-if="dashboard.widgets && dashboard.widgets.length > 0"
+        class="widget-embedding"
+      >
         <h3>{{ $t('dashboardSharing.widgetEmbedding') }}</h3>
-        <p class="text-muted">{{ $t('dashboardSharing.widgetEmbeddingDescription') }}</p>
-        
+        <p class="text-muted">
+          {{ $t('dashboardSharing.widgetEmbeddingDescription') }}
+        </p>
+
         <div class="widget-list">
           <div
             v-for="widget in dashboard.widgets"
@@ -117,7 +122,7 @@
       <!-- Permissions Management -->
       <div class="permissions-section">
         <h3>{{ $t('dashboardSharing.permissions') }}</h3>
-        
+
         <div class="add-permission">
           <div class="form-group">
             <label>{{ $t('dashboardSharing.addUser') }}</label>
@@ -129,9 +134,15 @@
                 :placeholder="$t('dashboardSharing.userEmail')"
               />
               <select v-model="newPermission.type" class="form-control">
-                <option value="view">{{ $t('dashboardSharing.permissionView') }}</option>
-                <option value="edit">{{ $t('dashboardSharing.permissionEdit') }}</option>
-                <option value="admin">{{ $t('dashboardSharing.permissionAdmin') }}</option>
+                <option value="view">
+                  {{ $t('dashboardSharing.permissionView') }}
+                </option>
+                <option value="edit">
+                  {{ $t('dashboardSharing.permissionEdit') }}
+                </option>
+                <option value="admin">
+                  {{ $t('dashboardSharing.permissionAdmin') }}
+                </option>
               </select>
               <button
                 class="btn btn-primary"
@@ -152,7 +163,9 @@
           >
             <div class="permission-info">
               <span class="user-email">{{ permission.user_email }}</span>
-              <span class="permission-type">{{ getPermissionTypeText(permission.permission_type) }}</span>
+              <span class="permission-type">{{
+                getPermissionTypeText(permission.permission_type)
+              }}</span>
             </div>
             <button
               class="btn btn-sm btn-outline-danger"
@@ -181,13 +194,13 @@ import { notifyIf } from '@baserow/modules/core/utils/error'
 export default {
   name: 'DashboardSharingModal',
   components: {
-    Modal
+    Modal,
   },
   props: {
     dashboard: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -196,8 +209,8 @@ export default {
       permissions: [],
       newPermission: {
         email: '',
-        type: 'view'
-      }
+        type: 'view',
+      },
     }
   },
   computed: {
@@ -216,7 +229,7 @@ export default {
     permissionLevelText() {
       const level = this.sharingSettings?.permission_level || 'private'
       return this.$t(`dashboardSharing.permissionLevel.${level}`)
-    }
+    },
   },
   async mounted() {
     await this.loadSharingSettings()
@@ -258,14 +271,14 @@ export default {
         const { data } = await this.$client.post(
           `/dashboard/sharing/dashboards/${this.dashboard.id}/create_public_link/`
         )
-        
+
         this.sharingSettings = {
           ...this.sharingSettings,
           permission_level: 'public',
           public_url: data.public_url,
-          public_token: data.token
+          public_token: data.token,
         }
-        
+
         this.$toast.success(this.$t('dashboardSharing.publicLinkCreated'))
       } catch (error) {
         notifyIf(error, 'dashboard')
@@ -279,13 +292,13 @@ export default {
         const { data } = await this.$client.post(
           `/dashboard/sharing/dashboards/${this.dashboard.id}/create_embed_link/`
         )
-        
+
         this.sharingSettings = {
           ...this.sharingSettings,
           embed_url: data.embed_url,
-          embed_token: data.token
+          embed_token: data.token,
         }
-        
+
         this.$toast.success(this.$t('dashboardSharing.embedLinkCreated'))
       } catch (error) {
         notifyIf(error, 'dashboard')
@@ -300,11 +313,13 @@ export default {
           `/dashboard/sharing/dashboards/${this.dashboard.id}/create_embed_link/`,
           { widget_ids: [widgetId] }
         )
-        
+
         if (data.widgets && data.widgets.length > 0) {
           const widget = data.widgets[0]
           await this.copyToClipboard(widget.embed_url)
-          this.$toast.success(this.$t('dashboardSharing.widgetEmbedLinkCreated'))
+          this.$toast.success(
+            this.$t('dashboardSharing.widgetEmbedLinkCreated')
+          )
         }
       } catch (error) {
         notifyIf(error, 'dashboard')
@@ -318,16 +333,16 @@ export default {
         await this.$client.post(
           `/dashboard/sharing/dashboards/${this.dashboard.id}/revoke_public_access/`
         )
-        
+
         this.sharingSettings = {
           ...this.sharingSettings,
           permission_level: 'private',
           public_url: null,
           public_token: null,
           embed_url: null,
-          embed_token: null
+          embed_token: null,
         }
-        
+
         this.$toast.success(this.$t('dashboardSharing.accessRevoked'))
       } catch (error) {
         notifyIf(error, 'dashboard')
@@ -342,10 +357,10 @@ export default {
           `/dashboard/sharing/dashboards/${this.dashboard.id}/set_permission/`,
           {
             user_email: this.newPermission.email,
-            permission_type: this.newPermission.type
+            permission_type: this.newPermission.type,
           }
         )
-        
+
         this.newPermission = { email: '', type: 'view' }
         await this.loadPermissions()
         this.$toast.success(this.$t('dashboardSharing.permissionAdded'))
@@ -362,7 +377,7 @@ export default {
           `/dashboard/sharing/dashboards/${this.dashboard.id}/remove_permission/`,
           { user_email: userEmail }
         )
-        
+
         await this.loadPermissions()
         this.$toast.success(this.$t('dashboardSharing.permissionRemoved'))
       } catch (error) {
@@ -391,7 +406,7 @@ export default {
         chart: 'fas fa-chart-bar',
         kpi: 'fas fa-tachometer-alt',
         table: 'fas fa-table',
-        calendar: 'fas fa-calendar'
+        calendar: 'fas fa-calendar',
       }
       return icons[widgetType] || 'fas fa-widget'
     },
@@ -400,8 +415,8 @@ export default {
     },
     getPermissionTypeText(type) {
       return this.$t(`dashboardSharing.permissionType.${type}`)
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -412,7 +427,7 @@ export default {
   .widget-embedding,
   .permissions-section {
     margin-bottom: 2rem;
-    
+
     h3 {
       margin-bottom: 1rem;
       font-size: 1.1rem;
@@ -425,17 +440,17 @@ export default {
       display: flex;
       align-items: center;
       margin-bottom: 1rem;
-      
+
       i {
         margin-right: 0.5rem;
         width: 1rem;
       }
     }
-    
+
     .public-url,
     .embed-url {
       margin-bottom: 1rem;
-      
+
       label {
         display: block;
         margin-bottom: 0.25rem;
@@ -446,13 +461,13 @@ export default {
 
   .url-input-group {
     display: flex;
-    
+
     input {
       flex: 1;
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
-    
+
     button {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
@@ -475,11 +490,11 @@ export default {
       border: 1px solid #e9ecef;
       border-radius: 0.25rem;
       margin-bottom: 0.5rem;
-      
+
       .widget-info {
         display: flex;
         align-items: center;
-        
+
         i {
           margin-right: 0.5rem;
           width: 1rem;
@@ -490,19 +505,19 @@ export default {
 
   .add-permission {
     margin-bottom: 1.5rem;
-    
+
     .permission-input-group {
       display: flex;
       gap: 0.5rem;
-      
+
       input {
         flex: 2;
       }
-      
+
       select {
         flex: 1;
       }
-      
+
       button {
         flex-shrink: 0;
       }
@@ -518,13 +533,13 @@ export default {
       border: 1px solid #e9ecef;
       border-radius: 0.25rem;
       margin-bottom: 0.5rem;
-      
+
       .permission-info {
         .user-email {
           font-weight: 500;
           margin-right: 1rem;
         }
-        
+
         .permission-type {
           color: #6c757d;
           font-size: 0.875rem;

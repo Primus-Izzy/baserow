@@ -13,16 +13,22 @@
     @dragend="handleDragEnd"
   >
     <!-- Event indicator -->
-    <div class="calendar-event__indicator" :style="{ backgroundColor: eventColor }"></div>
-    
+    <div
+      class="calendar-event__indicator"
+      :style="{ backgroundColor: eventColor }"
+    ></div>
+
     <!-- Event content -->
     <div class="calendar-event__content">
       <div class="calendar-event__title">
         {{ eventTitle }}
       </div>
-      
+
       <!-- Additional fields (non-compact mode) -->
-      <div v-if="!isCompact && visibleFields.length > 0" class="calendar-event__fields">
+      <div
+        v-if="!isCompact && visibleFields.length > 0"
+        class="calendar-event__fields"
+      >
         <div
           v-for="field in visibleFields"
           :key="field.id"
@@ -34,7 +40,7 @@
           </span>
         </div>
       </div>
-      
+
       <!-- Recurring indicator -->
       <div v-if="event.is_recurring" class="calendar-event__recurring-icon">
         <i class="iconoir-repeat"></i>
@@ -87,44 +93,53 @@ export default {
   },
   computed: {
     eventTitle() {
-      if (this.view.event_title_field && this.event[`field_${this.view.event_title_field}`]) {
+      if (
+        this.view.event_title_field &&
+        this.event[`field_${this.view.event_title_field}`]
+      ) {
         return this.event[`field_${this.view.event_title_field}`]
       }
       return this.event.title || `Event ${this.event.id}`
     },
-    
+
     eventColor() {
       if (this.event.color) {
         return this.event.color
       }
-      
+
       if (this.view.event_color_field) {
         const colorValue = this.event[`field_${this.view.event_color_field}`]
         return this.getColorFromValue(colorValue)
       }
-      
+
       return '#3174ad' // Default blue
     },
-    
+
     eventStyle() {
       return {
         borderLeftColor: this.eventColor,
       }
     },
-    
+
     visibleFields() {
-      return this.fields.filter(field => {
-        // Don't show the title field or date field in additional fields
-        if (field.id === this.view.event_title_field || field.id === this.view.date_field) {
-          return false
-        }
-        
-        const fieldOptions = this.$store.getters[
-          this.storePrefix + 'view/calendar/getFieldOptions'
-        ](field)
-        
-        return fieldOptions ? fieldOptions.show_in_event : false
-      }).slice(0, 3) // Limit to 3 additional fields
+      return this.fields
+        .filter((field) => {
+          // Don't show the title field or date field in additional fields
+          if (
+            field.id === this.view.event_title_field ||
+            field.id === this.view.date_field
+          ) {
+            return false
+          }
+
+          const fieldOptions =
+            this.$store.getters[
+              this.storePrefix + 'view/calendar/getFieldOptions'
+            ](field)
+
+          return fieldOptions ? fieldOptions.show_in_event : false
+        })
+        .slice(0, 3) // Limit to 3 additional fields
     },
   },
   methods: {
@@ -132,29 +147,29 @@ export default {
       event.stopPropagation()
       this.$emit('click', this.event)
     },
-    
+
     handleDragStart(event) {
       if (this.readOnly) {
         event.preventDefault()
         return
       }
-      
+
       this.isDragging = true
       this.$emit('dragstart', this.event, event)
     },
-    
+
     handleDragEnd(event) {
       this.isDragging = false
       this.$emit('dragend', event)
     },
-    
+
     getFieldValue(field) {
       const value = this.event[`field_${field.id}`]
-      
+
       if (value === null || value === undefined) {
         return '-'
       }
-      
+
       // Handle different field types
       switch (field.type) {
         case 'date':
@@ -168,37 +183,42 @@ export default {
         case 'single_select':
           return value?.value || value
         case 'multiple_select':
-          return Array.isArray(value) ? value.map(v => v.value || v).join(', ') : value
+          return Array.isArray(value)
+            ? value.map((v) => v.value || v).join(', ')
+            : value
         default:
-          return String(value).substring(0, 50) + (String(value).length > 50 ? '...' : '')
+          return (
+            String(value).substring(0, 50) +
+            (String(value).length > 50 ? '...' : '')
+          )
       }
     },
-    
+
     getColorFromValue(value) {
       if (!value) {
         return '#3174ad'
       }
-      
+
       // Handle single select options
       if (typeof value === 'object' && value.color) {
         return value.color
       }
-      
+
       // Handle color field
       if (typeof value === 'string' && value.startsWith('#')) {
         return value
       }
-      
+
       // Generate color from string
       return this.stringToColor(String(value))
     },
-    
+
     stringToColor(str) {
       let hash = 0
       for (let i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash)
       }
-      
+
       const hue = hash % 360
       return `hsl(${hue}, 70%, 50%)`
     },
@@ -234,7 +254,7 @@ export default {
 
   &--recurring {
     border-style: dashed;
-    
+
     &::before {
       content: '';
       position: absolute;

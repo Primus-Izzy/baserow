@@ -819,7 +819,7 @@
 // Conditional Formatting
 .grid-view__cell--conditional-formatting {
   position: relative;
-  
+
   &::before {
     content: '';
     @include absolute(0);
@@ -831,19 +831,19 @@
 // Column Groups
 .grid-view__column-group {
   position: relative;
-  
+
   &::before {
     content: '';
     @include absolute(0, 0, auto, 0);
     height: 3px;
     border-radius: 2px 2px 0 0;
   }
-  
+
   &--collapsed {
     .grid-view__column {
       display: none;
     }
-    
+
     &::after {
       content: '...';
       position: absolute;
@@ -871,7 +871,7 @@
   border-radius: 2px 2px 0 0;
   cursor: pointer;
   transition: opacity 0.2s;
-  
+
   &:hover {
     opacity: 0.8;
   }
@@ -881,7 +881,7 @@
 .grid-view__cell--enhanced-editing {
   .grid-view__cell-content {
     position: relative;
-    
+
     &:hover {
       background: rgba(66, 133, 244, 0.05);
       border-radius: 3px;
@@ -891,22 +891,24 @@
 
 // Rich Text Editor in cells
 .grid-view__rich-text-content {
-  strong, b {
+  strong,
+  b {
     font-weight: 600;
   }
-  
-  em, i {
+
+  em,
+  i {
     font-style: italic;
   }
-  
+
   u {
     text-decoration: underline;
   }
-  
+
   a {
     color: $color-primary-500;
     text-decoration: underline;
-    
+
     &:hover {
       color: $color-primary-600;
     }
@@ -928,28 +930,28 @@
 // Formula field syntax highlighting
 .grid-view__formula-editor {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  
+
   .formula-function {
     color: $color-primary-600;
     font-weight: 600;
   }
-  
+
   .formula-field {
     color: $color-success-600;
   }
-  
+
   .formula-operator {
     color: $color-warning-600;
   }
-  
+
   .formula-string {
     color: $color-error-600;
   }
-  
+
   .formula-number {
-    color: $color-info-600;
+    color: $palette-blue-600;
   }
-  
+
   .formula-error {
     background: rgba(244, 67, 54, 0.1);
     border-bottom: 2px wavy $color-error-500;
@@ -961,7 +963,7 @@
   .grid-view__head {
     transition: box-shadow 0.2s;
   }
-  
+
   .grid-view__body {
     scroll-behavior: smooth;
   }
@@ -973,11 +975,11 @@
     font-size: 10px;
     height: 16px;
   }
-  
+
   .grid-view__rich-text-content {
     font-size: 14px;
   }
-  
+
   .grid-view__formula-editor {
     font-size: 12px;
   }

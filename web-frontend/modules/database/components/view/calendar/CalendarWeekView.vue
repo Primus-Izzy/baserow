@@ -10,7 +10,9 @@
         :class="{ 'calendar-week-view__day-header--today': day.isToday }"
       >
         <div class="calendar-week-view__day-name">{{ day.dayName }}</div>
-        <div class="calendar-week-view__day-number">{{ day.date.getDate() }}</div>
+        <div class="calendar-week-view__day-number">
+          {{ day.date.getDate() }}
+        </div>
       </div>
     </div>
 
@@ -120,18 +122,18 @@ export default {
     weekDays() {
       const days = []
       const startOfWeek = this.getStartOfWeek(this.currentDate)
-      
+
       for (let i = 0; i < 7; i++) {
         const date = new Date(startOfWeek)
         date.setDate(startOfWeek.getDate() + i)
-        
+
         days.push({
           date,
           dayName: date.toLocaleDateString(undefined, { weekday: 'short' }),
           isToday: this.isToday(date),
         })
       }
-      
+
       return days
     },
   },
@@ -144,7 +146,7 @@ export default {
       start.setHours(0, 0, 0, 0)
       return start
     },
-    
+
     isToday(date) {
       const today = new Date()
       return (
@@ -153,38 +155,38 @@ export default {
         date.getFullYear() === today.getFullYear()
       )
     },
-    
+
     formatHour(hour) {
       const date = new Date()
       date.setHours(hour, 0, 0, 0)
-      return date.toLocaleTimeString(undefined, { 
+      return date.toLocaleTimeString(undefined, {
         hour: 'numeric',
         hour12: true,
       })
     },
-    
+
     getEventsForDay(date) {
       const dateStr = date.toISOString().split('T')[0]
-      return this.events.filter(event => {
+      return this.events.filter((event) => {
         if (!event.date) return false
         const eventDate = new Date(event.date).toISOString().split('T')[0]
         return eventDate === dateStr
       })
     },
-    
+
     getEventStyle(event) {
       // Position event based on time if datetime field is used
       let top = 0
       let height = 60 // Default height
-      
+
       if (event.date && event.date.includes('T')) {
         // Has time information
         const eventTime = new Date(event.date)
         const hour = eventTime.getHours()
         const minutes = eventTime.getMinutes()
-        
-        top = (hour * 60) + minutes // 60px per hour
-        
+
+        top = hour * 60 + minutes // 60px per hour
+
         // If there's an end time, calculate duration
         if (event.end_date && event.end_date.includes('T')) {
           const endTime = new Date(event.end_date)
@@ -192,7 +194,7 @@ export default {
           height = Math.max(30, duration) // Minimum 30px height
         }
       }
-      
+
       return {
         position: 'absolute',
         top: `${top}px`,
@@ -202,57 +204,60 @@ export default {
         zIndex: 10,
       }
     },
-    
+
     handleDayClick(date, event) {
       if (this.readOnly) return
-      
+
       // Calculate the time based on click position
       const rect = event.currentTarget.getBoundingClientRect()
       const y = event.clientY - rect.top
       const hour = Math.floor(y / 60) // 60px per hour
-      const minutes = Math.round((y % 60))
-      
+      const minutes = Math.round(y % 60)
+
       const clickDate = new Date(date)
       clickDate.setHours(hour, minutes, 0, 0)
-      
+
       this.$emit('date-click', clickDate)
     },
-    
+
     handleEventDragStart(event, dragEvent) {
       if (this.readOnly) {
         dragEvent.preventDefault()
         return
       }
-      
+
       this.draggedEvent = event
       dragEvent.dataTransfer.effectAllowed = 'move'
-      dragEvent.dataTransfer.setData('text/plain', JSON.stringify({
-        eventId: event.id,
-        originalDate: event.date,
-      }))
+      dragEvent.dataTransfer.setData(
+        'text/plain',
+        JSON.stringify({
+          eventId: event.id,
+          originalDate: event.date,
+        })
+      )
     },
-    
+
     handleDragOver(event) {
       if (this.readOnly || !this.draggedEvent) return
-      
+
       event.preventDefault()
       event.dataTransfer.dropEffect = 'move'
     },
-    
+
     handleDrop(date, event) {
       event.preventDefault()
-      
+
       if (this.readOnly || !this.draggedEvent) return
-      
+
       // Calculate the time based on drop position
       const rect = event.currentTarget.getBoundingClientRect()
       const y = event.clientY - rect.top
       const hour = Math.floor(y / 60)
-      const minutes = Math.round((y % 60))
-      
+      const minutes = Math.round(y % 60)
+
       const dropDate = new Date(date)
       dropDate.setHours(hour, minutes, 0, 0)
-      
+
       this.$emit('event-move', this.draggedEvent, dropDate)
       this.draggedEvent = null
     },

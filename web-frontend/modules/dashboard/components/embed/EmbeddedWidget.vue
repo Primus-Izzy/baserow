@@ -11,7 +11,10 @@
 
     <div v-else class="widget-content">
       <!-- Widget Header -->
-      <div v-if="widget.configuration?.title && !embedMode" class="widget-header">
+      <div
+        v-if="widget.configuration?.title && !embedMode"
+        class="widget-header"
+      >
         <h3>{{ widget.configuration.title }}</h3>
         <div class="widget-actions">
           <button
@@ -33,8 +36,14 @@
         <!-- KPI Widgets -->
         <div v-else-if="widget.widget_type === 'kpi'" class="kpi-container">
           <div class="kpi-value">{{ formatKpiValue(widgetData?.value) }}</div>
-          <div class="kpi-label">{{ widget.configuration?.label || 'KPI' }}</div>
-          <div v-if="widgetData?.change" class="kpi-change" :class="getChangeClass(widgetData.change)">
+          <div class="kpi-label">
+            {{ widget.configuration?.label || 'KPI' }}
+          </div>
+          <div
+            v-if="widgetData?.change"
+            class="kpi-change"
+            :class="getChangeClass(widgetData.change)"
+          >
             <i :class="getChangeIcon(widgetData.change)"></i>
             {{ formatChange(widgetData.change) }}
           </div>
@@ -61,7 +70,10 @@
         </div>
 
         <!-- Calendar Widgets -->
-        <div v-else-if="widget.widget_type === 'calendar'" class="calendar-container">
+        <div
+          v-else-if="widget.widget_type === 'calendar'"
+          class="calendar-container"
+        >
           <div class="calendar-header">
             <button @click="previousMonth">
               <i class="fas fa-chevron-left"></i>
@@ -102,12 +114,12 @@ export default {
   props: {
     widget: {
       type: Object,
-      required: true
+      required: true,
     },
     embedMode: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
@@ -115,19 +127,21 @@ export default {
       error: null,
       widgetData: null,
       chart: null,
-      currentDate: new Date()
+      currentDate: new Date(),
     }
   },
   computed: {
     isChartWidget() {
-      return ['bar', 'line', 'pie', 'doughnut', 'area'].includes(this.widget.widget_type)
+      return ['bar', 'line', 'pie', 'doughnut', 'area'].includes(
+        this.widget.widget_type
+      )
     },
     currentMonthYear() {
-      return this.currentDate.toLocaleDateString('en-US', { 
-        month: 'long', 
-        year: 'numeric' 
+      return this.currentDate.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric',
       })
-    }
+    },
   },
   async mounted() {
     await this.loadWidgetData()
@@ -142,11 +156,11 @@ export default {
       try {
         this.loading = true
         this.error = null
-        
+
         // Simulate widget data loading
         // In a real implementation, this would fetch data based on widget configuration
         await this.simulateDataLoading()
-        
+
         // Render chart if it's a chart widget
         if (this.isChartWidget) {
           this.$nextTick(() => {
@@ -166,8 +180,8 @@ export default {
     },
     async simulateDataLoading() {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
       // Generate mock data based on widget type
       if (this.isChartWidget) {
         this.widgetData = this.generateChartData()
@@ -180,24 +194,35 @@ export default {
     generateChartData() {
       const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
       const data = labels.map(() => Math.floor(Math.random() * 100))
-      
+
       return {
         labels,
-        datasets: [{
-          label: 'Sample Data',
-          data,
-          backgroundColor: this.widget.widget_type === 'pie' || this.widget.widget_type === 'doughnut'
-            ? ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
-            : '#36A2EB',
-          borderColor: '#36A2EB',
-          borderWidth: 1
-        }]
+        datasets: [
+          {
+            label: 'Sample Data',
+            data,
+            backgroundColor:
+              this.widget.widget_type === 'pie' ||
+              this.widget.widget_type === 'doughnut'
+                ? [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF',
+                    '#FF9F40',
+                  ]
+                : '#36A2EB',
+            borderColor: '#36A2EB',
+            borderWidth: 1,
+          },
+        ],
       }
     },
     generateKpiData() {
       return {
         value: Math.floor(Math.random() * 10000),
-        change: (Math.random() - 0.5) * 20 // -10% to +10%
+        change: (Math.random() - 0.5) * 20, // -10% to +10%
       }
     },
     generateTableData() {
@@ -205,44 +230,52 @@ export default {
         columns: [
           { key: 'name', label: 'Name' },
           { key: 'value', label: 'Value' },
-          { key: 'status', label: 'Status' }
+          { key: 'status', label: 'Status' },
         ],
         rows: [
           { name: 'Item 1', value: 100, status: 'Active' },
           { name: 'Item 2', value: 200, status: 'Inactive' },
-          { name: 'Item 3', value: 150, status: 'Active' }
-        ]
+          { name: 'Item 3', value: 150, status: 'Active' },
+        ],
       }
     },
     renderChart() {
       if (!this.widgetData || !this.isChartWidget) return
-      
+
       const canvas = this.$refs[`chart-${this.widget.id}`]
       if (!canvas) return
-      
+
       const ctx = canvas.getContext('2d')
-      
+
       if (this.chart) {
         this.chart.destroy()
       }
-      
+
       this.chart = new Chart(ctx, {
-        type: this.widget.widget_type === 'area' ? 'line' : this.widget.widget_type,
+        type:
+          this.widget.widget_type === 'area' ? 'line' : this.widget.widget_type,
         data: this.widgetData,
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              display: !this.embedMode || this.widget.widget_type === 'pie' || this.widget.widget_type === 'doughnut'
-            }
+              display:
+                !this.embedMode ||
+                this.widget.widget_type === 'pie' ||
+                this.widget.widget_type === 'doughnut',
+            },
           },
-          scales: this.widget.widget_type === 'pie' || this.widget.widget_type === 'doughnut' ? {} : {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
+          scales:
+            this.widget.widget_type === 'pie' ||
+            this.widget.widget_type === 'doughnut'
+              ? {}
+              : {
+                  y: {
+                    beginAtZero: true,
+                  },
+                },
+        },
       })
     },
     async refreshWidget() {
@@ -280,17 +313,25 @@ export default {
         line: 'fas fa-chart-line',
         pie: 'fas fa-chart-pie',
         doughnut: 'fas fa-chart-pie',
-        area: 'fas fa-chart-area'
+        area: 'fas fa-chart-area',
       }
       return icons[widgetType] || 'fas fa-widget'
     },
     previousMonth() {
-      this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1, 1)
+      this.currentDate = new Date(
+        this.currentDate.getFullYear(),
+        this.currentDate.getMonth() - 1,
+        1
+      )
     },
     nextMonth() {
-      this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 1)
-    }
-  }
+      this.currentDate = new Date(
+        this.currentDate.getFullYear(),
+        this.currentDate.getMonth() + 1,
+        1
+      )
+    },
+  },
 }
 </script>
 
@@ -299,7 +340,7 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  
+
   .widget-loading,
   .widget-error {
     display: flex;
@@ -307,47 +348,47 @@ export default {
     align-items: center;
     height: 100%;
     color: #6c757d;
-    
+
     i {
       margin-right: 0.5rem;
     }
   }
-  
+
   .widget-content {
     height: 100%;
     display: flex;
     flex-direction: column;
   }
-  
+
   .widget-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
     border-bottom: 1px solid #e9ecef;
-    
+
     h3 {
       margin: 0;
       font-size: 1rem;
       font-weight: 600;
     }
   }
-  
+
   .widget-body {
     flex: 1;
     padding: 1rem;
     overflow: hidden;
   }
-  
+
   .chart-container {
     height: 100%;
     position: relative;
-    
+
     canvas {
       max-height: 100%;
     }
   }
-  
+
   .kpi-container {
     display: flex;
     flex-direction: column;
@@ -355,91 +396,91 @@ export default {
     align-items: center;
     height: 100%;
     text-align: center;
-    
+
     .kpi-value {
       font-size: 2.5rem;
       font-weight: bold;
       color: #007bff;
       margin-bottom: 0.5rem;
     }
-    
+
     .kpi-label {
       font-size: 1rem;
       color: #6c757d;
       margin-bottom: 1rem;
     }
-    
+
     .kpi-change {
       font-size: 0.875rem;
       font-weight: 500;
-      
+
       &.positive {
         color: #28a745;
       }
-      
+
       &.negative {
         color: #dc3545;
       }
-      
+
       &.neutral {
         color: #6c757d;
       }
-      
+
       i {
         margin-right: 0.25rem;
       }
     }
   }
-  
+
   .table-container {
     height: 100%;
     overflow: auto;
-    
+
     .table {
       margin: 0;
-      
+
       th {
         background-color: #f8f9fa;
         border-top: none;
         font-weight: 600;
         font-size: 0.875rem;
       }
-      
+
       td {
         font-size: 0.875rem;
       }
     }
   }
-  
+
   .calendar-container {
     height: 100%;
-    
+
     .calendar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1rem;
-      
+
       button {
         background: none;
         border: none;
         padding: 0.5rem;
         cursor: pointer;
-        
+
         &:hover {
           background-color: #f8f9fa;
           border-radius: 0.25rem;
         }
       }
-      
+
       span {
         font-weight: 600;
       }
     }
-    
+
     .calendar-grid {
       height: calc(100% - 3rem);
-      
+
       .calendar-placeholder {
         display: flex;
         justify-content: center;
@@ -450,7 +491,7 @@ export default {
       }
     }
   }
-  
+
   .generic-widget {
     display: flex;
     flex-direction: column;
@@ -459,18 +500,18 @@ export default {
     height: 100%;
     text-align: center;
     color: #6c757d;
-    
+
     .widget-icon {
       font-size: 3rem;
       margin-bottom: 1rem;
     }
-    
+
     .widget-info {
       h4 {
         margin-bottom: 0.5rem;
         text-transform: capitalize;
       }
-      
+
       p {
         font-size: 0.875rem;
         margin: 0;
@@ -483,16 +524,16 @@ export default {
 .embedded-widget.embed-mode {
   .widget-header {
     padding: 0.5rem;
-    
+
     h3 {
       font-size: 0.875rem;
     }
   }
-  
+
   .widget-body {
     padding: 0.5rem;
   }
-  
+
   .kpi-container {
     .kpi-value {
       font-size: 2rem;

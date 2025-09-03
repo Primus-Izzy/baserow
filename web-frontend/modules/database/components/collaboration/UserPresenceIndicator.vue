@@ -36,10 +36,9 @@ export default {
   },
   computed: {
     activeUsers() {
-      return this.$store.getters['database/collaboration/activeUsersForContext'](
-        this.tableId,
-        this.viewId
-      ).slice(0, this.maxVisible)
+      return this.$store.getters[
+        'database/collaboration/activeUsersForContext'
+      ](this.tableId, this.viewId).slice(0, this.maxVisible)
     },
   },
   methods: {
@@ -47,15 +46,23 @@ export default {
       if (!name) return '?'
       return name
         .split(' ')
-        .map(part => part.charAt(0).toUpperCase())
+        .map((part) => part.charAt(0).toUpperCase())
         .join('')
         .substring(0, 2)
     },
     getUserColor(userId) {
       // Generate consistent color based on user ID
       const colors = [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-        '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+        '#FF6B6B',
+        '#4ECDC4',
+        '#45B7D1',
+        '#96CEB4',
+        '#FFEAA7',
+        '#DDA0DD',
+        '#98D8C8',
+        '#F7DC6F',
+        '#BB8FCE',
+        '#85C1E9',
       ]
       return colors[userId % colors.length]
     },

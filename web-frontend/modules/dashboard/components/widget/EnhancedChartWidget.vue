@@ -2,7 +2,8 @@
   <div
     class="dashboard-enhanced-chart-widget"
     :class="{
-      'dashboard-enhanced-chart-widget--with-header-description': widget.description,
+      'dashboard-enhanced-chart-widget--with-header-description':
+        widget.description,
     }"
   >
     <template v-if="!loading">
@@ -51,7 +52,10 @@
         />
       </div>
     </template>
-    <div v-else class="dashboard-enhanced-chart-widget__loading loading-spinner"></div>
+    <div
+      v-else
+      class="dashboard-enhanced-chart-widget__loading loading-spinner"
+    ></div>
   </div>
 </template>
 
@@ -93,11 +97,11 @@ export default {
       chartData: {
         labels: [],
         datasets: [],
-        type: 'bar'
+        type: 'bar',
       },
       chartLoading: false,
       refreshInterval: null,
-      realTimeSubscription: null
+      realTimeSubscription: null,
     }
   },
   computed: {
@@ -108,12 +112,15 @@ export default {
     },
     dataSourceMisconfigured() {
       // Check if any data sources have errors
-      return this.widget.data_source_ids?.some(id => {
-        const data = this.$store.getters[
-          `${this.storePrefix}dashboardApplication/getDataForDataSource`
-        ](id)
-        return data && data._error
-      }) || false
+      return (
+        this.widget.data_source_ids?.some((id) => {
+          const data =
+            this.$store.getters[
+              `${this.storePrefix}dashboardApplication/getDataForDataSource`
+            ](id)
+          return data && data._error
+        }) || false
+      )
     },
     chartOptions() {
       return {
@@ -145,7 +152,9 @@ export default {
         },
         scales: this.getScalesConfig(),
         animation: {
-          duration: this.widget.enable_animations ? this.widget.animation_duration : 0,
+          duration: this.widget.enable_animations
+            ? this.widget.animation_duration
+            : 0,
         },
         elements: this.getElementsConfig(),
       }
@@ -171,7 +180,7 @@ export default {
         this.chartData = {
           labels: [],
           datasets: [],
-          type: this.widget.chart_type
+          type: this.widget.chart_type,
         }
       } finally {
         this.chartLoading = false
@@ -196,7 +205,7 @@ export default {
               console.error('Real-time update error:', data.error)
               return
             }
-            
+
             // Update chart data with smooth animation
             this.chartData = data
             this.$refs.enhancedChart?.updateChartData(data)
@@ -219,7 +228,7 @@ export default {
         this.realTimeSubscription.unsubscribe()
         this.realTimeSubscription = null
       }
-      
+
       if (this.refreshInterval) {
         clearInterval(this.refreshInterval)
         this.refreshInterval = null
@@ -227,8 +236,11 @@ export default {
     },
     getScalesConfig() {
       const config = {}
-      
-      if (this.widget.chart_type !== 'pie' && this.widget.chart_type !== 'donut') {
+
+      if (
+        this.widget.chart_type !== 'pie' &&
+        this.widget.chart_type !== 'donut'
+      ) {
         config.y = {
           grid: {
             display: this.widget.show_grid,
@@ -240,12 +252,12 @@ export default {
           },
         }
       }
-      
+
       return config
     },
     getElementsConfig() {
       const config = {}
-      
+
       if (this.widget.chart_type === 'bar') {
         config.bar = {
           borderRadius: {
@@ -257,8 +269,11 @@ export default {
           borderWidth: 1,
         }
       }
-      
-      if (this.widget.chart_type === 'line' || this.widget.chart_type === 'area') {
+
+      if (
+        this.widget.chart_type === 'line' ||
+        this.widget.chart_type === 'area'
+      ) {
         config.line = {
           tension: 0.4,
         }
@@ -267,7 +282,7 @@ export default {
           hoverRadius: 6,
         }
       }
-      
+
       return config
     },
     onChartReady(chartInstance) {

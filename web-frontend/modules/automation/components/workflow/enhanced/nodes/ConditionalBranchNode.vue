@@ -2,7 +2,7 @@
   <div
     :class="[
       'conditional-branch-node',
-      { 'selected': selected, 'error': hasError, 'configured': isConfigured }
+      { selected: selected, error: hasError, configured: isConfigured },
     ]"
   >
     <div class="node-header">
@@ -31,7 +31,7 @@
         </button>
       </div>
     </div>
-    
+
     <div class="node-content">
       <div v-if="conditionConfig" class="condition-summary">
         <div class="condition-display">
@@ -53,7 +53,7 @@
         <span>{{ $t('visualBuilder.notConfigured') }}</span>
       </div>
     </div>
-    
+
     <div class="node-status">
       <div v-if="hasError" class="status-indicator error">
         <i class="iconoir-warning-triangle"></i>
@@ -68,7 +68,7 @@
         <span>{{ $t('visualBuilder.needsConfig') }}</span>
       </div>
     </div>
-    
+
     <!-- Connection Points -->
     <div class="connection-point input" data-connection="input">
       <div class="connection-dot"></div>
@@ -105,50 +105,54 @@ export default {
     conditionConfig() {
       return this.data.service || null
     },
-    
+
     isConfigured() {
-      return this.conditionConfig && 
-             this.conditionConfig.condition_template &&
-             this.conditionConfig.condition_type
+      return (
+        this.conditionConfig &&
+        this.conditionConfig.condition_template &&
+        this.conditionConfig.condition_type
+      )
     },
-    
+
     hasError() {
       // Check if condition configuration is invalid
-      return this.conditionConfig && 
-             (!this.conditionConfig.condition_template || 
-              !this.conditionConfig.condition_type)
+      return (
+        this.conditionConfig &&
+        (!this.conditionConfig.condition_template ||
+          !this.conditionConfig.condition_type)
+      )
     },
-    
+
     conditionText() {
       if (!this.conditionConfig) return ''
-      
+
       const template = this.conditionConfig.condition_template || ''
       const type = this.conditionConfig.condition_type || 'equals'
       const comparison = this.conditionConfig.comparison_value_template || ''
-      
+
       // Create a human-readable condition text
       if (template && comparison) {
         const operatorMap = {
-          'equals': '=',
-          'not_equals': '≠',
-          'greater_than': '>',
-          'less_than': '<',
-          'contains': 'contains',
-          'starts_with': 'starts with',
-          'ends_with': 'ends with',
-          'is_empty': 'is empty',
-          'is_not_empty': 'is not empty',
+          equals: '=',
+          not_equals: '≠',
+          greater_than: '>',
+          less_than: '<',
+          contains: 'contains',
+          starts_with: 'starts with',
+          ends_with: 'ends with',
+          is_empty: 'is empty',
+          is_not_empty: 'is not empty',
         }
-        
+
         const operator = operatorMap[type] || type
-        
+
         if (type === 'is_empty' || type === 'is_not_empty') {
           return `${template} ${operator}`
         }
-        
+
         return `${template} ${operator} ${comparison}`
       }
-      
+
       return template || 'No condition set'
     },
   },
@@ -166,21 +170,21 @@ export default {
   color: white;
   position: relative;
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
-  
+
   &.selected {
     border-color: #ffd700;
     box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
   }
-  
+
   &.error {
     border-color: #ff6b6b;
   }
-  
+
   &.configured {
     border-color: #51cf66;
   }
@@ -202,7 +206,7 @@ export default {
   align-items: center;
   justify-content: center;
   margin-right: 0.75rem;
-  
+
   i {
     font-size: 1.5rem;
   }
@@ -210,13 +214,13 @@ export default {
 
 .node-title {
   flex: 1;
-  
+
   h4 {
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
   }
-  
+
   .node-type {
     font-size: 0.75rem;
     opacity: 0.8;
@@ -242,15 +246,15 @@ export default {
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.3);
   }
-  
+
   &.delete-btn:hover {
     background: #ff6b6b;
   }
-  
+
   i {
     font-size: 0.9rem;
   }
@@ -267,7 +271,7 @@ export default {
     border-radius: 6px;
     padding: 0.75rem;
     margin-bottom: 1rem;
-    
+
     .condition-text {
       font-size: 0.9rem;
       font-weight: 500;
@@ -275,28 +279,28 @@ export default {
       word-break: break-all;
     }
   }
-  
+
   .branch-paths {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
   }
-  
+
   .branch-path {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-size: 0.8rem;
     font-weight: 500;
-    
+
     &.true-path {
       color: #51cf66;
     }
-    
+
     &.false-path {
       color: #ff6b6b;
     }
-    
+
     i {
       font-size: 1rem;
     }
@@ -310,7 +314,7 @@ export default {
   gap: 0.5rem;
   opacity: 0.7;
   font-size: 0.9rem;
-  
+
   i {
     font-size: 1.1rem;
   }
@@ -327,19 +331,19 @@ export default {
   gap: 0.5rem;
   font-size: 0.8rem;
   font-weight: 500;
-  
+
   &.success {
     color: #51cf66;
   }
-  
+
   &.error {
     color: #ff6b6b;
   }
-  
+
   &.warning {
     color: #ffd43b;
   }
-  
+
   i {
     font-size: 0.9rem;
   }
@@ -350,19 +354,19 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  
+
   &.input {
     top: -8px;
     left: 50%;
     transform: translateX(-50%);
   }
-  
+
   &.output-true {
     bottom: -8px;
     left: 25%;
     transform: translateX(-50%);
   }
-  
+
   &.output-false {
     bottom: -8px;
     right: 25%;
@@ -377,15 +381,15 @@ export default {
   border: 2px solid #f093fb;
   border-radius: 50%;
   transition: all 0.2s ease;
-  
+
   &.true {
     border-color: #51cf66;
   }
-  
+
   &.false {
     border-color: #ff6b6b;
   }
-  
+
   &:hover {
     transform: scale(1.2);
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);

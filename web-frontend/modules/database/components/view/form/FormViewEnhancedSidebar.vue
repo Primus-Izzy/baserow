@@ -5,7 +5,9 @@
         v-for="tab in tabs"
         :key="tab.key"
         class="form-view-enhanced-sidebar__tab"
-        :class="{ 'form-view-enhanced-sidebar__tab--active': activeTab === tab.key }"
+        :class="{
+          'form-view-enhanced-sidebar__tab--active': activeTab === tab.key,
+        }"
         @click="activeTab = tab.key"
       >
         <i :class="tab.icon"></i>
@@ -15,7 +17,10 @@
 
     <div class="form-view-enhanced-sidebar__content">
       <!-- Fields Tab -->
-      <div v-if="activeTab === 'fields'" class="form-view-enhanced-sidebar__tab-content">
+      <div
+        v-if="activeTab === 'fields'"
+        class="form-view-enhanced-sidebar__tab-content"
+      >
         <FormViewSidebar
           :database="database"
           :table="table"
@@ -31,13 +36,16 @@
       </div>
 
       <!-- Conditional Logic Tab -->
-      <div v-if="activeTab === 'conditional'" class="form-view-enhanced-sidebar__tab-content">
+      <div
+        v-if="activeTab === 'conditional'"
+        class="form-view-enhanced-sidebar__tab-content"
+      >
         <div class="form-view-enhanced-sidebar__section">
           <h3>{{ $t('formViewEnhancedSidebar.conditionalLogic') }}</h3>
           <p class="form-view-enhanced-sidebar__section-description">
             {{ $t('formViewEnhancedSidebar.conditionalLogicDescription') }}
           </p>
-          
+
           <div
             v-for="fieldOption in enabledFieldOptions"
             :key="fieldOption.field.id"
@@ -50,20 +58,25 @@
               :field-options="fieldOption"
               :fields="allFields"
               :read-only="readOnly"
-              @update-conditional-logic="updateFieldConditionalLogic(fieldOption, $event)"
+              @update-conditional-logic="
+                updateFieldConditionalLogic(fieldOption, $event)
+              "
             />
           </div>
         </div>
       </div>
 
       <!-- Validation Tab -->
-      <div v-if="activeTab === 'validation'" class="form-view-enhanced-sidebar__tab-content">
+      <div
+        v-if="activeTab === 'validation'"
+        class="form-view-enhanced-sidebar__tab-content"
+      >
         <div class="form-view-enhanced-sidebar__section">
           <h3>{{ $t('formViewEnhancedSidebar.validation') }}</h3>
           <p class="form-view-enhanced-sidebar__section-description">
             {{ $t('formViewEnhancedSidebar.validationDescription') }}
           </p>
-          
+
           <div
             v-for="fieldOption in enabledFieldOptions"
             :key="fieldOption.field.id"
@@ -75,14 +88,19 @@
             <FormViewValidationRules
               :field-options="fieldOption"
               :read-only="readOnly"
-              @update-validation-rules="updateFieldValidationRules(fieldOption, $event)"
+              @update-validation-rules="
+                updateFieldValidationRules(fieldOption, $event)
+              "
             />
           </div>
         </div>
       </div>
 
       <!-- Branding Tab -->
-      <div v-if="activeTab === 'branding'" class="form-view-enhanced-sidebar__tab-content">
+      <div
+        v-if="activeTab === 'branding'"
+        class="form-view-enhanced-sidebar__tab-content"
+      >
         <FormViewCustomBranding
           :view="view"
           :read-only="readOnly"
@@ -91,13 +109,16 @@
       </div>
 
       <!-- Access Control Tab -->
-      <div v-if="activeTab === 'access'" class="form-view-enhanced-sidebar__tab-content">
+      <div
+        v-if="activeTab === 'access'"
+        class="form-view-enhanced-sidebar__tab-content"
+      >
         <div class="form-view-enhanced-sidebar__section">
           <h3>{{ $t('formViewEnhancedSidebar.accessControl') }}</h3>
           <p class="form-view-enhanced-sidebar__section-description">
             {{ $t('formViewEnhancedSidebar.accessControlDescription') }}
           </p>
-          
+
           <FormGroup
             :label="$t('formViewEnhancedSidebar.publicAccess')"
             class="margin-bottom-2"
@@ -130,7 +151,9 @@
             <FormInput
               v-model="accessControl.submission_limit"
               type="number"
-              :placeholder="$t('formViewEnhancedSidebar.submissionLimitPlaceholder')"
+              :placeholder="
+                $t('formViewEnhancedSidebar.submissionLimitPlaceholder')
+              "
               min="1"
               @input="updateAccessControl"
             />
@@ -139,7 +162,10 @@
       </div>
 
       <!-- Sharing Tab -->
-      <div v-if="activeTab === 'sharing'" class="form-view-enhanced-sidebar__tab-content">
+      <div
+        v-if="activeTab === 'sharing'"
+        class="form-view-enhanced-sidebar__tab-content"
+      >
         <FormViewShareableLinks
           :view="view"
           :read-only="readOnly"
@@ -252,9 +278,13 @@ export default {
     },
     enabledFieldOptions() {
       // Return field options for enabled fields
-      return this.enabledFields.map(field => {
-        const fieldOption = this.view.field_options?.find(opt => opt.field.id === field.id)
-        return fieldOption || { field, conditional_logic: {}, validation_rules: [] }
+      return this.enabledFields.map((field) => {
+        const fieldOption = this.view.field_options?.find(
+          (opt) => opt.field.id === field.id
+        )
+        return (
+          fieldOption || { field, conditional_logic: {}, validation_rules: [] }
+        )
       })
     },
   },
@@ -288,7 +318,11 @@ export default {
     },
     async updateFieldConditionalLogic(fieldOption, logicData) {
       try {
-        await this.$emit('update-field-conditional-logic', fieldOption.field.id, logicData)
+        await this.$emit(
+          'update-field-conditional-logic',
+          fieldOption.field.id,
+          logicData
+        )
       } catch (error) {
         this.$store.dispatch('toast/error', {
           title: this.$t('formViewEnhancedSidebar.conditionalLogicUpdateError'),
@@ -298,7 +332,11 @@ export default {
     },
     async updateFieldValidationRules(fieldOption, rulesData) {
       try {
-        await this.$emit('update-field-validation-rules', fieldOption.field.id, rulesData)
+        await this.$emit(
+          'update-field-validation-rules',
+          fieldOption.field.id,
+          rulesData
+        )
       } catch (error) {
         this.$store.dispatch('toast/error', {
           title: this.$t('formViewEnhancedSidebar.validationRulesUpdateError'),

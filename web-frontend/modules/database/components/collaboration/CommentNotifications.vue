@@ -28,7 +28,10 @@
     </div>
 
     <div class="comment-notifications__content">
-      <div v-if="loading && notifications.length === 0" class="comment-notifications__loading">
+      <div
+        v-if="loading && notifications.length === 0"
+        class="comment-notifications__loading"
+      >
         <div class="notification-skeleton" v-for="i in 3" :key="i">
           <div class="notification-skeleton__avatar"></div>
           <div class="notification-skeleton__content">
@@ -38,7 +41,10 @@
         </div>
       </div>
 
-      <div v-else-if="notifications.length === 0" class="comment-notifications__empty">
+      <div
+        v-else-if="notifications.length === 0"
+        class="comment-notifications__empty"
+      >
         <i class="iconoir-bell-off"></i>
         <p>No comment notifications</p>
       </div>
@@ -62,17 +68,21 @@
 
           <div class="comment-notification__content">
             <div class="comment-notification__header">
-              <span class="comment-notification__sender">{{ notification.sender_name }}</span>
-              <span class="comment-notification__action">{{ getNotificationAction(notification.type) }}</span>
+              <span class="comment-notification__sender">{{
+                notification.sender_name
+              }}</span>
+              <span class="comment-notification__action">{{
+                getNotificationAction(notification.type)
+              }}</span>
               <span class="comment-notification__timestamp">
                 {{ formatRelativeTime(notification.created_at) }}
               </span>
             </div>
-            
+
             <div class="comment-notification__message">
               {{ notification.message }}
             </div>
-            
+
             <div class="comment-notification__context">
               <i class="iconoir-table"></i>
               {{ notification.table_name }} - Row {{ notification.row_id }}
@@ -113,7 +123,7 @@ export default {
   },
   computed: {
     unreadCount() {
-      return this.notifications.filter(n => !n.read).length
+      return this.notifications.filter((n) => !n.read).length
     },
   },
   async mounted() {
@@ -144,8 +154,10 @@ export default {
         await this.$axios.patch(`/api/notifications/${notificationId}/`, {
           read: true,
         })
-        
-        const notification = this.notifications.find(n => n.id === notificationId)
+
+        const notification = this.notifications.find(
+          (n) => n.id === notificationId
+        )
         if (notification) {
           notification.read = true
         }
@@ -156,22 +168,22 @@ export default {
     },
     async markAllAsRead() {
       const unreadIds = this.notifications
-        .filter(n => !n.read)
-        .map(n => n.id)
-      
+        .filter((n) => !n.read)
+        .map((n) => n.id)
+
       if (unreadIds.length === 0) return
-      
+
       try {
         await this.$axios.post('/api/notifications/mark-all-read/', {
           notification_ids: unreadIds,
         })
-        
-        this.notifications.forEach(notification => {
+
+        this.notifications.forEach((notification) => {
           if (unreadIds.includes(notification.id)) {
             notification.read = true
           }
         })
-        
+
         this.$toast.success('All notifications marked as read')
       } catch (error) {
         console.error('Failed to mark all notifications as read:', error)
@@ -181,8 +193,10 @@ export default {
     async dismissNotification(notificationId) {
       try {
         await this.$axios.delete(`/api/notifications/${notificationId}/`)
-        
-        this.notifications = this.notifications.filter(n => n.id !== notificationId)
+
+        this.notifications = this.notifications.filter(
+          (n) => n.id !== notificationId
+        )
       } catch (error) {
         console.error('Failed to dismiss notification:', error)
         this.$toast.error('Failed to dismiss notification')
@@ -201,7 +215,7 @@ export default {
           commentId: notification.comment_id,
         },
       })
-      
+
       // Mark as read if not already
       if (!notification.read) {
         this.markAsRead(notification.id)
@@ -221,7 +235,7 @@ export default {
     handleNewNotification(notification) {
       // Add new notification to the top of the list
       this.notifications.unshift(notification)
-      
+
       // Show toast notification
       this.$toast.info(`New comment from ${notification.sender_name}`)
     },
@@ -229,14 +243,22 @@ export default {
       if (!name) return '?'
       return name
         .split(' ')
-        .map(part => part.charAt(0).toUpperCase())
+        .map((part) => part.charAt(0).toUpperCase())
         .join('')
         .substring(0, 2)
     },
     getUserColor(userId) {
       const colors = [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-        '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+        '#FF6B6B',
+        '#4ECDC4',
+        '#45B7D1',
+        '#96CEB4',
+        '#FFEAA7',
+        '#DDA0DD',
+        '#98D8C8',
+        '#F7DC6F',
+        '#BB8FCE',
+        '#85C1E9',
       ]
       return colors[userId % colors.length]
     },
@@ -244,7 +266,7 @@ export default {
       const date = new Date(dateString)
       const now = new Date()
       const diffInSeconds = Math.floor((now - date) / 1000)
-      
+
       if (diffInSeconds < 60) {
         return 'just now'
       } else if (diffInSeconds < 3600) {
@@ -302,7 +324,7 @@ export default {
   font-size: 16px;
   font-weight: 600;
   color: #333;
-  
+
   i {
     font-size: 18px;
   }
@@ -363,7 +385,7 @@ export default {
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
-  
+
   &__avatar {
     width: 32px;
     height: 32px;
@@ -371,11 +393,11 @@ export default {
     background: #e9ecef;
     animation: pulse 1.5s ease-in-out infinite;
   }
-  
+
   &__content {
     flex: 1;
   }
-  
+
   &__header {
     width: 200px;
     height: 12px;
@@ -384,7 +406,7 @@ export default {
     margin-bottom: 8px;
     animation: pulse 1.5s ease-in-out infinite;
   }
-  
+
   &__text {
     width: 100%;
     height: 32px;
@@ -402,13 +424,13 @@ export default {
   padding: 40px 20px;
   color: #6c757d;
   text-align: center;
-  
+
   i {
     font-size: 48px;
     margin-bottom: 16px;
     opacity: 0.5;
   }
-  
+
   p {
     margin: 0;
     font-size: 14px;
@@ -428,15 +450,15 @@ export default {
   cursor: pointer;
   transition: all 0.2s ease;
   margin-bottom: 4px;
-  
+
   &:hover {
     background: #f8f9fa;
   }
-  
+
   &--unread {
     background: #e3f2fd;
     border-left: 3px solid #2196f3;
-    
+
     &:hover {
       background: #bbdefb;
     }
@@ -504,7 +526,7 @@ export default {
   gap: 4px;
   font-size: 11px;
   color: #6c757d;
-  
+
   i {
     font-size: 12px;
   }
@@ -516,7 +538,7 @@ export default {
   gap: 4px;
   opacity: 0;
   transition: opacity 0.2s ease;
-  
+
   .comment-notification:hover & {
     opacity: 1;
   }
@@ -535,12 +557,12 @@ export default {
   color: #6c757d;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: rgba(0, 0, 0, 0.1);
     color: #333;
   }
-  
+
   i {
     font-size: 12px;
   }
@@ -556,7 +578,8 @@ export default {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

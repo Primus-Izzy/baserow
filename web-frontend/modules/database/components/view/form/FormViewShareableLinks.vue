@@ -22,7 +22,9 @@
         v-for="link in shareableLinks"
         :key="link.id"
         class="form-view-shareable-links__link"
-        :class="{ 'form-view-shareable-links__link--inactive': !link.is_active }"
+        :class="{
+          'form-view-shareable-links__link--inactive': !link.is_active,
+        }"
       >
         <div class="form-view-shareable-links__link-info">
           <div class="form-view-shareable-links__link-name">
@@ -35,14 +37,23 @@
             <span class="form-view-shareable-links__link-type">
               {{ $t(`formViewShareableLinks.accessTypes.${link.access_type}`) }}
             </span>
-            <span v-if="link.expires_at" class="form-view-shareable-links__link-expires">
-              {{ $t('formViewShareableLinks.expiresAt', { date: formatDate(link.expires_at) }) }}
+            <span
+              v-if="link.expires_at"
+              class="form-view-shareable-links__link-expires"
+            >
+              {{
+                $t('formViewShareableLinks.expiresAt', {
+                  date: formatDate(link.expires_at),
+                })
+              }}
             </span>
             <span class="form-view-shareable-links__link-submissions">
-              {{ $t('formViewShareableLinks.submissions', { 
-                current: link.current_submissions, 
-                max: link.max_submissions || '∞' 
-              }) }}
+              {{
+                $t('formViewShareableLinks.submissions', {
+                  current: link.current_submissions,
+                  max: link.max_submissions || '∞',
+                })
+              }}
             </span>
           </div>
         </div>
@@ -80,7 +91,11 @@
             :icon="link.is_active ? 'iconoir-pause' : 'iconoir-play'"
             @click="toggleLinkStatus(link)"
           >
-            {{ link.is_active ? $t('formViewShareableLinks.disable') : $t('formViewShareableLinks.enable') }}
+            {{
+              link.is_active
+                ? $t('formViewShareableLinks.disable')
+                : $t('formViewShareableLinks.enable')
+            }}
           </Button>
           <Button
             type="danger"
@@ -143,7 +158,11 @@ export default {
     async deleteLink(link) {
       if (this.readOnly) return
 
-      const confirmed = confirm(this.$t('formViewShareableLinks.deleteConfirmMessage', { name: link.name }))
+      const confirmed = confirm(
+        this.$t('formViewShareableLinks.deleteConfirmMessage', {
+          name: link.name,
+        })
+      )
 
       if (confirmed) {
         try {
@@ -175,7 +194,7 @@ export default {
         textArea.select()
         document.execCommand('copy')
         document.body.removeChild(textArea)
-        
+
         this.$store.dispatch('toast/success', {
           title: this.$t('formViewShareableLinks.copySuccess'),
         })

@@ -8,7 +8,7 @@
         :show-percentage="true"
       />
     </div>
-    
+
     <!-- Editable input for manual source -->
     <div v-else class="row-edit-progress-bar-editable">
       <div class="row-edit-progress-bar-input-group">
@@ -22,10 +22,12 @@
           :max="field.max_value"
           :error="touched && !valid"
           :disabled="readOnly"
-          :placeholder="$t('rowEditFieldProgressBar.placeholder', { 
-            min: field.min_value, 
-            max: field.max_value 
-          })"
+          :placeholder="
+            $t('rowEditFieldProgressBar.placeholder', {
+              min: field.min_value,
+              max: field.max_value,
+            })
+          "
           @keyup.enter="
             onBlur()
             $refs.input.blur()
@@ -44,7 +46,7 @@
           {{ field.min_value }} - {{ field.max_value }}
         </div>
       </div>
-      
+
       <!-- Progress bar preview -->
       <div class="row-edit-progress-bar-preview">
         <ProgressBarDisplay
@@ -106,7 +108,7 @@ export default {
         this.copy = String(value)
       }
     },
-    
+
     /**
      * Handle input changes
      */
@@ -114,7 +116,7 @@ export default {
       this.copy = newCopy
       this.$emit('input', this.copy)
     },
-    
+
     /**
      * Validate the input value
      */
@@ -122,25 +124,25 @@ export default {
       if (this.isReadOnly) {
         return true
       }
-      
+
       if (value === null || value === undefined || value === '') {
         return true // Allow empty values
       }
-      
+
       const numValue = parseFloat(value)
       if (isNaN(numValue)) {
         this.error = this.$t('fieldErrors.invalidNumber')
         return false
       }
-      
+
       if (numValue < this.field.min_value || numValue > this.field.max_value) {
         this.error = this.$t('fieldErrors.numberOutOfRange', {
           min: this.field.min_value,
-          max: this.field.max_value
+          max: this.field.max_value,
         })
         return false
       }
-      
+
       return true
     },
   },
@@ -156,7 +158,7 @@ export default {
   .row-edit-progress-bar-input-group {
     position: relative;
     margin-bottom: 12px;
-    
+
     .row-edit-progress-bar-range {
       position: absolute;
       right: 8px;
@@ -170,7 +172,7 @@ export default {
       pointer-events: none;
     }
   }
-  
+
   .row-edit-progress-bar-preview {
     padding: 8px 12px;
     background-color: #f8f9fa;
@@ -193,7 +195,7 @@ export default {
         padding: 0;
       }
     }
-    
+
     .row-edit-progress-bar-preview {
       padding: 12px;
     }

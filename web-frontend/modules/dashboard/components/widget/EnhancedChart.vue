@@ -8,7 +8,7 @@
       class="enhanced-chart"
       @chart:render="onChartRender"
     />
-    
+
     <div v-else-if="loading" class="enhanced-chart__loading">
       <div class="loading-spinner"></div>
     </div>
@@ -112,11 +112,21 @@ export default {
       required: true,
       validator: (value) => {
         return [
-          'bar', 'line', 'area', 'pie', 'donut', 'mixed',
-          'polar', 'radar', 'scatter', 'bubble', 'stacked-bar',
-          'horizontal-bar', 'combo'
+          'bar',
+          'line',
+          'area',
+          'pie',
+          'donut',
+          'mixed',
+          'polar',
+          'radar',
+          'scatter',
+          'bubble',
+          'stacked-bar',
+          'horizontal-bar',
+          'combo',
         ].includes(value)
-      }
+      },
     },
     chartData: {
       type: Object,
@@ -162,51 +172,54 @@ export default {
         mixed: 'Bar',
         combo: 'Bar',
       }
-      
+
       return componentMap[this.chartType] || 'Bar'
     },
     processedChartData() {
       const data = { ...this.chartData }
-      
+
       // Process area charts
       if (this.chartType === 'area') {
-        data.datasets = data.datasets.map(dataset => ({
+        data.datasets = data.datasets.map((dataset) => ({
           ...dataset,
           fill: true,
-          backgroundColor: this.addAlpha(dataset.backgroundColor || dataset.borderColor, 0.2),
+          backgroundColor: this.addAlpha(
+            dataset.backgroundColor || dataset.borderColor,
+            0.2
+          ),
         }))
       }
-      
+
       // Process stacked bar charts
       if (this.chartType === 'stacked-bar') {
-        data.datasets = data.datasets.map(dataset => ({
+        data.datasets = data.datasets.map((dataset) => ({
           ...dataset,
           stack: dataset.stack || 'Stack 0',
         }))
       }
-      
+
       // Process mixed/combo charts
       if (this.chartType === 'mixed' || this.chartType === 'combo') {
-        data.datasets = data.datasets.map(dataset => ({
+        data.datasets = data.datasets.map((dataset) => ({
           ...dataset,
           type: dataset.type || 'bar',
         }))
       }
-      
+
       return data
     },
     processedChartOptions() {
       const options = { ...this.chartOptions }
-      
+
       // Add responsive design options
       options.responsive = true
       options.maintainAspectRatio = false
-      
+
       // Configure for horizontal bar charts
       if (this.chartType === 'horizontal-bar') {
         options.indexAxis = 'y'
       }
-      
+
       // Configure for stacked charts
       if (this.chartType === 'stacked-bar') {
         options.scales = {
@@ -221,7 +234,7 @@ export default {
           },
         }
       }
-      
+
       // Mobile optimizations
       if (this.isMobile) {
         options.plugins = {
@@ -249,7 +262,7 @@ export default {
           },
         }
       }
-      
+
       return options
     },
     isMobile() {
@@ -267,7 +280,7 @@ export default {
   methods: {
     addAlpha(color, alpha) {
       if (!color) return color
-      
+
       // Convert hex to rgba
       if (color.startsWith('#')) {
         const hex = color.slice(1)
@@ -276,17 +289,17 @@ export default {
         const b = parseInt(hex.slice(4, 6), 16)
         return `rgba(${r}, ${g}, ${b}, ${alpha})`
       }
-      
+
       // If already rgba, modify alpha
       if (color.startsWith('rgba')) {
         return color.replace(/[\d\.]+\)$/g, `${alpha})`)
       }
-      
+
       // If rgb, convert to rgba
       if (color.startsWith('rgb')) {
         return color.replace('rgb', 'rgba').replace(')', `, ${alpha})`)
       }
-      
+
       return color
     },
     onChartRender(chart) {
@@ -322,7 +335,7 @@ export default {
       if (this.chartInstance) {
         const canvas = this.chartInstance.canvas
         const url = canvas.toDataURL(`image/${format}`)
-        
+
         // Create download link
         const link = document.createElement('a')
         link.download = `chart.${format}`
@@ -391,12 +404,12 @@ export default {
   .enhanced-chart-container {
     min-height: 150px;
   }
-  
+
   .enhanced-chart__no-data-icon {
     font-size: 36px;
     margin-bottom: 12px;
   }
-  
+
   .enhanced-chart__no-data-text {
     font-size: 14px;
   }

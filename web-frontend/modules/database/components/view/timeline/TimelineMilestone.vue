@@ -8,12 +8,21 @@
     @mouseleave="showTooltip = false"
   >
     <!-- Milestone indicator -->
-    <div class="timeline-milestone__indicator" :style="{ backgroundColor: milestone.color }">
-      <i :class="milestone.icon || 'iconoir-flag'" class="timeline-milestone__icon"></i>
+    <div
+      class="timeline-milestone__indicator"
+      :style="{ backgroundColor: milestone.color }"
+    >
+      <i
+        :class="milestone.icon || 'iconoir-flag'"
+        class="timeline-milestone__icon"
+      ></i>
     </div>
 
     <!-- Milestone line -->
-    <div class="timeline-milestone__line" :style="{ backgroundColor: milestone.color }"></div>
+    <div
+      class="timeline-milestone__line"
+      :style="{ backgroundColor: milestone.color }"
+    ></div>
 
     <!-- Milestone label -->
     <div class="timeline-milestone__label">
@@ -25,7 +34,10 @@
       <div class="milestone-tooltip">
         <div class="milestone-tooltip__title">{{ milestone.name }}</div>
         <div class="milestone-tooltip__date">{{ formatMilestoneDate() }}</div>
-        <div v-if="milestone.description" class="milestone-tooltip__description">
+        <div
+          v-if="milestone.description"
+          class="milestone-tooltip__description"
+        >
           {{ milestone.description }}
         </div>
         <div v-if="milestone.row_id" class="milestone-tooltip__row">
@@ -61,11 +73,16 @@ export default {
   computed: {
     pixelsPerDay() {
       switch (this.zoomLevel) {
-        case 'day': return 100
-        case 'week': return 20
-        case 'month': return 5
-        case 'year': return 1
-        default: return 20
+        case 'day':
+          return 100
+        case 'week':
+          return 20
+        case 'month':
+          return 5
+        case 'year':
+          return 1
+        default:
+          return 20
       }
     },
     milestoneDate() {
@@ -76,10 +93,13 @@ export default {
     getMilestoneStyle() {
       const milestoneDate = this.getMilestoneDate()
       if (!milestoneDate) return { display: 'none' }
-      
+
       const timelineStart = this.visibleDateRange.start
-      const offset = ((milestoneDate - timelineStart) / (1000 * 60 * 60 * 24)) * this.pixelsPerDay + 200 // 200px for label column
-      
+      const offset =
+        ((milestoneDate - timelineStart) / (1000 * 60 * 60 * 24)) *
+          this.pixelsPerDay +
+        200 // 200px for label column
+
       return {
         left: offset + 'px',
       }
@@ -93,34 +113,34 @@ export default {
           return row[fieldName] ? new Date(row[fieldName]) : null
         }
       }
-      
+
       // If no row is linked, milestone might have a fixed date
       return this.milestone.date ? new Date(this.milestone.date) : null
     },
     getLinkedRow() {
       if (!this.milestone.row_id) return null
-      
+
       // This would need to be accessed from the parent component or store
       const allRows = this.$parent.allRows || []
-      return allRows.find(row => row.id === this.milestone.row_id)
+      return allRows.find((row) => row.id === this.milestone.row_id)
     },
     getLinkedRowTitle() {
       const row = this.getLinkedRow()
       if (!row) return 'Unknown'
-      
+
       // Get the primary field or first text field
       const fields = this.$parent.fields || []
-      const primaryField = fields.find(f => f.primary)
+      const primaryField = fields.find((f) => f.primary)
       if (primaryField) {
         return row[`field_${primaryField.id}`] || 'Untitled'
       }
-      
+
       return `Row ${row.id}`
     },
     formatMilestoneDate() {
       const date = this.getMilestoneDate()
       if (!date) return 'No date'
-      
+
       return date.toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'short',

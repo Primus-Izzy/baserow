@@ -4,9 +4,7 @@
       <i class="fas fa-lock"></i>
     </div>
     <div class="lock-message">
-      <span v-if="isMyLock" class="my-lock">
-        You are editing this field
-      </span>
+      <span v-if="isMyLock" class="my-lock"> You are editing this field </span>
       <span v-else class="other-lock">
         {{ lockOwnerName }} is editing this field
       </span>
@@ -63,7 +61,9 @@ export default {
     },
     lockOwnerName() {
       if (!this.lockOwnerId) return 'Unknown User'
-      const presence = this.$store.getters['database/collaboration/userPresence'](this.lockOwnerId)
+      const presence = this.$store.getters[
+        'database/collaboration/userPresence'
+      ](this.lockOwnerId)
       return presence?.userName || 'Unknown User'
     },
   },
@@ -102,12 +102,12 @@ export default {
 
 .lock-message {
   flex: 1;
-  
+
   .my-lock {
     color: #28a745;
     font-weight: 500;
   }
-  
+
   .other-lock {
     color: #ffc107;
     font-weight: 500;
@@ -122,7 +122,7 @@ export default {
   padding: 2px;
   border-radius: 2px;
   transition: color 0.2s ease;
-  
+
   &:hover {
     color: #dc3545;
   }

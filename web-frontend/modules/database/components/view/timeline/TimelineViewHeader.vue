@@ -25,7 +25,7 @@
             <i class="iconoir-calendar"></i>
             {{ formatDateRange() }}
           </button>
-          
+
           <div v-if="showDateRangePicker" class="timeline-header__date-picker">
             <input
               v-model="startDate"
@@ -44,10 +44,7 @@
         </div>
 
         <!-- View options -->
-        <Dropdown
-          :show-search="false"
-          class="timeline-header__options"
-        >
+        <Dropdown :show-search="false" class="timeline-header__options">
           <template #header>
             <button class="timeline-header__options-btn">
               <i class="iconoir-settings"></i>
@@ -140,16 +137,16 @@ export default {
       start.setMonth(start.getMonth() - 1)
       const end = new Date(now)
       end.setMonth(end.getMonth() + 2)
-      
+
       this.startDate = start.toISOString().split('T')[0]
       this.endDate = end.toISOString().split('T')[0]
     },
     formatDateRange() {
       if (!this.startDate || !this.endDate) return 'Select Range'
-      
+
       const start = new Date(this.startDate)
       const end = new Date(this.endDate)
-      
+
       return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`
     },
     updateDateRange() {

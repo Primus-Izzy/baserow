@@ -18,7 +18,9 @@
         v-for="rule in conditionalFormattingRules"
         :key="rule.id"
         class="grid-view-conditional-formatting__rule"
-        :class="{ 'grid-view-conditional-formatting__rule--inactive': !rule.is_active }"
+        :class="{
+          'grid-view-conditional-formatting__rule--inactive': !rule.is_active,
+        }"
       >
         <div class="grid-view-conditional-formatting__rule-preview">
           <div
@@ -31,13 +33,16 @@
             {{ $t('gridView.conditionalFormatting.sampleText') }}
           </div>
         </div>
-        
+
         <div class="grid-view-conditional-formatting__rule-details">
           <div class="grid-view-conditional-formatting__rule-name">
             {{ rule.name }}
           </div>
           <div class="grid-view-conditional-formatting__rule-condition">
-            {{ getFieldName(rule.field) }} {{ getConditionText(rule.condition_type) }} "{{ rule.condition_value }}"
+            {{ getFieldName(rule.field) }}
+            {{ getConditionText(rule.condition_type) }} "{{
+              rule.condition_value
+            }}"
           </div>
         </div>
 
@@ -79,14 +84,15 @@
     </div>
 
     <!-- Create/Edit Rule Modal -->
-    <Modal
-      v-if="showCreateModal || editingRule"
-      @hidden="closeModal"
-    >
+    <Modal v-if="showCreateModal || editingRule" @hidden="closeModal">
       <h2 slot="title">
-        {{ editingRule ? $t('gridView.conditionalFormatting.editRule') : $t('gridView.conditionalFormatting.createRule') }}
+        {{
+          editingRule
+            ? $t('gridView.conditionalFormatting.editRule')
+            : $t('gridView.conditionalFormatting.createRule')
+        }}
       </h2>
-      
+
       <form @submit.prevent="saveRule">
         <FormGroup
           :label="$t('gridView.conditionalFormatting.ruleName')"
@@ -94,15 +100,14 @@
         >
           <FormInput
             v-model="ruleForm.name"
-            :placeholder="$t('gridView.conditionalFormatting.ruleNamePlaceholder')"
+            :placeholder="
+              $t('gridView.conditionalFormatting.ruleNamePlaceholder')
+            "
             required
           />
         </FormGroup>
 
-        <FormGroup
-          :label="$t('gridView.conditionalFormatting.field')"
-          required
-        >
+        <FormGroup :label="$t('gridView.conditionalFormatting.field')" required>
           <Dropdown v-model="ruleForm.field">
             <DropdownItem
               v-for="field in availableFields"
@@ -127,10 +132,7 @@
           </Dropdown>
         </FormGroup>
 
-        <FormGroup
-          :label="$t('gridView.conditionalFormatting.value')"
-          required
-        >
+        <FormGroup :label="$t('gridView.conditionalFormatting.value')" required>
           <FormInput
             v-model="ruleForm.condition_value"
             :placeholder="$t('gridView.conditionalFormatting.valuePlaceholder')"
@@ -139,7 +141,9 @@
         </FormGroup>
 
         <div class="grid-view-conditional-formatting__colors">
-          <FormGroup :label="$t('gridView.conditionalFormatting.backgroundColor')">
+          <FormGroup
+            :label="$t('gridView.conditionalFormatting.backgroundColor')"
+          >
             <ColorPicker v-model="ruleForm.background_color" />
           </FormGroup>
 
@@ -212,22 +216,64 @@ export default {
   },
   computed: {
     availableFields() {
-      return this.fields.filter(field => 
-        ['text', 'long_text', 'number', 'rating', 'single_select', 'multiple_select', 'boolean'].includes(field.type)
+      return this.fields.filter((field) =>
+        [
+          'text',
+          'long_text',
+          'number',
+          'rating',
+          'single_select',
+          'multiple_select',
+          'boolean',
+        ].includes(field.type)
       )
     },
     availableConditions() {
       return [
-        { value: 'equals', name: this.$t('gridView.conditionalFormatting.conditions.equals') },
-        { value: 'not_equals', name: this.$t('gridView.conditionalFormatting.conditions.notEquals') },
-        { value: 'contains', name: this.$t('gridView.conditionalFormatting.conditions.contains') },
-        { value: 'not_contains', name: this.$t('gridView.conditionalFormatting.conditions.notContains') },
-        { value: 'starts_with', name: this.$t('gridView.conditionalFormatting.conditions.startsWith') },
-        { value: 'ends_with', name: this.$t('gridView.conditionalFormatting.conditions.endsWith') },
-        { value: 'greater_than', name: this.$t('gridView.conditionalFormatting.conditions.greaterThan') },
-        { value: 'less_than', name: this.$t('gridView.conditionalFormatting.conditions.lessThan') },
-        { value: 'is_empty', name: this.$t('gridView.conditionalFormatting.conditions.isEmpty') },
-        { value: 'is_not_empty', name: this.$t('gridView.conditionalFormatting.conditions.isNotEmpty') },
+        {
+          value: 'equals',
+          name: this.$t('gridView.conditionalFormatting.conditions.equals'),
+        },
+        {
+          value: 'not_equals',
+          name: this.$t('gridView.conditionalFormatting.conditions.notEquals'),
+        },
+        {
+          value: 'contains',
+          name: this.$t('gridView.conditionalFormatting.conditions.contains'),
+        },
+        {
+          value: 'not_contains',
+          name: this.$t(
+            'gridView.conditionalFormatting.conditions.notContains'
+          ),
+        },
+        {
+          value: 'starts_with',
+          name: this.$t('gridView.conditionalFormatting.conditions.startsWith'),
+        },
+        {
+          value: 'ends_with',
+          name: this.$t('gridView.conditionalFormatting.conditions.endsWith'),
+        },
+        {
+          value: 'greater_than',
+          name: this.$t(
+            'gridView.conditionalFormatting.conditions.greaterThan'
+          ),
+        },
+        {
+          value: 'less_than',
+          name: this.$t('gridView.conditionalFormatting.conditions.lessThan'),
+        },
+        {
+          value: 'is_empty',
+          name: this.$t('gridView.conditionalFormatting.conditions.isEmpty'),
+        },
+        {
+          value: 'is_not_empty',
+          name: this.$t('gridView.conditionalFormatting.conditions.isNotEmpty'),
+        },
       ]
     },
   },
@@ -237,18 +283,22 @@ export default {
   methods: {
     async loadConditionalFormattingRules() {
       try {
-        const { data } = await GridViewService(this.$client).getConditionalFormatting(this.view.id)
+        const { data } = await GridViewService(
+          this.$client
+        ).getConditionalFormatting(this.view.id)
         this.conditionalFormattingRules = data
       } catch (error) {
         notifyIf(error, 'view')
       }
     },
     getFieldName(fieldId) {
-      const field = this.fields.find(f => f.id === fieldId)
+      const field = this.fields.find((f) => f.id === fieldId)
       return field ? field.name : ''
     },
     getConditionText(conditionType) {
-      const condition = this.availableConditions.find(c => c.value === conditionType)
+      const condition = this.availableConditions.find(
+        (c) => c.value === conditionType
+      )
       return condition ? condition.name : conditionType
     },
     async toggleRuleActive(rule) {
@@ -271,8 +321,12 @@ export default {
     async deleteRule(rule) {
       if (confirm(this.$t('gridView.conditionalFormatting.confirmDelete'))) {
         try {
-          await GridViewService(this.$client).deleteConditionalFormatting(this.view.id, rule.id)
-          this.conditionalFormattingRules = this.conditionalFormattingRules.filter(r => r.id !== rule.id)
+          await GridViewService(this.$client).deleteConditionalFormatting(
+            this.view.id,
+            rule.id
+          )
+          this.conditionalFormattingRules =
+            this.conditionalFormattingRules.filter((r) => r.id !== rule.id)
           this.$emit('rules-updated', this.conditionalFormattingRules)
         } catch (error) {
           notifyIf(error, 'view')
@@ -283,18 +337,21 @@ export default {
       this.saving = true
       try {
         if (this.editingRule) {
-          const { data } = await GridViewService(this.$client).updateConditionalFormatting(
+          const { data } = await GridViewService(
+            this.$client
+          ).updateConditionalFormatting(
             this.view.id,
             this.editingRule.id,
             this.ruleForm
           )
-          const index = this.conditionalFormattingRules.findIndex(r => r.id === this.editingRule.id)
+          const index = this.conditionalFormattingRules.findIndex(
+            (r) => r.id === this.editingRule.id
+          )
           this.conditionalFormattingRules.splice(index, 1, data)
         } else {
-          const { data } = await GridViewService(this.$client).createConditionalFormatting(
-            this.view.id,
-            this.ruleForm
-          )
+          const { data } = await GridViewService(
+            this.$client
+          ).createConditionalFormatting(this.view.id, this.ruleForm)
           this.conditionalFormattingRules.push(data)
         }
         this.$emit('rules-updated', this.conditionalFormattingRules)
@@ -329,7 +386,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
-    
+
     h3 {
       margin: 0;
       font-size: 16px;
@@ -350,7 +407,7 @@ export default {
     border: 1px solid #e1e5e9;
     border-radius: 6px;
     background: #fff;
-    
+
     &--inactive {
       opacity: 0.6;
     }
@@ -371,12 +428,12 @@ export default {
 
   &__rule-details {
     flex: 1;
-    
+
     &-name {
       font-weight: 600;
       margin-bottom: 2px;
     }
-    
+
     &-condition {
       font-size: 12px;
       color: #666;
@@ -392,13 +449,13 @@ export default {
     text-align: center;
     padding: 40px 20px;
     color: #666;
-    
+
     i {
       font-size: 48px;
       margin-bottom: 16px;
       opacity: 0.5;
     }
-    
+
     p {
       margin: 0;
       font-size: 14px;
@@ -414,7 +471,7 @@ export default {
 
   &__preview {
     margin: 16px 0;
-    
+
     &-sample {
       padding: 8px 16px;
       border-radius: 4px;

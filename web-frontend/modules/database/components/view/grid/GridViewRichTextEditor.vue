@@ -11,7 +11,7 @@
       @keydown="onKeyDown"
       v-html="formattedValue"
     ></div>
-    
+
     <div
       v-if="isFocused && !readOnly"
       class="grid-view-rich-text-editor__toolbar"
@@ -20,7 +20,10 @@
         <button
           type="button"
           class="grid-view-rich-text-editor__toolbar-button"
-          :class="{ 'grid-view-rich-text-editor__toolbar-button--active': isFormatActive('bold') }"
+          :class="{
+            'grid-view-rich-text-editor__toolbar-button--active':
+              isFormatActive('bold'),
+          }"
           @click="toggleFormat('bold')"
           title="Bold"
         >
@@ -29,7 +32,10 @@
         <button
           type="button"
           class="grid-view-rich-text-editor__toolbar-button"
-          :class="{ 'grid-view-rich-text-editor__toolbar-button--active': isFormatActive('italic') }"
+          :class="{
+            'grid-view-rich-text-editor__toolbar-button--active':
+              isFormatActive('italic'),
+          }"
           @click="toggleFormat('italic')"
           title="Italic"
         >
@@ -38,14 +44,17 @@
         <button
           type="button"
           class="grid-view-rich-text-editor__toolbar-button"
-          :class="{ 'grid-view-rich-text-editor__toolbar-button--active': isFormatActive('underline') }"
+          :class="{
+            'grid-view-rich-text-editor__toolbar-button--active':
+              isFormatActive('underline'),
+          }"
           @click="toggleFormat('underline')"
           title="Underline"
         >
           <i class="iconoir-underline"></i>
         </button>
       </div>
-      
+
       <div class="grid-view-rich-text-editor__toolbar-group">
         <button
           type="button"
@@ -105,7 +114,10 @@ export default {
   },
   methods: {
     updateEditorContent() {
-      if (this.$refs.editor && this.$refs.editor.innerHTML !== this.formattedValue) {
+      if (
+        this.$refs.editor &&
+        this.$refs.editor.innerHTML !== this.formattedValue
+      ) {
         this.$refs.editor.innerHTML = this.formattedValue
       }
     },
@@ -129,7 +141,7 @@ export default {
         this.$emit('save')
         return
       }
-      
+
       // Handle Escape key
       if (event.key === 'Escape') {
         event.preventDefault()
@@ -139,7 +151,7 @@ export default {
         this.$emit('cancel')
         return
       }
-      
+
       // Handle keyboard shortcuts
       if (event.ctrlKey || event.metaKey) {
         switch (event.key) {
@@ -189,7 +201,7 @@ export default {
 <style lang="scss" scoped>
 .grid-view-rich-text-editor {
   position: relative;
-  
+
   &__content {
     min-height: 20px;
     padding: 4px 8px;
@@ -197,20 +209,20 @@ export default {
     border-radius: 4px;
     outline: none;
     line-height: 1.4;
-    
+
     &--focused {
       border-color: #4285f4;
       background: #fff;
       box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.1);
     }
-    
+
     &:empty::before {
       content: attr(placeholder);
       color: #999;
       pointer-events: none;
     }
   }
-  
+
   &__toolbar {
     position: absolute;
     top: 100%;
@@ -226,18 +238,18 @@ export default {
     z-index: 1000;
     margin-top: 2px;
   }
-  
+
   &__toolbar-group {
     display: flex;
     gap: 2px;
-    
+
     &:not(:last-child) {
       border-right: 1px solid #e1e5e9;
       padding-right: 4px;
       margin-right: 4px;
     }
   }
-  
+
   &__toolbar-button {
     display: flex;
     align-items: center;
@@ -250,21 +262,21 @@ export default {
     cursor: pointer;
     color: #666;
     transition: all 0.2s;
-    
+
     &:hover {
       background: #f5f5f5;
       color: #333;
     }
-    
+
     &--active {
       background: #4285f4;
       color: #fff;
-      
+
       &:hover {
         background: #3367d6;
       }
     }
-    
+
     i {
       font-size: 14px;
     }
@@ -273,22 +285,24 @@ export default {
 
 // Global styles for rich text content
 :deep(.grid-view-rich-text-editor__content) {
-  strong, b {
+  strong,
+  b {
     font-weight: bold;
   }
-  
-  em, i {
+
+  em,
+  i {
     font-style: italic;
   }
-  
+
   u {
     text-decoration: underline;
   }
-  
+
   a {
     color: #4285f4;
     text-decoration: underline;
-    
+
     &:hover {
       color: #3367d6;
     }

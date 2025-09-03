@@ -19,7 +19,7 @@
         class="timeline-row__bar"
         :class="[
           'timeline-row__bar--' + getBarType(),
-          { 'timeline-row__bar--critical': isOnCriticalPath }
+          { 'timeline-row__bar--critical': isOnCriticalPath },
         ]"
         :style="getBarStyle()"
         @mousedown="startDrag"
@@ -35,7 +35,10 @@
         <!-- Bar content -->
         <div class="timeline-row__bar-content">
           <span class="timeline-row__bar-title">{{ getRowTitle(row) }}</span>
-          <span v-if="progressPercentage !== null" class="timeline-row__bar-progress">
+          <span
+            v-if="progressPercentage !== null"
+            class="timeline-row__bar-progress"
+          >
             {{ Math.round(progressPercentage) }}%
           </span>
         </div>
@@ -62,7 +65,10 @@
         :title="milestone.name"
         @click="$emit('milestone-clicked', milestone)"
       >
-        <i :class="milestone.icon || 'iconoir-flag'" :style="{ color: milestone.color }"></i>
+        <i
+          :class="milestone.icon || 'iconoir-flag'"
+          :style="{ color: milestone.color }"
+        ></i>
       </div>
     </div>
   </div>
@@ -150,10 +156,14 @@ export default {
       return this.getRowDate(this.endDateField)
     },
     progressPercentage() {
-      const progressField = this.fields.find(f => f.type === 'number' && f.name.toLowerCase().includes('progress'))
+      const progressField = this.fields.find(
+        (f) => f.type === 'number' && f.name.toLowerCase().includes('progress')
+      )
       if (progressField) {
         const value = this.row[`field_${progressField.id}`]
-        return value !== null && value !== undefined ? Math.min(100, Math.max(0, value)) : null
+        return value !== null && value !== undefined
+          ? Math.min(100, Math.max(0, value))
+          : null
       }
       return null
     },
@@ -163,11 +173,16 @@ export default {
     },
     pixelsPerDay() {
       switch (this.zoomLevel) {
-        case 'day': return 100
-        case 'week': return 20
-        case 'month': return 5
-        case 'year': return 1
-        default: return 20
+        case 'day':
+          return 100
+        case 'week':
+          return 20
+        case 'month':
+          return 5
+        case 'year':
+          return 1
+        default:
+          return 20
       }
     },
   },
@@ -193,24 +208,24 @@ export default {
     },
     getRowTitle(row) {
       // Get the primary field value or first text field
-      const primaryField = this.fields.find(f => f.primary)
+      const primaryField = this.fields.find((f) => f.primary)
       if (primaryField) {
         return row[`field_${primaryField.id}`] || 'Untitled'
       }
-      
-      const textField = this.fields.find(f => f.type === 'text')
+
+      const textField = this.fields.find((f) => f.type === 'text')
       if (textField) {
         return row[`field_${textField.id}`] || 'Untitled'
       }
-      
+
       return `Row ${row.id}`
     },
     formatDuration(startDate, endDate) {
       if (!startDate || !endDate) return ''
-      
+
       const diffTime = Math.abs(endDate - startDate)
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      
+
       if (diffDays === 1) return '1 day'
       if (diffDays < 7) return `${diffDays} days`
       if (diffDays < 30) return `${Math.round(diffDays / 7)} weeks`
@@ -224,41 +239,52 @@ export default {
     },
     getBarStyle() {
       const style = {}
-      
+
       if (!this.startDate && !this.endDate) return style
-      
+
       const timelineStart = this.visibleDateRange.start
       const timelineEnd = this.visibleDateRange.end
-      const timelineWidth = (timelineEnd - timelineStart) / (1000 * 60 * 60 * 24) * this.pixelsPerDay
-      
+      const timelineWidth =
+        ((timelineEnd - timelineStart) / (1000 * 60 * 60 * 24)) *
+        this.pixelsPerDay
+
       let barStart = this.startDate || this.endDate
       let barEnd = this.endDate || this.startDate
-      
+
       // Calculate position and width
-      const startOffset = (barStart - timelineStart) / (1000 * 60 * 60 * 24) * this.pixelsPerDay
-      const barWidth = Math.max(20, (barEnd - barStart) / (1000 * 60 * 60 * 24) * this.pixelsPerDay)
-      
+      const startOffset =
+        ((barStart - timelineStart) / (1000 * 60 * 60 * 24)) * this.pixelsPerDay
+      const barWidth = Math.max(
+        20,
+        ((barEnd - barStart) / (1000 * 60 * 60 * 24)) * this.pixelsPerDay
+      )
+
       style.left = Math.max(0, startOffset) + 'px'
       style.width = barWidth + 'px'
-      
+
       // Color coding based on status or field values
-      const colorField = this.fields.find(f => f.type === 'single_select' && f.name.toLowerCase().includes('status'))
+      const colorField = this.fields.find(
+        (f) =>
+          f.type === 'single_select' && f.name.toLowerCase().includes('status')
+      )
       if (colorField) {
         const value = this.row[`field_${colorField.id}`]
         if (value && value.color) {
           style.backgroundColor = value.color
         }
       }
-      
+
       return style
     },
     getMilestoneStyle(milestone) {
       const milestoneDate = this.getMilestoneDate(milestone)
       if (!milestoneDate) return { display: 'none' }
-      
+
       const timelineStart = this.visibleDateRange.start
-      const offset = (milestoneDate - timelineStart) / (1000 * 60 * 60 * 24) * this.pixelsPerDay
-      
+      const offset =
+        ((milestoneDate - timelineStart) / (1000 * 60 * 60 * 24)) *
+        this.pixelsPerDay
+
       return {
         left: offset + 'px',
         color: milestone.color,
@@ -272,17 +298,17 @@ export default {
     },
     startDrag(event) {
       if (this.readOnly) return
-      
+
       this.isDragging = true
       this.dragStartX = event.clientX
       this.originalStartDate = this.startDate
       this.originalEndDate = this.endDate
-      
+
       event.preventDefault()
     },
     startResize(type) {
       if (this.readOnly) return
-      
+
       this.isResizing = true
       this.resizeType = type
       this.originalStartDate = this.startDate
@@ -290,10 +316,10 @@ export default {
     },
     handleMouseMove(event) {
       if (!this.isDragging && !this.isResizing) return
-      
+
       const deltaX = event.clientX - this.dragStartX
       const daysDelta = deltaX / this.pixelsPerDay
-      
+
       if (this.isDragging) {
         // Move both start and end dates
         if (this.originalStartDate) {
@@ -301,7 +327,7 @@ export default {
           newStartDate.setDate(newStartDate.getDate() + daysDelta)
           this.updateDate('start', newStartDate)
         }
-        
+
         if (this.originalEndDate) {
           const newEndDate = new Date(this.originalEndDate)
           newEndDate.setDate(newEndDate.getDate() + daysDelta)
@@ -325,7 +351,7 @@ export default {
         this.isDragging = false
         this.isResizing = false
         this.resizeType = null
-        
+
         // Emit final date changes
         if (this.startDate !== this.originalStartDate) {
           this.emitDateChange('start', this.startDate)
@@ -336,10 +362,11 @@ export default {
       }
     },
     updateDate(type, newDate) {
-      const field = type === 'start' 
-        ? this.fields.find(f => f.id === this.startDateField)
-        : this.fields.find(f => f.id === this.endDateField)
-      
+      const field =
+        type === 'start'
+          ? this.fields.find((f) => f.id === this.startDateField)
+          : this.fields.find((f) => f.id === this.endDateField)
+
       if (field) {
         // Update the row data locally for immediate feedback
         const fieldName = `field_${field.id}`
@@ -347,10 +374,11 @@ export default {
       }
     },
     emitDateChange(type, newDate) {
-      const field = type === 'start' 
-        ? this.fields.find(f => f.id === this.startDateField)
-        : this.fields.find(f => f.id === this.endDateField)
-      
+      const field =
+        type === 'start'
+          ? this.fields.find((f) => f.id === this.startDateField)
+          : this.fields.find((f) => f.id === this.endDateField)
+
       if (field) {
         this.$emit('date-changed', this.row, field, newDate)
       }
@@ -388,7 +416,7 @@ export default {
     font-size: 14px;
     cursor: pointer;
     color: var(--color-neutral-800);
-    
+
     &:hover {
       color: var(--color-primary);
     }

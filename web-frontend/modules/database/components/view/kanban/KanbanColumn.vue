@@ -1,9 +1,9 @@
 <template>
-  <div 
+  <div
     class="kanban-column"
     :class="{
       'kanban-column--dragging-over': isDraggingOver,
-      'kanban-column--empty': rows.length === 0
+      'kanban-column--empty': rows.length === 0,
     }"
     :data-column-id="column.id"
     @dragover.prevent="handleDragOver"
@@ -13,18 +13,25 @@
     <!-- Column header -->
     <div class="kanban-column__header">
       <div class="kanban-column__title">
-        <div 
+        <div
           class="kanban-column__color-indicator"
           :style="{ backgroundColor: getColumnColor(column.color) }"
         ></div>
         <span class="kanban-column__name">{{ column.name }}</span>
         <span class="kanban-column__count">({{ rows.length }})</span>
       </div>
-      
+
       <!-- Column actions -->
       <div class="kanban-column__actions">
         <button
-          v-if="!readOnly && $hasPermission('database.table.create_row', table, database.workspace.id)"
+          v-if="
+            !readOnly &&
+            $hasPermission(
+              'database.table.create_row',
+              table,
+              database.workspace.id
+            )
+          "
           class="kanban-column__add-card"
           @click="addCard"
           :title="$t('kanbanView.addCard')"
@@ -35,10 +42,7 @@
     </div>
 
     <!-- Column content -->
-    <div 
-      class="kanban-column__content"
-      ref="columnContent"
-    >
+    <div class="kanban-column__content" ref="columnContent">
       <!-- Cards -->
       <KanbanCard
         v-for="row in rows"
@@ -56,7 +60,7 @@
         @drag-start="handleCardDragStart"
         @drag-end="handleCardDragEnd"
       />
-      
+
       <!-- Empty state -->
       <div v-if="rows.length === 0" class="kanban-column__empty">
         <div class="kanban-column__empty-icon">
@@ -66,7 +70,14 @@
           {{ $t('kanbanView.noCards') }}
         </div>
         <button
-          v-if="!readOnly && $hasPermission('database.table.create_row', table, database.workspace.id)"
+          v-if="
+            !readOnly &&
+            $hasPermission(
+              'database.table.create_row',
+              table,
+              database.workspace.id
+            )
+          "
           class="kanban-column__empty-add"
           @click="addCard"
         >
@@ -153,14 +164,16 @@ export default {
      */
     addCard() {
       // Create a new row with the column's status value pre-filled
-      const statusField = this.fields.find(f => f.id === this.view.single_select_field)
+      const statusField = this.fields.find(
+        (f) => f.id === this.view.single_select_field
+      )
       if (!statusField) return
-      
+
       const initialValues = {}
       if (!this.column.isNull) {
         initialValues[`field_${statusField.id}`] = this.column.value
       }
-      
+
       // Emit to parent to show the row create modal with pre-filled values
       this.$emit('add-card', {
         column: this.column,
@@ -173,7 +186,7 @@ export default {
     handleDragOver(event) {
       event.preventDefault()
       event.dataTransfer.dropEffect = 'move'
-      
+
       if (!this.isDraggingOver) {
         this.isDraggingOver = true
         this.dragCounter = 1
@@ -196,7 +209,7 @@ export default {
       event.preventDefault()
       this.isDraggingOver = false
       this.dragCounter = 0
-      
+
       try {
         const dragData = JSON.parse(event.dataTransfer.getData('text/plain'))
         if (dragData.type === 'kanban-card' && dragData.row) {

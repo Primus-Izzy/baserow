@@ -5,13 +5,16 @@
         {{ $t('calendarView.externalSync') }}
       </h2>
     </template>
-    
+
     <template #content>
       <div class="external-sync-modal">
         <!-- Existing sync configurations -->
-        <div v-if="syncConfigs.length > 0" class="external-sync-modal__existing">
+        <div
+          v-if="syncConfigs.length > 0"
+          class="external-sync-modal__existing"
+        >
           <h3>{{ $t('calendarView.existingSyncs') }}</h3>
-          
+
           <div class="external-sync-modal__sync-list">
             <div
               v-for="config in syncConfigs"
@@ -31,27 +34,31 @@
                     {{ getSyncDirectionLabel(config.sync_direction) }}
                   </span>
                 </div>
-                <div v-if="config.last_sync" class="external-sync-modal__sync-last">
-                  {{ $t('calendarView.lastSync') }}: {{ formatDate(config.last_sync) }}
+                <div
+                  v-if="config.last_sync"
+                  class="external-sync-modal__sync-last"
+                >
+                  {{ $t('calendarView.lastSync') }}:
+                  {{ formatDate(config.last_sync) }}
                 </div>
               </div>
-              
+
               <div class="external-sync-modal__sync-actions">
                 <button
                   class="button button--small"
                   @click="triggerSync(config.id)"
                   :disabled="syncing"
                 >
-                  <i class="iconoir-refresh" :class="{ 'rotating': syncing }"></i>
+                  <i class="iconoir-refresh" :class="{ rotating: syncing }"></i>
                   {{ $t('calendarView.syncNow') }}
                 </button>
-                
+
                 <SwitchInput
                   :value="config.is_active"
                   @input="toggleSync(config.id, $event)"
                   :disabled="updating"
                 />
-                
+
                 <button
                   class="button button--small button--error"
                   @click="deleteSync(config.id)"
@@ -67,8 +74,11 @@
         <!-- Add new sync configuration -->
         <div class="external-sync-modal__add-new">
           <h3>{{ $t('calendarView.addNewSync') }}</h3>
-          
-          <form @submit.prevent="addSyncConfig" class="external-sync-modal__form">
+
+          <form
+            @submit.prevent="addSyncConfig"
+            class="external-sync-modal__form"
+          >
             <!-- Provider selection -->
             <div class="external-sync-modal__field">
               <label class="external-sync-modal__label">
@@ -242,7 +252,7 @@ export default {
         notifyIf(error, 'view')
       }
     },
-    
+
     getProviderIcon(provider) {
       const icons = {
         google: 'iconoir-google',
@@ -251,7 +261,7 @@ export default {
       }
       return icons[provider] || 'iconoir-calendar'
     },
-    
+
     getProviderLabel(provider) {
       const labels = {
         google: 'Google Calendar',
@@ -260,7 +270,7 @@ export default {
       }
       return labels[provider] || provider
     },
-    
+
     getSyncDirectionLabel(direction) {
       const labels = {
         import: this.$t('calendarView.importOnly'),
@@ -269,16 +279,16 @@ export default {
       }
       return labels[direction] || direction
     },
-    
+
     formatDate(dateString) {
       if (!dateString) return ''
       const date = new Date(dateString)
       return date.toLocaleString()
     },
-    
+
     async addSyncConfig() {
       if (!this.canAddSync) return
-      
+
       this.adding = true
       try {
         // This would call the API to create the sync config
@@ -288,16 +298,16 @@ export default {
           is_active: true,
           last_sync: null,
         }
-        
+
         this.syncConfigs.push(newConfig)
-        
+
         // Reset form
         this.newSync = {
           provider: '',
           external_calendar_id: '',
           sync_direction: 'bidirectional',
         }
-        
+
         this.$emit('updated')
       } catch (error) {
         notifyIf(error, 'view')
@@ -305,16 +315,16 @@ export default {
         this.adding = false
       }
     },
-    
+
     async triggerSync(syncId) {
       this.syncing = true
       try {
         // This would call the API to trigger sync
-        const config = this.syncConfigs.find(c => c.id === syncId)
+        const config = this.syncConfigs.find((c) => c.id === syncId)
         if (config) {
           config.last_sync = new Date().toISOString()
         }
-        
+
         this.$emit('updated')
       } catch (error) {
         notifyIf(error, 'view')
@@ -322,16 +332,16 @@ export default {
         this.syncing = false
       }
     },
-    
+
     async toggleSync(syncId, isActive) {
       this.updating = true
       try {
         // This would call the API to update the sync config
-        const config = this.syncConfigs.find(c => c.id === syncId)
+        const config = this.syncConfigs.find((c) => c.id === syncId)
         if (config) {
           config.is_active = isActive
         }
-        
+
         this.$emit('updated')
       } catch (error) {
         notifyIf(error, 'view')
@@ -339,17 +349,17 @@ export default {
         this.updating = false
       }
     },
-    
+
     async deleteSync(syncId) {
       if (!confirm(this.$t('calendarView.confirmDeleteSync'))) {
         return
       }
-      
+
       this.updating = true
       try {
         // This would call the API to delete the sync config
-        this.syncConfigs = this.syncConfigs.filter(c => c.id !== syncId)
-        
+        this.syncConfigs = this.syncConfigs.filter((c) => c.id !== syncId)
+
         this.$emit('updated')
       } catch (error) {
         notifyIf(error, 'view')
@@ -515,8 +525,12 @@ export default {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 768px) {

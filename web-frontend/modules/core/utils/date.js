@@ -164,3 +164,7 @@ export function getUserTimeZone() {
     return moment.tz.guess()
   }
 }
+
+export function formatDate(dateTime, format = 'YYYY-MM-DD') {
+  return moment(dateTime).format(format)
+}

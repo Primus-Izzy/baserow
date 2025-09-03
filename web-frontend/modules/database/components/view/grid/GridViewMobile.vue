@@ -3,17 +3,11 @@
     <!-- Mobile Header -->
     <div class="mobile-header">
       <div class="header-actions">
-        <button 
-          class="action-button"
-          @click="$emit('toggle-sidebar')"
-        >
+        <button class="action-button" @click="$emit('toggle-sidebar')">
           <i class="fas fa-bars"></i>
         </button>
         <h1 class="header-title">{{ view.name }}</h1>
-        <button 
-          class="action-button"
-          @click="$emit('show-options')"
-        >
+        <button class="action-button" @click="$emit('show-options')">
           <i class="fas fa-ellipsis-v"></i>
         </button>
       </div>
@@ -23,21 +17,21 @@
     <div class="mobile-content">
       <!-- Quick Actions Bar -->
       <div class="quick-actions-bar">
-        <button 
+        <button
           class="quick-action-btn touch-feedback"
           @click="$emit('add-row')"
         >
           <i class="fas fa-plus"></i>
           <span>Add Row</span>
         </button>
-        <button 
+        <button
           class="quick-action-btn touch-feedback"
           @click="showFilters = !showFilters"
         >
           <i class="fas fa-filter"></i>
           <span>Filter</span>
         </button>
-        <button 
+        <button
           class="quick-action-btn touch-feedback"
           @click="showSort = !showSort"
         >
@@ -55,7 +49,7 @@
           </button>
         </div>
         <div class="panel-content">
-          <GridViewFilterPresets 
+          <GridViewFilterPresets
             :view="view"
             :mobile="true"
             @apply-filter="handleFilterApply"
@@ -79,7 +73,7 @@
       <!-- Mobile Table View -->
       <div class="mobile-table-container">
         <!-- Horizontal scroll with sticky first column -->
-        <div 
+        <div
           class="mobile-table-scroll"
           @touchstart="handleTouchStart"
           @touchend="handleTouchEnd"
@@ -88,8 +82,8 @@
           <table class="mobile-table">
             <thead class="sticky-header">
               <tr>
-                <th 
-                  v-for="field in visibleFields" 
+                <th
+                  v-for="field in visibleFields"
                   :key="field.id"
                   class="mobile-th"
                   :class="{ 'sticky-column': field.id === firstFieldId }"
@@ -97,31 +91,35 @@
                 >
                   <div class="th-content">
                     <span class="field-name">{{ field.name }}</span>
-                    <i 
-                      v-if="getSortDirection(field.id)" 
+                    <i
+                      v-if="getSortDirection(field.id)"
                       class="sort-icon"
-                      :class="getSortDirection(field.id) === 'ASC' ? 'fas fa-sort-up' : 'fas fa-sort-down'"
+                      :class="
+                        getSortDirection(field.id) === 'ASC'
+                          ? 'fas fa-sort-up'
+                          : 'fas fa-sort-down'
+                      "
                     ></i>
                   </div>
                 </th>
               </tr>
             </thead>
             <tbody>
-              <tr 
-                v-for="row in rows" 
+              <tr
+                v-for="row in rows"
                 :key="row.id"
                 class="mobile-row touch-feedback"
                 @click="handleRowClick(row)"
                 @touchstart="handleRowTouchStart(row, $event)"
                 @touchend="handleRowTouchEnd(row, $event)"
               >
-                <td 
+                <td
                   v-for="field in visibleFields"
                   :key="`${row.id}-${field.id}`"
                   class="mobile-td"
-                  :class="{ 
+                  :class="{
                     'sticky-column': field.id === firstFieldId,
-                    'editable': canEditField(field)
+                    editable: canEditField(field),
                   }"
                   @dblclick="handleCellEdit(row, field)"
                 >
@@ -144,7 +142,7 @@
 
       <!-- Mobile Card View Toggle -->
       <div class="view-toggle">
-        <button 
+        <button
           class="toggle-btn"
           :class="{ active: viewMode === 'table' }"
           @click="viewMode = 'table'"
@@ -152,7 +150,7 @@
           <i class="fas fa-table"></i>
           Table
         </button>
-        <button 
+        <button
           class="toggle-btn"
           :class="{ active: viewMode === 'cards' }"
           @click="viewMode = 'cards'"
@@ -164,7 +162,7 @@
 
       <!-- Mobile Card View -->
       <div v-if="viewMode === 'cards'" class="mobile-cards">
-        <div 
+        <div
           v-for="row in rows"
           :key="row.id"
           class="mobile-card touch-feedback"
@@ -175,15 +173,12 @@
             <span class="card-title">
               {{ getRowTitle(row) }}
             </span>
-            <button 
-              class="card-menu-btn"
-              @click.stop="showCardMenu(row)"
-            >
+            <button class="card-menu-btn" @click.stop="showCardMenu(row)">
               <i class="fas fa-ellipsis-v"></i>
             </button>
           </div>
           <div class="card-content">
-            <div 
+            <div
               v-for="field in getCardFields()"
               :key="field.id"
               class="card-field"
@@ -236,26 +231,26 @@ import GridViewFilterPresets from './GridViewFilterPresets'
 export default {
   name: 'GridViewMobile',
   components: {
-    GridViewFilterPresets
+    GridViewFilterPresets,
   },
   mixins: [mobileResponsive],
   props: {
     view: {
       type: Object,
-      required: true
+      required: true,
     },
     rows: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     fields: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     loading: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
@@ -264,38 +259,38 @@ export default {
       viewMode: 'table', // 'table' or 'cards'
       currentTab: 'data',
       longPressTimer: null,
-      selectedRows: new Set()
+      selectedRows: new Set(),
     }
   },
   computed: {
     visibleFields() {
-      return this.fields.filter(field => !field.hidden)
+      return this.fields.filter((field) => !field.hidden)
     },
     firstFieldId() {
       return this.visibleFields.length > 0 ? this.visibleFields[0].id : null
-    }
+    },
   },
   methods: {
     handleFilterApply(filter) {
       this.$emit('apply-filter', filter)
       this.showFilters = false
     },
-    
+
     handleColumnSort(field) {
       this.$emit('sort-column', field)
     },
-    
+
     getSortDirection(fieldId) {
       // Implementation would depend on your sort state
       return null
     },
-    
+
     handleRowClick(row) {
       if (!this.selectedRows.has(row.id)) {
         this.$emit('row-click', row)
       }
     },
-    
+
     handleRowTouchStart(row, event) {
       this.handleTouchStart(event)
       // Start long press timer for multi-select
@@ -307,7 +302,7 @@ export default {
         }
       }, 500)
     },
-    
+
     handleRowTouchEnd(row, event) {
       this.handleTouchEnd(event)
       if (this.longPressTimer) {
@@ -315,13 +310,13 @@ export default {
         this.longPressTimer = null
       }
     },
-    
+
     handleCardTouchStart(row, event) {
       this.handleLongPress(event, () => {
         this.showCardMenu(row)
       })
     },
-    
+
     toggleRowSelection(row) {
       if (this.selectedRows.has(row.id)) {
         this.selectedRows.delete(row.id)
@@ -330,50 +325,50 @@ export default {
       }
       this.$emit('selection-change', Array.from(this.selectedRows))
     },
-    
+
     handleCellEdit(row, field) {
       if (this.canEditField(field)) {
         this.$emit('cell-edit', { row, field })
       }
     },
-    
+
     handleCellUpdate(row, field, value) {
       this.$emit('cell-update', { row, field, value })
     },
-    
+
     canEditField(field) {
       // Implementation would depend on your permission system
       return !field.readonly
     },
-    
+
     getFieldComponent(fieldType) {
       // Return appropriate mobile field component
       return `GridViewField${fieldType}`
     },
-    
+
     getRowTitle(row) {
       const firstField = this.visibleFields[0]
       return firstField ? row[`field_${firstField.id}`] : `Row ${row.id}`
     },
-    
+
     getCardFields() {
       // Return first 4-5 most important fields for card view
       return this.visibleFields.slice(0, 5)
     },
-    
+
     showCardMenu(row) {
       this.$emit('show-card-menu', row)
     },
-    
+
     handleScroll(event) {
       // Handle horizontal scroll with sticky column
       const scrollLeft = event.target.scrollLeft
       const stickyColumns = document.querySelectorAll('.sticky-column')
-      stickyColumns.forEach(col => {
+      stickyColumns.forEach((col) => {
         col.style.transform = `translateX(${scrollLeft}px)`
       })
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -393,7 +388,7 @@ export default {
   gap: $mobile-spacing-sm;
   background: var(--color-neutral-100);
   border-bottom: 1px solid var(--color-neutral-200);
-  
+
   .quick-action-btn {
     @include touch-friendly;
     display: flex;
@@ -404,12 +399,12 @@ export default {
     border-radius: 8px;
     padding: $mobile-spacing-sm;
     flex: 1;
-    
+
     .fas {
       margin-bottom: 4px;
       font-size: 16px;
     }
-    
+
     span {
       font-size: $mobile-font-size-xs;
     }
@@ -419,19 +414,19 @@ export default {
 .mobile-panel {
   background: var(--color-neutral-50);
   border-bottom: 1px solid var(--color-neutral-200);
-  
+
   .panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: $mobile-spacing-md;
     border-bottom: 1px solid var(--color-neutral-200);
-    
+
     h3 {
       margin: 0;
       font-size: $mobile-font-size-md;
     }
-    
+
     .close-btn {
       @include touch-friendly;
       background: none;
@@ -439,7 +434,7 @@ export default {
       color: var(--color-neutral-600);
     }
   }
-  
+
   .panel-content {
     padding: $mobile-spacing-md;
   }
@@ -448,7 +443,7 @@ export default {
 .mobile-table-container {
   flex: 1;
   overflow: hidden;
-  
+
   .mobile-table-scroll {
     height: 100%;
     overflow: auto;
@@ -456,77 +451,78 @@ export default {
       -webkit-overflow-scrolling: touch;
     }
   }
-  
+
   .mobile-table {
     width: 100%;
     border-collapse: collapse;
-    
+
     .sticky-header {
       position: sticky;
       top: 0;
       background: var(--color-neutral-100);
       z-index: 10;
     }
-    
+
     .mobile-th {
       @include touch-friendly;
       border: 1px solid var(--color-neutral-200);
       background: var(--color-neutral-100);
       font-weight: 600;
       text-align: left;
-      
+
       &.sticky-column {
         position: sticky;
         left: 0;
         z-index: 11;
         background: var(--color-neutral-200);
       }
-      
+
       .th-content {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        
+
         .field-name {
           font-size: $mobile-font-size-sm;
         }
-        
+
         .sort-icon {
           color: var(--color-primary);
         }
       }
     }
-    
+
     .mobile-row {
       &:nth-child(even) {
         background: var(--color-neutral-25);
       }
-      
-      &:hover, &:active {
+
+      &:hover,
+      &:active {
         background: var(--color-primary-100);
       }
     }
-    
+
     .mobile-td {
       border: 1px solid var(--color-neutral-200);
       padding: $mobile-spacing-sm;
       min-width: 120px;
-      
+
       &.sticky-column {
         position: sticky;
         left: 0;
         background: inherit;
         z-index: 5;
       }
-      
+
       &.editable {
         cursor: pointer;
-        
+
         &:hover {
           background: var(--color-primary-50);
         }
       }
-      
+
       .cell-content {
         font-size: $mobile-font-size-sm;
         line-height: 1.4;
@@ -540,7 +536,7 @@ export default {
   padding: $mobile-spacing-sm $mobile-spacing-md;
   background: var(--color-neutral-100);
   border-top: 1px solid var(--color-neutral-200);
-  
+
   .toggle-btn {
     @include touch-friendly;
     flex: 1;
@@ -550,11 +546,11 @@ export default {
     background: none;
     border: none;
     color: var(--color-neutral-600);
-    
+
     &.active {
       color: var(--color-primary);
     }
-    
+
     .fas {
       margin-bottom: 4px;
     }
@@ -565,24 +561,24 @@ export default {
   padding: $mobile-spacing-md;
   display: grid;
   gap: $mobile-spacing-md;
-  
+
   .mobile-card {
     background: var(--color-neutral-50);
     border: 1px solid var(--color-neutral-200);
     border-radius: 8px;
     padding: $mobile-spacing-md;
-    
+
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: $mobile-spacing-sm;
-      
+
       .card-title {
         font-weight: 600;
         font-size: $mobile-font-size-md;
       }
-      
+
       .card-menu-btn {
         @include touch-friendly;
         background: none;
@@ -590,18 +586,18 @@ export default {
         color: var(--color-neutral-600);
       }
     }
-    
+
     .card-content {
       .card-field {
         margin-bottom: $mobile-spacing-sm;
-        
+
         .field-label {
           display: block;
           font-size: $mobile-font-size-xs;
           color: var(--color-neutral-600);
           margin-bottom: 2px;
         }
-        
+
         .field-value {
           font-size: $mobile-font-size-sm;
         }
@@ -616,7 +612,7 @@ export default {
   align-items: center;
   justify-content: center;
   padding: $mobile-spacing-xl;
-  
+
   .loading-spinner {
     width: 32px;
     height: 32px;
@@ -629,7 +625,11 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

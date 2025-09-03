@@ -2,24 +2,24 @@
   <div
     class="notification-item"
     :class="{
-      'unread': !notification.is_read,
-      'clickable': isClickable
+      unread: !notification.is_read,
+      clickable: isClickable,
     }"
     @click="handleClick"
   >
     <div class="notification-icon">
       <i :class="getNotificationIcon(notification.notification_type)"></i>
     </div>
-    
+
     <div class="notification-content">
       <div class="notification-title">
         {{ notification.title }}
       </div>
-      
+
       <div class="notification-message">
         {{ notification.message }}
       </div>
-      
+
       <div class="notification-meta">
         <span class="notification-time">
           {{ formatTime(notification.created_at) }}
@@ -29,37 +29,34 @@
         </span>
       </div>
     </div>
-    
+
     <div class="notification-actions">
       <button
         v-if="!notification.is_read"
         class="mark-read-btn"
-        @click.stop="markAsRead"
         title="Mark as read"
+        @click.stop="markAsRead"
       >
         <i class="fas fa-check"></i>
       </button>
-      
+
       <div class="notification-status">
-        <div
-          v-if="!notification.is_read"
-          class="unread-indicator"
-        ></div>
+        <div v-if="!notification.is_read" class="unread-indicator"></div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { formatDistanceToNow } from 'date-fns'
+import { getHumanPeriodAgoCount } from '@baserow/modules/core/utils/date'
 
 export default {
   name: 'NotificationItem',
   props: {
     notification: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     isClickable() {
@@ -69,10 +66,10 @@ export default {
         'comment_reply',
         'row_assigned',
         'form_submission',
-        'automation_failed'
+        'automation_failed',
       ]
       return clickableTypes.includes(this.notification.notification_type.name)
-    }
+    },
   },
   methods: {
     handleClick() {
@@ -80,11 +77,11 @@ export default {
         this.$emit('click', this.notification)
       }
     },
-    
+
     markAsRead() {
       this.$emit('mark-read', [this.notification.id])
     },
-    
+
     getNotificationIcon(notificationType) {
       const iconMap = {
         comment_mention: 'fas fa-at',
@@ -94,12 +91,12 @@ export default {
         form_submission: 'fas fa-file-alt',
         workspace_invitation: 'fas fa-user-plus',
         security_alert: 'fas fa-shield-alt',
-        digest: 'fas fa-newspaper'
+        digest: 'fas fa-newspaper',
       }
-      
+
       return iconMap[notificationType.name] || 'fas fa-bell'
     },
-    
+
     getTypeLabel(notificationType) {
       const labelMap = {
         comment_mention: 'Mention',
@@ -109,20 +106,21 @@ export default {
         form_submission: 'Form',
         workspace_invitation: 'Invitation',
         security_alert: 'Security',
-        digest: 'Digest'
+        digest: 'Digest',
       }
-      
+
       return labelMap[notificationType.name] || notificationType.category
     },
-    
+
     formatTime(timestamp) {
       try {
-        return formatDistanceToNow(new Date(timestamp), { addSuffix: true })
+        const { count, period } = getHumanPeriodAgoCount(timestamp)
+        return `${count} ${period} ago`
       } catch (error) {
         return 'Recently'
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -133,27 +131,27 @@ export default {
   padding: 12px 16px;
   border-bottom: 1px solid var(--color-neutral-100);
   transition: background-color 0.2s;
-  
+
   &:hover {
     background-color: var(--color-neutral-50);
   }
-  
+
   &.clickable {
     cursor: pointer;
-    
+
     &:hover {
       background-color: var(--color-primary-50);
     }
   }
-  
+
   &.unread {
     background-color: var(--color-primary-25);
-    
+
     &:hover {
       background-color: var(--color-primary-75);
     }
   }
-  
+
   &:last-child {
     border-bottom: none;
   }
@@ -169,15 +167,15 @@ export default {
   background-color: var(--color-neutral-100);
   border-radius: 50%;
   margin-right: 12px;
-  
+
   .fas {
     font-size: 14px;
     color: var(--color-neutral-600);
   }
-  
+
   .unread & {
     background-color: var(--color-primary-100);
-    
+
     .fas {
       color: var(--color-primary-600);
     }
@@ -202,7 +200,7 @@ export default {
   color: var(--color-neutral-700);
   line-height: 1.4;
   margin-bottom: 6px;
-  
+
   // Truncate long messages
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -251,12 +249,12 @@ export default {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  
+
   &:hover {
     background-color: var(--color-success-100);
     color: var(--color-success-600);
   }
-  
+
   .fas {
     font-size: 12px;
   }
@@ -276,33 +274,33 @@ export default {
 
 // Category-specific icon colors
 .notification-item {
-  &[data-category="collaboration"] .notification-icon {
+  &[data-category='collaboration'] .notification-icon {
     background-color: var(--color-blue-100);
-    
+
     .fas {
       color: var(--color-blue-600);
     }
   }
-  
-  &[data-category="automation"] .notification-icon {
+
+  &[data-category='automation'] .notification-icon {
     background-color: var(--color-purple-100);
-    
+
     .fas {
       color: var(--color-purple-600);
     }
   }
-  
-  &[data-category="security"] .notification-icon {
+
+  &[data-category='security'] .notification-icon {
     background-color: var(--color-error-100);
-    
+
     .fas {
       color: var(--color-error-600);
     }
   }
-  
-  &[data-category="system"] .notification-icon {
+
+  &[data-category='system'] .notification-icon {
     background-color: var(--color-neutral-100);
-    
+
     .fas {
       color: var(--color-neutral-600);
     }

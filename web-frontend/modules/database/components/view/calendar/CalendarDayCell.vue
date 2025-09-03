@@ -36,7 +36,7 @@
         @dragstart="handleEventDragStart(event, $event)"
         @dragend="handleEventDragEnd"
       />
-      
+
       <!-- More events indicator -->
       <div
         v-if="hiddenEventsCount > 0"
@@ -125,14 +125,14 @@ export default {
     isMobile() {
       return window.innerWidth <= 768
     },
-    
+
     visibleEvents() {
       if (this.showAllEvents || this.events.length <= this.maxVisibleEvents) {
         return this.events
       }
       return this.events.slice(0, this.maxVisibleEvents)
     },
-    
+
     hiddenEventsCount() {
       return Math.max(0, this.events.length - this.maxVisibleEvents)
     },
@@ -143,63 +143,66 @@ export default {
         this.$emit('date-click', this.date)
       }
     },
-    
+
     handleEventClick(event) {
       this.$emit('event-click', event)
     },
-    
+
     handleAddEvent() {
       this.$emit('event-create', this.date)
     },
-    
+
     handleEventDragStart(event, dragEvent) {
       if (this.readOnly) {
         dragEvent.preventDefault()
         return
       }
-      
+
       this.draggedEvent = event
       dragEvent.dataTransfer.effectAllowed = 'move'
-      dragEvent.dataTransfer.setData('text/plain', JSON.stringify({
-        eventId: event.id,
-        originalDate: event.date,
-      }))
-      
+      dragEvent.dataTransfer.setData(
+        'text/plain',
+        JSON.stringify({
+          eventId: event.id,
+          originalDate: event.date,
+        })
+      )
+
       // Add visual feedback
       dragEvent.target.style.opacity = '0.5'
     },
-    
+
     handleEventDragEnd(dragEvent) {
       dragEvent.target.style.opacity = '1'
       this.draggedEvent = null
     },
-    
+
     handleDragOver(event) {
       if (this.readOnly || !this.draggedEvent) {
         return
       }
-      
+
       event.preventDefault()
       event.dataTransfer.dropEffect = 'move'
       this.isDraggingOver = true
     },
-    
+
     handleDragLeave() {
       this.isDraggingOver = false
     },
-    
+
     handleDrop(event) {
       event.preventDefault()
       this.isDraggingOver = false
-      
+
       if (this.readOnly || !this.draggedEvent) {
         return
       }
-      
+
       try {
         const data = JSON.parse(event.dataTransfer.getData('text/plain'))
         const originalDate = new Date(data.originalDate)
-        
+
         // Only move if the date is different
         if (originalDate.toDateString() !== this.date.toDateString()) {
           this.$emit('event-move', this.draggedEvent, this.date)
@@ -207,7 +210,7 @@ export default {
       } catch (error) {
         console.error('Error parsing drag data:', error)
       }
-      
+
       this.draggedEvent = null
     },
   },

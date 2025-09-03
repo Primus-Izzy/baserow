@@ -8,9 +8,9 @@
           :key="item.name"
           :to="item.to"
           class="nav-item touch-feedback"
-          :class="{ 
+          :class="{
             'nav-item-active': isActiveRoute(item.to),
-            'nav-item-disabled': item.disabled
+            'nav-item-disabled': item.disabled,
           }"
           @click="handleNavClick(item)"
         >
@@ -34,7 +34,7 @@
     </button>
 
     <!-- Mobile Menu Overlay -->
-    <div 
+    <div
       v-if="showMobileMenu"
       class="mobile-menu-overlay"
       @click="closeMobileMenu"
@@ -46,7 +46,7 @@
             <i class="fas fa-times"></i>
           </button>
         </div>
-        
+
         <div class="menu-content">
           <div class="menu-section">
             <h4>Views</h4>
@@ -62,7 +62,7 @@
               </button>
             </div>
           </div>
-          
+
           <div class="menu-section">
             <h4>Actions</h4>
             <div class="menu-items">
@@ -82,7 +82,7 @@
     </div>
 
     <!-- Swipe Gesture Indicator -->
-    <div 
+    <div
       v-if="showSwipeIndicator"
       class="swipe-indicator"
       :class="swipeDirection"
@@ -108,47 +108,47 @@ export default {
           label: 'Tables',
           icon: 'fas fa-table',
           to: '/tables',
-          badge: null
+          badge: null,
         },
         {
           name: 'views',
           label: 'Views',
           icon: 'fas fa-eye',
           to: '/views',
-          badge: null
+          badge: null,
         },
         {
           name: 'dashboard',
           label: 'Dashboard',
           icon: 'fas fa-chart-bar',
           to: '/dashboard',
-          badge: null
+          badge: null,
         },
         {
           name: 'settings',
           label: 'Settings',
           icon: 'fas fa-cog',
           to: '/settings',
-          badge: null
-        }
-      ]
+          badge: null,
+        },
+      ],
     },
     fabAction: {
       type: Object,
-      default: null
+      default: null,
     },
     showFab: {
       type: Boolean,
-      default: true
+      default: true,
     },
     availableViews: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     menuActions: {
       type: Array,
-      default: () => []
-    }
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -163,7 +163,7 @@ export default {
       touchStartX: 0,
       touchStartY: 0,
       touchEndX: 0,
-      touchEndY: 0
+      touchEndY: 0,
     }
   },
   mounted() {
@@ -180,58 +180,65 @@ export default {
         window.addEventListener('scroll', this.handleScroll, { passive: true })
       }
     },
-    
+
     removeScrollListener() {
       window.removeEventListener('scroll', this.handleScroll)
     },
-    
+
     handleScroll() {
       const currentScrollY = window.scrollY
-      
+
       if (Math.abs(currentScrollY - this.lastScrollY) < this.scrollThreshold) {
         return
       }
-      
+
       // Hide navigation when scrolling down, show when scrolling up
       if (currentScrollY > this.lastScrollY && currentScrollY > 100) {
         this.hideNavigation = true
       } else {
         this.hideNavigation = false
       }
-      
+
       this.lastScrollY = currentScrollY
     },
-    
+
     setupSwipeGestures() {
       if (this.isMobileDevice) {
-        document.addEventListener('touchstart', this.handleTouchStart, { passive: true })
-        document.addEventListener('touchend', this.handleTouchEnd, { passive: true })
+        document.addEventListener('touchstart', this.handleTouchStart, {
+          passive: true,
+        })
+        document.addEventListener('touchend', this.handleTouchEnd, {
+          passive: true,
+        })
       }
     },
-    
+
     removeSwipeGestures() {
       document.removeEventListener('touchstart', this.handleTouchStart)
       document.removeEventListener('touchend', this.handleTouchEnd)
     },
-    
+
     handleTouchStart(event) {
       this.touchStartX = event.touches[0].clientX
       this.touchStartY = event.touches[0].clientY
     },
-    
+
     handleTouchEnd(event) {
       this.touchEndX = event.changedTouches[0].clientX
       this.touchEndY = event.changedTouches[0].clientY
       this.handleSwipeGesture()
     },
-    
+
     handleSwipeGesture() {
       const deltaX = this.touchEndX - this.touchStartX
       const deltaY = this.touchEndY - this.touchStartY
       const minSwipeDistance = 50
 
       // Horizontal swipe
-      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+      if (
+        Math.abs(deltaX) > Math.abs(deltaY) &&
+        Math.abs(deltaX) > minSwipeDistance
+      ) {
         if (deltaX > 0) {
           this.onSwipeRight()
         } else {
@@ -247,120 +254,120 @@ export default {
         }
       }
     },
-    
+
     addHapticFeedback(type = 'light') {
       if (navigator.vibrate) {
         const patterns = {
           light: 50,
           medium: 100,
-          heavy: 200
+          heavy: 200,
         }
         navigator.vibrate(patterns[type] || patterns.light)
       }
     },
-    
+
     isActiveRoute(route) {
       return this.$route.path.startsWith(route)
     },
-    
+
     handleNavClick(item) {
       if (item.disabled) return
-      
+
       if (item.action) {
         this.$emit('nav-action', item.action)
       } else {
         this.$router.push(item.to)
       }
-      
+
       // Haptic feedback
       if (navigator.vibrate) {
         navigator.vibrate(50)
       }
     },
-    
+
     handleFabClick() {
       if (this.fabAction && this.fabAction.action) {
         this.$emit('fab-action', this.fabAction.action)
       }
-      
+
       // Haptic feedback
       if (navigator.vibrate) {
         navigator.vibrate(100)
       }
     },
-    
+
     showMobileMenuOverlay() {
       this.showMobileMenu = true
       document.body.style.overflow = 'hidden'
     },
-    
+
     closeMobileMenu() {
       this.showMobileMenu = false
       document.body.style.overflow = ''
     },
-    
+
     switchView(view) {
       this.$emit('switch-view', view)
       this.closeMobileMenu()
     },
-    
+
     handleMenuAction(action) {
       this.$emit('menu-action', action)
       this.closeMobileMenu()
     },
-    
+
     showSwipeHint(direction, text) {
       this.swipeDirection = direction
       this.swipeIndicatorText = text
       this.showSwipeIndicator = true
-      
+
       if (this.swipeIndicatorTimer) {
         clearTimeout(this.swipeIndicatorTimer)
       }
-      
+
       this.swipeIndicatorTimer = setTimeout(() => {
         this.showSwipeIndicator = false
       }, 2000)
     },
-    
+
     // Handle swipe gestures from parent components
     onSwipeLeft() {
       this.$emit('swipe-left')
       this.showSwipeHint('left', 'Swipe left for next')
     },
-    
+
     onSwipeRight() {
       this.$emit('swipe-right')
       this.showSwipeHint('right', 'Swipe right for previous')
     },
-    
+
     onSwipeUp() {
       this.$emit('swipe-up')
       this.showSwipeHint('up', 'Swipe up for more')
     },
-    
+
     onSwipeDown() {
       this.$emit('swipe-down')
       this.showSwipeHint('down', 'Swipe down to refresh')
     },
-    
+
     // Update navigation badges
     updateBadge(itemName, count) {
-      const item = this.navigationItems.find(item => item.name === itemName)
+      const item = this.navigationItems.find((item) => item.name === itemName)
       if (item) {
         item.badge = count > 0 ? count : null
       }
     },
-    
+
     // Show/hide navigation programmatically
     showNavigation() {
       this.hideNavigation = false
     },
-    
+
     hideNavigationBar() {
       this.hideNavigation = true
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -379,15 +386,15 @@ export default {
       z-index: 1000;
       transform: translateY(0);
       transition: transform 0.3s ease;
-      
+
       &.nav-hidden {
         transform: translateY(100%);
       }
-      
+
       .nav-container {
         display: flex;
         padding: $mobile-spacing-sm 0;
-        
+
         .nav-item {
           flex: 1;
           display: flex;
@@ -397,29 +404,29 @@ export default {
           text-decoration: none;
           color: var(--color-neutral-600);
           transition: all 0.2s ease;
-          
+
           &.nav-item-active {
             color: var(--color-primary);
-            
+
             .nav-icon i {
               transform: scale(1.1);
             }
           }
-          
+
           &.nav-item-disabled {
             opacity: 0.5;
             pointer-events: none;
           }
-          
+
           .nav-icon {
             position: relative;
             margin-bottom: 4px;
-            
+
             i {
               font-size: 20px;
               transition: transform 0.2s ease;
             }
-            
+
             .nav-badge {
               position: absolute;
               top: -8px;
@@ -434,7 +441,7 @@ export default {
               text-align: center;
             }
           }
-          
+
           .nav-label {
             font-size: $mobile-font-size-xs;
             font-weight: 500;
@@ -444,7 +451,7 @@ export default {
         }
       }
     }
-    
+
     .fab {
       position: fixed;
       bottom: 80px;
@@ -463,15 +470,15 @@ export default {
       z-index: 999;
       transform: scale(1);
       transition: all 0.3s ease;
-      
+
       &.fab-hidden {
         transform: scale(0) translateY(100px);
       }
-      
+
       &:active {
         transform: scale(0.9);
       }
-      
+
       &::before {
         content: '';
         position: absolute;
@@ -485,13 +492,13 @@ export default {
         transform: scale(0);
         transition: transform 0.3s ease;
       }
-      
+
       &:active::before {
         transform: scale(1.2);
         opacity: 0.3;
       }
     }
-    
+
     .mobile-menu-overlay {
       position: fixed;
       top: 0;
@@ -502,7 +509,7 @@ export default {
       z-index: 1001;
       display: flex;
       align-items: flex-end;
-      
+
       .mobile-menu {
         width: 100%;
         background: var(--color-neutral-50);
@@ -510,20 +517,20 @@ export default {
         max-height: 80vh;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        
+
         .menu-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           padding: $mobile-spacing-lg $mobile-spacing-md;
           border-bottom: 1px solid var(--color-neutral-200);
-          
+
           h3 {
             margin: 0;
             font-size: $mobile-font-size-lg;
             font-weight: 600;
           }
-          
+
           .close-btn {
             @include touch-friendly;
             background: none;
@@ -532,24 +539,24 @@ export default {
             color: var(--color-neutral-600);
           }
         }
-        
+
         .menu-content {
           padding: $mobile-spacing-md;
-          
+
           .menu-section {
             margin-bottom: $mobile-spacing-lg;
-            
+
             h4 {
               margin: 0 0 $mobile-spacing-md 0;
               font-size: $mobile-font-size-md;
               font-weight: 600;
               color: var(--color-neutral-700);
             }
-            
+
             .menu-items {
               display: grid;
               gap: $mobile-spacing-sm;
-              
+
               .menu-item {
                 @include touch-friendly;
                 display: flex;
@@ -561,13 +568,13 @@ export default {
                 padding: $mobile-spacing-md;
                 text-align: left;
                 color: var(--color-neutral-700);
-                
+
                 i {
                   font-size: 18px;
                   width: 20px;
                   text-align: center;
                 }
-                
+
                 span {
                   font-size: $mobile-font-size-md;
                   font-weight: 500;
@@ -578,7 +585,7 @@ export default {
         }
       }
     }
-    
+
     .swipe-indicator {
       position: fixed;
       top: 50%;
@@ -593,34 +600,34 @@ export default {
       gap: $mobile-spacing-sm;
       z-index: 1002;
       animation: swipeIndicatorFade 2s ease-in-out;
-      
+
       i {
         font-size: 20px;
       }
-      
+
       span {
         font-size: $mobile-font-size-sm;
         font-weight: 500;
       }
-      
+
       &.left {
         animation: swipeIndicatorSlideLeft 2s ease-in-out;
       }
-      
+
       &.right {
         animation: swipeIndicatorSlideRight 2s ease-in-out;
       }
-      
+
       &.up {
         animation: swipeIndicatorSlideUp 2s ease-in-out;
       }
-      
+
       &.down {
         animation: swipeIndicatorSlideDown 2s ease-in-out;
       }
     }
   }
-  
+
   // Hide on desktop
   @include desktop-up {
     display: none;
@@ -628,31 +635,77 @@ export default {
 }
 
 @keyframes swipeIndicatorFade {
-  0%, 100% { opacity: 0; }
-  20%, 80% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
 }
 
 @keyframes swipeIndicatorSlideLeft {
-  0% { opacity: 0; transform: translate(-30%, -50%); }
-  20%, 80% { opacity: 1; transform: translate(-50%, -50%); }
-  100% { opacity: 0; transform: translate(-70%, -50%); }
+  0% {
+    opacity: 0;
+    transform: translate(-30%, -50%);
+  }
+  20%,
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-70%, -50%);
+  }
 }
 
 @keyframes swipeIndicatorSlideRight {
-  0% { opacity: 0; transform: translate(-70%, -50%); }
-  20%, 80% { opacity: 1; transform: translate(-50%, -50%); }
-  100% { opacity: 0; transform: translate(-30%, -50%); }
+  0% {
+    opacity: 0;
+    transform: translate(-70%, -50%);
+  }
+  20%,
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-30%, -50%);
+  }
 }
 
 @keyframes swipeIndicatorSlideUp {
-  0% { opacity: 0; transform: translate(-50%, -30%); }
-  20%, 80% { opacity: 1; transform: translate(-50%, -50%); }
-  100% { opacity: 0; transform: translate(-50%, -70%); }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -30%);
+  }
+  20%,
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -70%);
+  }
 }
 
 @keyframes swipeIndicatorSlideDown {
-  0% { opacity: 0; transform: translate(-50%, -70%); }
-  20%, 80% { opacity: 1; transform: translate(-50%, -50%); }
-  100% { opacity: 0; transform: translate(-50%, -30%); }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -70%);
+  }
+  20%,
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -30%);
+  }
 }
 </style>

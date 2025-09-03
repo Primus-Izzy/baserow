@@ -41,10 +41,7 @@
           :disabled="readOnly"
           class="kanban-header__dropdown"
         >
-          <DropdownItem
-            :name="$t('kanbanView.noColorField')"
-            :value="null"
-          >
+          <DropdownItem :name="$t('kanbanView.noColorField')" :value="null">
             <i class="iconoir-color-picker"></i>
             {{ $t('kanbanView.noColorField') }}
           </DropdownItem>
@@ -74,17 +71,14 @@
     </template>
 
     <!-- Fields configuration modal -->
-    <Modal
-      v-if="showFieldsModal"
-      @hidden="showFieldsModal = false"
-    >
+    <Modal v-if="showFieldsModal" @hidden="showFieldsModal = false">
       <h2 class="box__title">{{ $t('kanbanView.configureFields') }}</h2>
-      
+
       <div class="kanban-fields-config">
         <p class="kanban-fields-config__description">
           {{ $t('kanbanView.configureFieldsDescription') }}
         </p>
-        
+
         <div class="kanban-fields-config__list">
           <div
             v-for="field in configurableFields"
@@ -97,19 +91,16 @@
             >
               {{ field.name }}
             </Checkbox>
-            
+
             <div class="kanban-fields-config__field-type">
               {{ getFieldTypeName(field) }}
             </div>
           </div>
         </div>
       </div>
-      
+
       <div class="actions">
-        <button
-          class="button button--large"
-          @click="showFieldsModal = false"
-        >
+        <button class="button button--large" @click="showFieldsModal = false">
           {{ $t('action.done') }}
         </button>
       </div>
@@ -162,15 +153,14 @@ export default {
      * Returns all single-select fields that can be used for Kanban columns.
      */
     singleSelectFields() {
-      return this.fields.filter(field => field.type === 'single_select')
+      return this.fields.filter((field) => field.type === 'single_select')
     },
     /**
      * Returns fields that can be configured for display on cards.
      */
     configurableFields() {
-      return this.fields.filter(field => 
-        !field.primary && 
-        field.id !== this.view.single_select_field
+      return this.fields.filter(
+        (field) => !field.primary && field.id !== this.view.single_select_field
       )
     },
     /**
@@ -182,7 +172,7 @@ export default {
       },
       async set(value) {
         if (value === this.view.single_select_field) return
-        
+
         try {
           await this.$store.dispatch('view/update', {
             view: this.view,
@@ -203,7 +193,7 @@ export default {
       },
       async set(value) {
         if (value === this.view.card_cover_image_field) return
-        
+
         try {
           await this.$store.dispatch('view/update', {
             view: this.view,
@@ -220,9 +210,8 @@ export default {
      * Checks if a field is visible on cards.
      */
     isFieldVisible(field) {
-      const fieldOptions = this.$store.getters[
-        `${this.storePrefix}view/kanban/getAllFieldOptions`
-      ]
+      const fieldOptions =
+        this.$store.getters[`${this.storePrefix}view/kanban/getAllFieldOptions`]
       const options = fieldOptions[field.id]
       return options ? !options.hidden : true
     },

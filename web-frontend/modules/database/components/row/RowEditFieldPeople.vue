@@ -36,7 +36,7 @@
         </template>
       </li>
     </ul>
-    
+
     <div v-else-if="value && value.id" class="field-people__single-item">
       <div
         v-if="field.show_avatar"
@@ -67,13 +67,13 @@
     </div>
 
     <span v-if="!readOnly" ref="dropdownLink">
-      <ButtonText 
-        icon="iconoir-plus" 
-        @click.prevent="toggleDropdown()"
-      >
-        {{ field.multiple_people 
-          ? $t('rowEditFieldPeople.addPerson') 
-          : (value && value.id ? $t('rowEditFieldPeople.changePerson') : $t('rowEditFieldPeople.selectPerson'))
+      <ButtonText icon="iconoir-plus" @click.prevent="toggleDropdown()">
+        {{
+          field.multiple_people
+            ? $t('rowEditFieldPeople.addPerson')
+            : value && value.id
+            ? $t('rowEditFieldPeople.changePerson')
+            : $t('rowEditFieldPeople.selectPerson')
         }}
       </ButtonText>
     </span>
@@ -89,7 +89,7 @@
       @input="updateValue($event, value)"
       @hide="touch()"
     />
-    
+
     <div v-show="touched && !valid" class="error">
       {{ error }}
     </div>
@@ -109,8 +109,8 @@ export default {
   methods: {
     clearSingleValue() {
       this.$emit('update', null, this.value)
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -129,7 +129,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   &--row-edit {
     margin-bottom: 0;
   }
@@ -146,7 +146,7 @@ export default {
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 14px;
-  
+
   &--no-avatar {
     padding-left: 12px;
   }
@@ -164,7 +164,7 @@ export default {
   font-size: 12px;
   cursor: pointer;
   flex-shrink: 0;
-  
+
   &:hover {
     color: #333;
   }

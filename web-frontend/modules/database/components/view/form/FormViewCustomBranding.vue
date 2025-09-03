@@ -11,7 +11,7 @@
       <!-- Logo Section -->
       <div class="form-view-custom-branding__section">
         <h4>{{ $t('formViewCustomBranding.logoSection') }}</h4>
-        
+
         <FormGroup
           :label="$t('formViewCustomBranding.logoUrl')"
           :error="errors.logo_url"
@@ -40,7 +40,7 @@
       <!-- Colors Section -->
       <div class="form-view-custom-branding__section">
         <h4>{{ $t('formViewCustomBranding.colorsSection') }}</h4>
-        
+
         <div class="form-view-custom-branding__color-grid">
           <FormGroup
             :label="$t('formViewCustomBranding.primaryColor')"
@@ -123,7 +123,7 @@
       <!-- Thank You Message Section -->
       <div class="form-view-custom-branding__section">
         <h4>{{ $t('formViewCustomBranding.thankYouSection') }}</h4>
-        
+
         <FormGroup
           :label="$t('formViewCustomBranding.thankYouTitle')"
           :error="errors.thank_you_title"
@@ -143,7 +143,9 @@
         >
           <FormTextarea
             v-model="branding.thank_you_message"
-            :placeholder="$t('formViewCustomBranding.thankYouMessagePlaceholder')"
+            :placeholder="
+              $t('formViewCustomBranding.thankYouMessagePlaceholder')
+            "
             :rows="4"
             @input="updateBranding"
           />
@@ -156,7 +158,7 @@
         <p class="form-view-custom-branding__section-description">
           {{ $t('formViewCustomBranding.customCssDescription') }}
         </p>
-        
+
         <FormGroup
           :label="$t('formViewCustomBranding.customCss')"
           :error="errors.custom_css"
@@ -175,22 +177,31 @@
     <!-- Preview Section -->
     <div class="form-view-custom-branding__preview">
       <h4>{{ $t('formViewCustomBranding.preview') }}</h4>
-      <div 
+      <div
         class="form-view-custom-branding__preview-container"
         :style="previewStyles"
       >
-        <div v-if="branding.logo_url" class="form-view-custom-branding__preview-logo">
-          <img 
-            :src="branding.logo_url" 
+        <div
+          v-if="branding.logo_url"
+          class="form-view-custom-branding__preview-logo"
+        >
+          <img
+            :src="branding.logo_url"
             :alt="branding.logo_alt || 'Logo'"
             class="form-view-custom-branding__preview-logo-img"
           />
         </div>
         <h3 class="form-view-custom-branding__preview-title">
-          {{ branding.thank_you_title || $t('formViewCustomBranding.defaultThankYouTitle') }}
+          {{
+            branding.thank_you_title ||
+            $t('formViewCustomBranding.defaultThankYouTitle')
+          }}
         </h3>
         <p class="form-view-custom-branding__preview-message">
-          {{ branding.thank_you_message || $t('formViewCustomBranding.defaultThankYouMessage') }}
+          {{
+            branding.thank_you_message ||
+            $t('formViewCustomBranding.defaultThankYouMessage')
+          }}
         </p>
       </div>
     </div>
@@ -328,11 +339,11 @@ export default {
     border: 1px solid #e1e5e9;
     border-radius: 4px;
     cursor: pointer;
-    
+
     &::-webkit-color-swatch-wrapper {
       padding: 0;
     }
-    
+
     &::-webkit-color-swatch {
       border: none;
       border-radius: 3px;

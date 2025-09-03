@@ -1,5 +1,8 @@
 <template>
-  <div class="grid-view-inline-dropdown" :class="{ 'grid-view-inline-dropdown--open': isOpen }">
+  <div
+    class="grid-view-inline-dropdown"
+    :class="{ 'grid-view-inline-dropdown--open': isOpen }"
+  >
     <div
       ref="trigger"
       class="grid-view-inline-dropdown__trigger"
@@ -12,17 +15,14 @@
       </span>
       <i class="grid-view-inline-dropdown__arrow iconoir-nav-arrow-down"></i>
     </div>
-    
+
     <div
       v-if="isOpen"
       ref="dropdown"
       class="grid-view-inline-dropdown__dropdown"
       :style="dropdownStyle"
     >
-      <div
-        v-if="searchable"
-        class="grid-view-inline-dropdown__search"
-      >
+      <div v-if="searchable" class="grid-view-inline-dropdown__search">
         <input
           ref="searchInput"
           v-model="searchQuery"
@@ -32,15 +32,17 @@
           @keydown="onSearchKeyDown"
         />
       </div>
-      
+
       <div class="grid-view-inline-dropdown__options">
         <div
           v-for="(option, index) in filteredOptions"
           :key="option.value"
           class="grid-view-inline-dropdown__option"
           :class="{
-            'grid-view-inline-dropdown__option--selected': option.value === value,
-            'grid-view-inline-dropdown__option--highlighted': index === highlightedIndex,
+            'grid-view-inline-dropdown__option--selected':
+              option.value === value,
+            'grid-view-inline-dropdown__option--highlighted':
+              index === highlightedIndex,
           }"
           @click="selectOption(option)"
           @mouseenter="highlightedIndex = index"
@@ -58,21 +60,23 @@
             class="grid-view-inline-dropdown__option-check iconoir-check"
           ></i>
         </div>
-        
+
         <div
           v-if="filteredOptions.length === 0"
           class="grid-view-inline-dropdown__no-options"
         >
           {{ $t('gridView.inlineDropdown.noOptions') }}
         </div>
-        
+
         <div
           v-if="allowCreate && searchQuery && !exactMatch"
           class="grid-view-inline-dropdown__create-option"
           @click="createOption"
         >
           <i class="iconoir-plus"></i>
-          {{ $t('gridView.inlineDropdown.createOption', { value: searchQuery }) }}
+          {{
+            $t('gridView.inlineDropdown.createOption', { value: searchQuery })
+          }}
         </div>
       </div>
     </div>
@@ -118,20 +122,21 @@ export default {
   },
   computed: {
     displayValue() {
-      const option = this.options.find(opt => opt.value === this.value)
+      const option = this.options.find((opt) => opt.value === this.value)
       return option ? option.label : ''
     },
     filteredOptions() {
       if (!this.searchQuery) {
         return this.options
       }
-      return this.options.filter(option =>
+      return this.options.filter((option) =>
         option.label.toLowerCase().includes(this.searchQuery.toLowerCase())
       )
     },
     exactMatch() {
-      return this.options.some(option =>
-        option.label.toLowerCase() === this.searchQuery.toLowerCase()
+      return this.options.some(
+        (option) =>
+          option.label.toLowerCase() === this.searchQuery.toLowerCase()
       )
     },
   },
@@ -146,7 +151,7 @@ export default {
   methods: {
     toggle() {
       if (this.readOnly) return
-      
+
       if (this.isOpen) {
         this.close()
       } else {
@@ -183,11 +188,13 @@ export default {
       this.selectOption(newOption)
     },
     findSelectedIndex() {
-      return this.filteredOptions.findIndex(option => option.value === this.value)
+      return this.filteredOptions.findIndex(
+        (option) => option.value === this.value
+      )
     },
     onKeyDown(event) {
       if (this.readOnly) return
-      
+
       switch (event.key) {
         case 'Enter':
         case ' ':
@@ -255,26 +262,26 @@ export default {
     },
     updateDropdownPosition() {
       if (!this.isOpen || !this.$refs.dropdown) return
-      
+
       const trigger = this.$refs.trigger
       const dropdown = this.$refs.dropdown
       const triggerRect = trigger.getBoundingClientRect()
       const dropdownRect = dropdown.getBoundingClientRect()
       const viewportHeight = window.innerHeight
-      
+
       let top = triggerRect.bottom + 2
       let left = triggerRect.left
-      
+
       // Check if dropdown would go below viewport
       if (top + dropdownRect.height > viewportHeight) {
         top = triggerRect.top - dropdownRect.height - 2
       }
-      
+
       // Check if dropdown would go outside right edge
       if (left + dropdownRect.width > window.innerWidth) {
         left = window.innerWidth - dropdownRect.width - 10
       }
-      
+
       this.dropdownStyle = {
         position: 'fixed',
         top: `${top}px`,
@@ -290,7 +297,7 @@ export default {
 <style lang="scss" scoped>
 .grid-view-inline-dropdown {
   position: relative;
-  
+
   &__trigger {
     display: flex;
     align-items: center;
@@ -301,44 +308,44 @@ export default {
     cursor: pointer;
     outline: none;
     transition: all 0.2s;
-    
+
     &:hover {
       border-color: #e1e5e9;
       background: #f8f9fa;
     }
-    
+
     &:focus {
       border-color: #4285f4;
       box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.1);
     }
   }
-  
+
   &--open &__trigger {
     border-color: #4285f4;
     box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.1);
   }
-  
+
   &__value {
     flex: 1;
     text-align: left;
     color: #333;
-    
+
     &:empty {
       color: #999;
     }
   }
-  
+
   &__arrow {
     margin-left: 8px;
     color: #666;
     font-size: 12px;
     transition: transform 0.2s;
   }
-  
+
   &--open &__arrow {
     transform: rotate(180deg);
   }
-  
+
   &__dropdown {
     background: #fff;
     border: 1px solid #e1e5e9;
@@ -347,12 +354,12 @@ export default {
     max-height: 200px;
     overflow: hidden;
   }
-  
+
   &__search {
     padding: 8px;
     border-bottom: 1px solid #e1e5e9;
   }
-  
+
   &__search-input {
     width: 100%;
     padding: 6px 8px;
@@ -360,35 +367,35 @@ export default {
     border-radius: 4px;
     outline: none;
     font-size: 14px;
-    
+
     &:focus {
       border-color: #4285f4;
     }
   }
-  
+
   &__options {
     max-height: 160px;
     overflow-y: auto;
   }
-  
+
   &__option {
     display: flex;
     align-items: center;
     padding: 8px 12px;
     cursor: pointer;
     transition: background-color 0.2s;
-    
+
     &:hover,
     &--highlighted {
       background: #f8f9fa;
     }
-    
+
     &--selected {
       background: #e3f2fd;
       color: #1976d2;
     }
   }
-  
+
   &__option-color {
     width: 12px;
     height: 12px;
@@ -396,24 +403,24 @@ export default {
     margin-right: 8px;
     flex-shrink: 0;
   }
-  
+
   &__option-text {
     flex: 1;
   }
-  
+
   &__option-check {
     margin-left: 8px;
     color: #4285f4;
     font-size: 14px;
   }
-  
+
   &__no-options {
     padding: 12px;
     text-align: center;
     color: #666;
     font-style: italic;
   }
-  
+
   &__create-option {
     display: flex;
     align-items: center;
@@ -422,11 +429,11 @@ export default {
     color: #4285f4;
     border-top: 1px solid #e1e5e9;
     transition: background-color 0.2s;
-    
+
     &:hover {
       background: #f8f9fa;
     }
-    
+
     i {
       margin-right: 8px;
       font-size: 14px;

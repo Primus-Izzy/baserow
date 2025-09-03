@@ -5,7 +5,11 @@
       "Bash(npm:*)",
       "Bash(docker:*)",
       "Bash(docker-compose:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(yarn install)",
+      "Bash(npx eslint:*)",
+      "Bash(npx prettier:*)"
     ],
     "deny": [],
     "ask": []

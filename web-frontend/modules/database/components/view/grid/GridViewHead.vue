@@ -1,5 +1,5 @@
 <template>
-  <div 
+  <div
     class="grid-view__head"
     :class="{ 'grid-view__head--sticky': view.sticky_header }"
   >

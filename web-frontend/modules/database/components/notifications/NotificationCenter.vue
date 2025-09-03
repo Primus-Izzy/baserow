@@ -2,7 +2,10 @@
   <div class="notification-center">
     <!-- Notification Bell Icon -->
     <div class="notification-bell" @click="togglePanel">
-      <i class="fas fa-bell" :class="{ 'has-notifications': hasUnreadNotifications }"></i>
+      <i
+        class="fas fa-bell"
+        :class="{ 'has-notifications': hasUnreadNotifications }"
+      ></i>
       <span v-if="unreadCount > 0" class="notification-badge">
         {{ unreadCount > 99 ? '99+' : unreadCount }}
       </span>
@@ -50,9 +53,18 @@
           <span>Loading notifications...</span>
         </div>
 
-        <div v-else-if="filteredNotifications.length === 0" class="notification-empty">
+        <div
+          v-else-if="filteredNotifications.length === 0"
+          class="notification-empty"
+        >
           <i class="fas fa-bell-slash"></i>
-          <p>{{ currentFilter === 'unread' ? 'No unread notifications' : 'No notifications yet' }}</p>
+          <p>
+            {{
+              currentFilter === 'unread'
+                ? 'No unread notifications'
+                : 'No notifications yet'
+            }}
+          </p>
         </div>
 
         <div v-else class="notification-items">
@@ -102,7 +114,7 @@ export default {
   name: 'NotificationCenter',
   components: {
     NotificationItem,
-    NotificationSettings
+    NotificationSettings,
   },
   data() {
     return {
@@ -111,7 +123,7 @@ export default {
       currentFilter: 'all',
       currentPage: 1,
       hasMoreNotifications: false,
-      loadingMore: false
+      loadingMore: false,
     }
   },
   computed: {
@@ -119,26 +131,26 @@ export default {
       'notifications',
       'unreadCount',
       'loading',
-      'error'
+      'error',
     ]),
     ...mapGetters('database/notifications', [
       'hasUnreadNotifications',
-      'getUnreadNotifications'
+      'getUnreadNotifications',
     ]),
     filteredNotifications() {
       if (this.currentFilter === 'unread') {
         return this.getUnreadNotifications
       }
       return this.notifications
-    }
+    },
   },
   async mounted() {
     // Load initial notifications
     await this.fetchNotifications()
-    
+
     // Set up real-time updates
     this.setupRealtimeUpdates()
-    
+
     // Close panel when clicking outside
     document.addEventListener('click', this.handleDocumentClick)
   },
@@ -150,56 +162,58 @@ export default {
       'fetchNotifications',
       'markAsRead',
       'markAllAsRead',
-      'handleRealtimeNotification'
+      'handleRealtimeNotification',
     ]),
-    
+
     togglePanel() {
       this.showPanel = !this.showPanel
       if (this.showPanel) {
         this.refreshNotifications()
       }
     },
-    
+
     closePanel() {
       this.showPanel = false
     },
-    
+
     openSettings() {
       this.showSettings = true
     },
-    
+
     closeSettings() {
       this.showSettings = false
     },
-    
+
     setFilter(filter) {
       this.currentFilter = filter
     },
-    
+
     async refreshNotifications() {
       try {
-        const workspaceId = this.$store.getters['workspace/getCurrentWorkspaceId']
-        await this.fetchNotifications({ 
+        const workspaceId =
+          this.$store.getters['workspace/getCurrentWorkspaceId']
+        await this.fetchNotifications({
           workspaceId,
-          page: 1
+          page: 1,
         })
         this.currentPage = 1
       } catch (error) {
         this.$toast.error('Failed to load notifications')
       }
     },
-    
+
     async loadMoreNotifications() {
       if (this.loadingMore) return
-      
+
       this.loadingMore = true
       try {
-        const workspaceId = this.$store.getters['workspace/getCurrentWorkspaceId']
+        const workspaceId =
+          this.$store.getters['workspace/getCurrentWorkspaceId']
         const response = await this.fetchNotifications({
           workspaceId,
-          page: this.currentPage + 1
+          page: this.currentPage + 1,
         })
-        
+
         this.currentPage++
         this.hasMoreNotifications = response.next !== null
       } catch (error) {
@@ -208,24 +222,24 @@ export default {
         this.loadingMore = false
       }
     },
-    
+
     async handleNotificationClick(notification) {
       // Mark as read if not already read
       if (!notification.is_read) {
         await this.markAsRead([notification.id])
       }
-      
+
       // Navigate to the related content if applicable
       this.navigateToNotificationContent(notification)
-      
+
       // Close panel
       this.closePanel()
     },
-    
+
     navigateToNotificationContent(notification) {
       // Handle navigation based on notification type
       const { notification_type, data } = notification
-      
+
       switch (notification_type.name) {
         case 'comment_mention':
         case 'comment_reply':
@@ -234,76 +248,76 @@ export default {
               name: 'database-table',
               params: {
                 databaseId: data.database_id,
-                tableId: data.table_id
+                tableId: data.table_id,
               },
               query: {
                 row: data.row_id,
-                comments: 'true'
-              }
+                comments: 'true',
+              },
             })
           }
           break
-          
+
         case 'row_assigned':
           if (data.table_id && data.row_id) {
             this.$router.push({
               name: 'database-table',
               params: {
                 databaseId: data.database_id,
-                tableId: data.table_id
+                tableId: data.table_id,
               },
               query: {
-                row: data.row_id
-              }
+                row: data.row_id,
+              },
             })
           }
           break
-          
+
         case 'form_submission':
           if (data.table_id) {
             this.$router.push({
               name: 'database-table',
               params: {
                 databaseId: data.database_id,
-                tableId: data.table_id
-              }
+                tableId: data.table_id,
+              },
             })
           }
           break
-          
+
         case 'automation_failed':
           if (data.automation_id) {
             this.$router.push({
               name: 'database-automation',
               params: {
                 databaseId: data.database_id,
-                automationId: data.automation_id
-              }
+                automationId: data.automation_id,
+              },
             })
           }
           break
       }
     },
-    
+
     handleSettingsUpdated() {
       this.$toast.success('Notification settings updated')
       this.closeSettings()
     },
-    
+
     handleDocumentClick(event) {
       // Close panel if clicking outside
       if (!this.$el.contains(event.target)) {
         this.closePanel()
       }
     },
-    
+
     setupRealtimeUpdates() {
       // Listen for real-time notifications via WebSocket
       if (this.$realtime) {
         this.$realtime.subscribe('notifications', (data) => {
           if (data.type === 'notification_created') {
             this.handleRealtimeNotification(data.notification)
-            
+
             // Show toast for important notifications
             if (data.notification.notification_type.category === 'security') {
               this.$toast.error(data.notification.title)
@@ -313,8 +327,8 @@ export default {
           }
         })
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -329,15 +343,15 @@ export default {
   padding: 8px;
   border-radius: 4px;
   transition: background-color 0.2s;
-  
+
   &:hover {
     background-color: var(--color-neutral-100);
   }
-  
+
   .fas {
     font-size: 18px;
     color: var(--color-neutral-600);
-    
+
     &.has-notifications {
       color: var(--color-primary-600);
     }
@@ -379,7 +393,7 @@ export default {
   align-items: center;
   padding: 16px;
   border-bottom: 1px solid var(--color-neutral-200);
-  
+
   h3 {
     margin: 0;
     font-size: 16px;
@@ -408,11 +422,11 @@ export default {
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
-  
+
   &:hover {
     background-color: var(--color-neutral-100);
   }
-  
+
   &.active {
     background-color: var(--color-primary-100);
     color: var(--color-primary-700);
@@ -441,12 +455,12 @@ export default {
   justify-content: center;
   padding: 32px;
   color: var(--color-neutral-500);
-  
+
   .fas {
     font-size: 32px;
     margin-bottom: 12px;
   }
-  
+
   p {
     margin: 0;
     font-size: 14px;
@@ -482,8 +496,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 768px) {

@@ -13,7 +13,10 @@
       <span v-if="commentCount > 0" class="comment-button__count">
         {{ commentCount }}
       </span>
-      <span v-if="unresolvedCount > 0" class="comment-button__unresolved-indicator">
+      <span
+        v-if="unresolvedCount > 0"
+        class="comment-button__unresolved-indicator"
+      >
         !
       </span>
     </button>
@@ -51,7 +54,7 @@ export default {
       return this.commentCount > 0
     },
     unresolvedComments() {
-      return this.comments.filter(comment => !comment.is_resolved)
+      return this.comments.filter((comment) => !comment.is_resolved)
     },
     unresolvedCount() {
       return this.unresolvedComments.length
@@ -103,43 +106,43 @@ export default {
   transition: all 0.2s ease;
   min-width: 32px;
   height: 28px;
-  
+
   &:hover {
     background: #f8f9fa;
     border-color: #adb5bd;
     color: #495057;
   }
-  
+
   &--active {
     background: #e3f2fd;
     border-color: #2196f3;
     color: #1976d2;
-    
+
     &:hover {
       background: #bbdefb;
     }
   }
-  
+
   &--unresolved {
     background: #fff3cd;
     border-color: #ffc107;
     color: #856404;
-    
+
     &:hover {
       background: #ffeaa7;
     }
-    
+
     &.comment-button__btn--active {
       background: #fff3cd;
       border-color: #ffc107;
       color: #856404;
-      
+
       &:hover {
         background: #ffeaa7;
       }
     }
   }
-  
+
   i {
     font-size: 14px;
   }
@@ -176,16 +179,16 @@ export default {
     height: 24px;
     min-width: 28px;
     font-size: 11px;
-    
+
     i {
       font-size: 12px;
     }
   }
-  
+
   .comment-button__count {
     font-size: 10px;
   }
-  
+
   .comment-button__unresolved-indicator {
     width: 10px;
     height: 10px;
@@ -199,16 +202,16 @@ export default {
     height: 36px;
     min-width: 40px;
     font-size: 14px;
-    
+
     i {
       font-size: 16px;
     }
   }
-  
+
   .comment-button__count {
     font-size: 12px;
   }
-  
+
   .comment-button__unresolved-indicator {
     width: 14px;
     height: 14px;

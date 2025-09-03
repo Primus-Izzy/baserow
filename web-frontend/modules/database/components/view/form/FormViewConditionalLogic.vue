@@ -16,7 +16,10 @@
       </Checkbox>
     </div>
 
-    <div v-if="conditionalLogic.enabled" class="form-view-conditional-logic__config">
+    <div
+      v-if="conditionalLogic.enabled"
+      class="form-view-conditional-logic__config"
+    >
       <div class="form-view-conditional-logic__logic-type">
         <label class="control__label">
           {{ $t('formViewConditionalLogic.logicType') }}
@@ -168,18 +171,44 @@ export default {
   computed: {
     availableFields() {
       // Return fields that can be used in conditions (excluding current field)
-      return this.fields.filter(field => field.id !== this.fieldOptions.field.id)
+      return this.fields.filter(
+        (field) => field.id !== this.fieldOptions.field.id
+      )
     },
     availableOperators() {
       return [
-        { value: 'equals', label: this.$t('formViewConditionalLogic.operators.equals') },
-        { value: 'not_equals', label: this.$t('formViewConditionalLogic.operators.notEquals') },
-        { value: 'contains', label: this.$t('formViewConditionalLogic.operators.contains') },
-        { value: 'not_contains', label: this.$t('formViewConditionalLogic.operators.notContains') },
-        { value: 'is_empty', label: this.$t('formViewConditionalLogic.operators.isEmpty') },
-        { value: 'is_not_empty', label: this.$t('formViewConditionalLogic.operators.isNotEmpty') },
-        { value: 'greater_than', label: this.$t('formViewConditionalLogic.operators.greaterThan') },
-        { value: 'less_than', label: this.$t('formViewConditionalLogic.operators.lessThan') },
+        {
+          value: 'equals',
+          label: this.$t('formViewConditionalLogic.operators.equals'),
+        },
+        {
+          value: 'not_equals',
+          label: this.$t('formViewConditionalLogic.operators.notEquals'),
+        },
+        {
+          value: 'contains',
+          label: this.$t('formViewConditionalLogic.operators.contains'),
+        },
+        {
+          value: 'not_contains',
+          label: this.$t('formViewConditionalLogic.operators.notContains'),
+        },
+        {
+          value: 'is_empty',
+          label: this.$t('formViewConditionalLogic.operators.isEmpty'),
+        },
+        {
+          value: 'is_not_empty',
+          label: this.$t('formViewConditionalLogic.operators.isNotEmpty'),
+        },
+        {
+          value: 'greater_than',
+          label: this.$t('formViewConditionalLogic.operators.greaterThan'),
+        },
+        {
+          value: 'less_than',
+          label: this.$t('formViewConditionalLogic.operators.lessThan'),
+        },
       ]
     },
   },

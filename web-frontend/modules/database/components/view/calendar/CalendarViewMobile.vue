@@ -3,17 +3,11 @@
     <!-- Mobile Header -->
     <div class="mobile-header">
       <div class="header-actions">
-        <button 
-          class="action-button"
-          @click="$emit('toggle-sidebar')"
-        >
+        <button class="action-button" @click="$emit('toggle-sidebar')">
           <i class="fas fa-bars"></i>
         </button>
         <h1 class="header-title">{{ view.name }}</h1>
-        <button 
-          class="action-button"
-          @click="$emit('show-options')"
-        >
+        <button class="action-button" @click="$emit('show-options')">
           <i class="fas fa-ellipsis-v"></i>
         </button>
       </div>
@@ -24,26 +18,20 @@
       <!-- Calendar Navigation -->
       <div class="calendar-navigation">
         <div class="nav-controls">
-          <button 
-            class="nav-btn touch-feedback"
-            @click="previousPeriod"
-          >
+          <button class="nav-btn touch-feedback" @click="previousPeriod">
             <i class="fas fa-chevron-left"></i>
           </button>
-          
+
           <div class="current-period">
             <h2 class="period-title">{{ currentPeriodTitle }}</h2>
             <span class="period-subtitle">{{ currentPeriodSubtitle }}</span>
           </div>
-          
-          <button 
-            class="nav-btn touch-feedback"
-            @click="nextPeriod"
-          >
+
+          <button class="nav-btn touch-feedback" @click="nextPeriod">
             <i class="fas fa-chevron-right"></i>
           </button>
         </div>
-        
+
         <!-- View Mode Toggle -->
         <div class="view-mode-toggle">
           <button
@@ -60,7 +48,7 @@
       </div>
 
       <!-- Calendar Content -->
-      <div 
+      <div
         class="calendar-content"
         @touchstart="handleTouchStart"
         @touchmove="handleTouchMove"
@@ -70,15 +58,11 @@
         <div v-if="currentViewMode === 'month'" class="month-view">
           <!-- Weekday Headers -->
           <div class="weekday-headers">
-            <div 
-              v-for="day in weekdays"
-              :key="day"
-              class="weekday-header"
-            >
+            <div v-for="day in weekdays" :key="day" class="weekday-header">
               {{ day }}
             </div>
           </div>
-          
+
           <!-- Calendar Grid -->
           <div class="calendar-grid">
             <div
@@ -87,9 +71,9 @@
               class="calendar-day"
               :class="{
                 'other-month': !date.isCurrentMonth,
-                'today': date.isToday,
-                'selected': selectedDate === date.dateString,
-                'has-events': date.events.length > 0
+                today: date.isToday,
+                selected: selectedDate === date.dateString,
+                'has-events': date.events.length > 0,
               }"
               @click="selectDate(date)"
             >
@@ -102,10 +86,7 @@
                   :style="{ backgroundColor: event.color }"
                   @click.stop="selectEvent(event)"
                 ></div>
-                <div 
-                  v-if="date.events.length > 2"
-                  class="more-events"
-                >
+                <div v-if="date.events.length > 2" class="more-events">
                   +{{ date.events.length - 2 }}
                 </div>
               </div>
@@ -117,29 +98,25 @@
         <div v-if="currentViewMode === 'week'" class="week-view">
           <!-- Week Header -->
           <div class="week-header">
-            <div 
+            <div
               v-for="date in weekDates"
               :key="date.dateString"
               class="week-day-header"
-              :class="{ 'today': date.isToday }"
+              :class="{ today: date.isToday }"
             >
               <div class="day-name">{{ date.dayName }}</div>
               <div class="day-number">{{ date.day }}</div>
             </div>
           </div>
-          
+
           <!-- Week Timeline -->
           <div class="week-timeline">
             <div class="time-slots">
-              <div
-                v-for="hour in timeSlots"
-                :key="hour"
-                class="time-slot"
-              >
+              <div v-for="hour in timeSlots" :key="hour" class="time-slot">
                 <span class="time-label">{{ formatHour(hour) }}</span>
               </div>
             </div>
-            
+
             <div class="week-events">
               <div
                 v-for="date in weekDates"
@@ -153,7 +130,7 @@
                   :style="{
                     top: `${getEventTop(event)}px`,
                     height: `${getEventHeight(event)}px`,
-                    backgroundColor: event.color
+                    backgroundColor: event.color,
                   }"
                   @click="selectEvent(event)"
                 >
@@ -170,9 +147,11 @@
           <!-- Day Header -->
           <div class="day-header">
             <h3 class="day-title">{{ selectedDateFormatted }}</h3>
-            <span class="day-subtitle">{{ selectedDayEvents.length }} events</span>
+            <span class="day-subtitle"
+              >{{ selectedDayEvents.length }} events</span
+            >
           </div>
-          
+
           <!-- Day Events List -->
           <div class="day-events-list">
             <div
@@ -196,12 +175,12 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Empty State -->
             <div v-if="selectedDayEvents.length === 0" class="empty-day">
               <i class="fas fa-calendar-day"></i>
               <p>No events scheduled</p>
-              <button 
+              <button
                 class="add-event-btn touch-feedback"
                 @click="addEvent(selectedDate)"
               >
@@ -214,24 +193,18 @@
 
       <!-- Quick Actions -->
       <div class="quick-actions">
-        <button 
-          class="quick-action-btn touch-feedback"
-          @click="goToToday"
-        >
+        <button class="quick-action-btn touch-feedback" @click="goToToday">
           <i class="fas fa-calendar-day"></i>
           <span>Today</span>
         </button>
-        <button 
+        <button
           class="quick-action-btn touch-feedback"
           @click="addEvent(selectedDate || getCurrentDate())"
         >
           <i class="fas fa-plus"></i>
           <span>Add Event</span>
         </button>
-        <button 
-          class="quick-action-btn touch-feedback"
-          @click="showFilters"
-        >
+        <button class="quick-action-btn touch-feedback" @click="showFilters">
           <i class="fas fa-filter"></i>
           <span>Filter</span>
         </button>
@@ -264,14 +237,14 @@
             </div>
           </div>
           <div class="event-actions">
-            <button 
+            <button
               class="action-btn edit-btn"
               @click="editEvent(selectedEvent)"
             >
               <i class="fas fa-edit"></i>
               Edit
             </button>
-            <button 
+            <button
               class="action-btn delete-btn"
               @click="deleteEvent(selectedEvent)"
             >
@@ -310,16 +283,16 @@ export default {
   props: {
     view: {
       type: Object,
-      required: true
+      required: true,
     },
     events: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     fields: {
       type: Array,
-      default: () => []
-    }
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -331,25 +304,25 @@ export default {
       viewModes: [
         { value: 'month', label: 'Month', icon: 'fas fa-calendar' },
         { value: 'week', label: 'Week', icon: 'fas fa-calendar-week' },
-        { value: 'day', label: 'Day', icon: 'fas fa-calendar-day' }
+        { value: 'day', label: 'Day', icon: 'fas fa-calendar-day' },
       ],
       weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       timeSlots: Array.from({ length: 24 }, (_, i) => i),
-      swipeThreshold: 50
+      swipeThreshold: 50,
     }
   },
   computed: {
     currentPeriodTitle() {
-      const options = { 
-        year: 'numeric', 
-        month: 'long' 
+      const options = {
+        year: 'numeric',
+        month: 'long',
       }
       if (this.currentViewMode === 'day') {
         options.day = 'numeric'
       }
       return this.currentDate.toLocaleDateString('en-US', options)
     },
-    
+
     currentPeriodSubtitle() {
       if (this.currentViewMode === 'week') {
         const startOfWeek = this.getStartOfWeek(this.currentDate)
@@ -359,73 +332,81 @@ export default {
       }
       return ''
     },
-    
+
     monthDates() {
       const dates = []
-      const startOfMonth = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1)
-      const endOfMonth = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0)
+      const startOfMonth = new Date(
+        this.currentDate.getFullYear(),
+        this.currentDate.getMonth(),
+        1
+      )
+      const endOfMonth = new Date(
+        this.currentDate.getFullYear(),
+        this.currentDate.getMonth() + 1,
+        0
+      )
       const startOfCalendar = this.getStartOfWeek(startOfMonth)
-      
+
       for (let i = 0; i < 42; i++) {
         const date = new Date(startOfCalendar)
         date.setDate(startOfCalendar.getDate() + i)
-        
+
         dates.push({
           date,
           day: date.getDate(),
           dateString: this.formatDateString(date),
           isCurrentMonth: date.getMonth() === this.currentDate.getMonth(),
           isToday: this.isToday(date),
-          events: this.getEventsForDate(date)
+          events: this.getEventsForDate(date),
         })
       }
-      
+
       return dates
     },
-    
+
     weekDates() {
       const dates = []
       const startOfWeek = this.getStartOfWeek(this.currentDate)
-      
+
       for (let i = 0; i < 7; i++) {
         const date = new Date(startOfWeek)
         date.setDate(startOfWeek.getDate() + i)
-        
+
         dates.push({
           date,
           day: date.getDate(),
           dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
           dateString: this.formatDateString(date),
           isToday: this.isToday(date),
-          events: this.getEventsForDate(date)
+          events: this.getEventsForDate(date),
         })
       }
-      
+
       return dates
     },
-    
+
     selectedDayEvents() {
       if (!this.selectedDate) return []
       const date = new Date(this.selectedDate)
       return this.getEventsForDate(date)
     },
-    
+
     selectedDateFormatted() {
       if (!this.selectedDate) return ''
       const date = new Date(this.selectedDate)
-      return date.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
       })
-    }
+    },
   },
   methods: {
     setViewMode(mode) {
       this.currentViewMode = mode
     },
-    
+
     previousPeriod() {
       const newDate = new Date(this.currentDate)
       if (this.currentViewMode === 'month') {
@@ -437,7 +418,7 @@ export default {
       }
       this.currentDate = newDate
     },
-    
+
     nextPeriod() {
       const newDate = new Date(this.currentDate)
       if (this.currentViewMode === 'month') {
@@ -449,106 +430,106 @@ export default {
       }
       this.currentDate = newDate
     },
-    
+
     goToToday() {
       this.currentDate = new Date()
       this.selectedDate = this.formatDateString(new Date())
     },
-    
+
     selectDate(dateObj) {
       this.selectedDate = dateObj.dateString
       if (this.currentViewMode === 'month' && dateObj.events.length > 0) {
         this.setViewMode('day')
       }
     },
-    
+
     selectEvent(event) {
       this.selectedEvent = event
     },
-    
+
     addEvent(date) {
       this.$emit('add-event', date)
     },
-    
+
     editEvent(event) {
       this.$emit('edit-event', event)
       this.selectedEvent = null
     },
-    
+
     deleteEvent(event) {
       this.$emit('delete-event', event)
       this.selectedEvent = null
     },
-    
+
     showFilters() {
       this.$emit('show-filters')
     },
-    
+
     getStartOfWeek(date) {
       const startOfWeek = new Date(date)
       startOfWeek.setDate(date.getDate() - date.getDay())
       return startOfWeek
     },
-    
+
     isToday(date) {
       const today = new Date()
       return date.toDateString() === today.toDateString()
     },
-    
+
     formatDateString(date) {
       return date.toISOString().split('T')[0]
     },
-    
+
     getCurrentDate() {
       return this.formatDateString(new Date())
     },
-    
+
     getEventsForDate(date) {
       const dateString = this.formatDateString(date)
-      return this.events.filter(event => {
+      return this.events.filter((event) => {
         const eventDate = new Date(event.date)
         return this.formatDateString(eventDate) === dateString
       })
     },
-    
+
     formatHour(hour) {
       const ampm = hour >= 12 ? 'PM' : 'AM'
       const displayHour = hour % 12 || 12
       return `${displayHour} ${ampm}`
     },
-    
+
     formatEventTime(event) {
       const startTime = new Date(event.start_time)
       const endTime = new Date(event.end_time)
       return `${this.formatTime(startTime)} - ${this.formatTime(endTime)}`
     },
-    
+
     formatTime(date) {
-      return date.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
         minute: '2-digit',
-        hour12: true 
+        hour12: true,
       })
     },
-    
+
     getEventTop(event) {
       const startTime = new Date(event.start_time)
       const hours = startTime.getHours()
       const minutes = startTime.getMinutes()
       return (hours * 60 + minutes) * 0.5 // 0.5px per minute
     },
-    
+
     getEventHeight(event) {
       const startTime = new Date(event.start_time)
       const endTime = new Date(event.end_time)
       const duration = (endTime - startTime) / (1000 * 60) // duration in minutes
       return Math.max(duration * 0.5, 20) // minimum 20px height
     },
-    
+
     handleTouchMove(event) {
       const touchX = event.touches[0].clientX
       const deltaX = touchX - this.touchStartX
-      
+
       if (Math.abs(deltaX) > this.swipeThreshold) {
         if (deltaX > 0) {
           this.previousPeriod()
@@ -557,21 +538,21 @@ export default {
         }
         this.touchStartX = touchX
       }
-    }
+    },
   },
-  
+
   mounted() {
     this.selectedDate = this.getCurrentDate()
-    
+
     // Handle swipe gestures
     this.$on('swipe-left', () => {
       this.nextPeriod()
     })
-    
+
     this.$on('swipe-right', () => {
       this.previousPeriod()
     })
-  }
+  },
 }
 </script>
 
@@ -588,13 +569,13 @@ export default {
 .calendar-navigation {
   background: var(--color-neutral-100);
   border-bottom: 1px solid var(--color-neutral-200);
-  
+
   .nav-controls {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: $mobile-spacing-md;
-    
+
     .nav-btn {
       @include touch-friendly;
       background: var(--color-neutral-50);
@@ -606,29 +587,29 @@ export default {
       align-items: center;
       justify-content: center;
     }
-    
+
     .current-period {
       text-align: center;
       flex: 1;
-      
+
       .period-title {
         margin: 0;
         font-size: $mobile-font-size-lg;
         font-weight: 600;
       }
-      
+
       .period-subtitle {
         font-size: $mobile-font-size-sm;
         color: var(--color-neutral-600);
       }
     }
   }
-  
+
   .view-mode-toggle {
     display: flex;
     padding: 0 $mobile-spacing-md $mobile-spacing-md;
     gap: $mobile-spacing-sm;
-    
+
     .mode-btn {
       @include touch-friendly;
       flex: 1;
@@ -639,18 +620,18 @@ export default {
       border: 1px solid var(--color-neutral-300);
       border-radius: 8px;
       padding: $mobile-spacing-sm;
-      
+
       &.active {
         background: var(--color-primary);
         color: white;
         border-color: var(--color-primary);
       }
-      
+
       .fas {
         margin-bottom: 4px;
         font-size: 16px;
       }
-      
+
       span {
         font-size: $mobile-font-size-xs;
       }
@@ -667,13 +648,13 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  
+
   .weekday-headers {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     background: var(--color-neutral-100);
     border-bottom: 1px solid var(--color-neutral-200);
-    
+
     .weekday-header {
       padding: $mobile-spacing-sm;
       text-align: center;
@@ -682,28 +663,28 @@ export default {
       color: var(--color-neutral-600);
     }
   }
-  
+
   .calendar-grid {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: repeat(6, 1fr);
-    
+
     .calendar-day {
       border: 1px solid var(--color-neutral-200);
       padding: $mobile-spacing-sm;
       display: flex;
       flex-direction: column;
       cursor: pointer;
-      
+
       &.other-month {
         opacity: 0.5;
         background: var(--color-neutral-25);
       }
-      
+
       &.today {
         background: var(--color-primary-50);
-        
+
         .day-number {
           background: var(--color-primary);
           color: white;
@@ -715,32 +696,32 @@ export default {
           justify-content: center;
         }
       }
-      
+
       &.selected {
         background: var(--color-primary-100);
       }
-      
+
       &.has-events {
         background: var(--color-neutral-100);
       }
-      
+
       .day-number {
         font-size: $mobile-font-size-sm;
         font-weight: 600;
         margin-bottom: 4px;
       }
-      
+
       .day-events {
         display: flex;
         flex-wrap: wrap;
         gap: 2px;
-        
+
         .event-dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
         }
-        
+
         .more-events {
           font-size: 10px;
           color: var(--color-neutral-600);
@@ -754,20 +735,20 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  
+
   .week-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     background: var(--color-neutral-100);
     border-bottom: 1px solid var(--color-neutral-200);
-    
+
     .week-day-header {
       padding: $mobile-spacing-sm;
       text-align: center;
-      
+
       &.today {
         background: var(--color-primary-50);
-        
+
         .day-number {
           background: var(--color-primary);
           color: white;
@@ -779,59 +760,59 @@ export default {
           justify-content: center;
         }
       }
-      
+
       .day-name {
         font-size: $mobile-font-size-xs;
         color: var(--color-neutral-600);
       }
-      
+
       .day-number {
         font-size: $mobile-font-size-sm;
         font-weight: 600;
       }
     }
   }
-  
+
   .week-timeline {
     flex: 1;
     display: flex;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    
+
     .time-slots {
       width: 60px;
       background: var(--color-neutral-100);
       border-right: 1px solid var(--color-neutral-200);
-      
+
       .time-slot {
         height: 60px;
         border-bottom: 1px solid var(--color-neutral-200);
         display: flex;
         align-items: center;
         justify-content: center;
-        
+
         .time-label {
           font-size: $mobile-font-size-xs;
           color: var(--color-neutral-600);
         }
       }
     }
-    
+
     .week-events {
       flex: 1;
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       position: relative;
-      
+
       .day-column {
         border-right: 1px solid var(--color-neutral-200);
         position: relative;
-        
+
         &:last-child {
           border-right: none;
         }
       }
-      
+
       .week-event {
         position: absolute;
         left: 2px;
@@ -841,12 +822,12 @@ export default {
         color: white;
         font-size: $mobile-font-size-xs;
         cursor: pointer;
-        
+
         .event-title {
           font-weight: 600;
           line-height: 1.2;
         }
-        
+
         .event-time {
           opacity: 0.9;
         }
@@ -859,31 +840,31 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  
+
   .day-header {
     padding: $mobile-spacing-md;
     background: var(--color-neutral-100);
     border-bottom: 1px solid var(--color-neutral-200);
     text-align: center;
-    
+
     .day-title {
       margin: 0;
       font-size: $mobile-font-size-lg;
       font-weight: 600;
     }
-    
+
     .day-subtitle {
       font-size: $mobile-font-size-sm;
       color: var(--color-neutral-600);
     }
   }
-  
+
   .day-events-list {
     flex: 1;
     overflow-y: auto;
     padding: $mobile-spacing-md;
     -webkit-overflow-scrolling: touch;
-    
+
     .day-event {
       background: var(--color-neutral-50);
       border: 1px solid var(--color-neutral-200);
@@ -893,35 +874,35 @@ export default {
       margin-bottom: $mobile-spacing-md;
       display: flex;
       gap: $mobile-spacing-md;
-      
+
       .event-time {
         font-size: $mobile-font-size-sm;
         font-weight: 600;
         color: var(--color-primary);
         min-width: 80px;
       }
-      
+
       .event-details {
         flex: 1;
-        
+
         .event-title {
           margin: 0 0 4px 0;
           font-size: $mobile-font-size-md;
           font-weight: 600;
         }
-        
+
         .event-description {
           margin: 0 0 8px 0;
           font-size: $mobile-font-size-sm;
           color: var(--color-neutral-600);
           line-height: 1.4;
         }
-        
+
         .event-meta {
           .event-location {
             font-size: $mobile-font-size-xs;
             color: var(--color-neutral-600);
-            
+
             .fas {
               margin-right: 4px;
             }
@@ -929,23 +910,23 @@ export default {
         }
       }
     }
-    
+
     .empty-day {
       text-align: center;
       padding: $mobile-spacing-xl;
       color: var(--color-neutral-600);
-      
+
       .fas {
         font-size: 48px;
         margin-bottom: $mobile-spacing-md;
         opacity: 0.5;
       }
-      
+
       p {
         margin-bottom: $mobile-spacing-md;
         font-size: $mobile-font-size-md;
       }
-      
+
       .add-event-btn {
         @include touch-friendly;
         background: var(--color-primary);
@@ -964,7 +945,7 @@ export default {
   gap: $mobile-spacing-sm;
   background: var(--color-neutral-100);
   border-top: 1px solid var(--color-neutral-200);
-  
+
   .quick-action-btn {
     @include touch-friendly;
     display: flex;
@@ -975,12 +956,12 @@ export default {
     border-radius: 8px;
     padding: $mobile-spacing-sm;
     flex: 1;
-    
+
     .fas {
       margin-bottom: 4px;
       font-size: 16px;
     }
-    
+
     span {
       font-size: $mobile-font-size-xs;
     }
@@ -993,31 +974,31 @@ export default {
       margin: 0 0 $mobile-spacing-md 0;
       font-size: $mobile-font-size-lg;
     }
-    
+
     .event-info {
       margin-bottom: $mobile-spacing-lg;
-      
+
       .info-item {
         display: flex;
         align-items: center;
         margin-bottom: $mobile-spacing-sm;
-        
+
         .fas {
           width: 20px;
           margin-right: $mobile-spacing-sm;
           color: var(--color-neutral-600);
         }
-        
+
         span {
           font-size: $mobile-font-size-sm;
         }
       }
     }
-    
+
     .event-actions {
       display: flex;
       gap: $mobile-spacing-md;
-      
+
       .action-btn {
         @include touch-friendly;
         flex: 1;
@@ -1025,16 +1006,16 @@ export default {
         border-radius: 8px;
         padding: $mobile-spacing-sm $mobile-spacing-md;
         font-weight: 600;
-        
+
         .fas {
           margin-right: 4px;
         }
-        
+
         &.edit-btn {
           background: var(--color-primary);
           color: white;
         }
-        
+
         &.delete-btn {
           background: var(--color-error);
           color: white;

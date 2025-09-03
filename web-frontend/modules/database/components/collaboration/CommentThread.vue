@@ -1,9 +1,7 @@
 <template>
   <div class="comment-thread">
     <div class="comment-thread__header">
-      <h4 class="comment-thread__title">
-        Comments ({{ totalComments }})
-      </h4>
+      <h4 class="comment-thread__title">Comments ({{ totalComments }})</h4>
       <div class="comment-thread__actions">
         <button
           v-if="hasUnresolvedComments"
@@ -25,7 +23,10 @@
     </div>
 
     <div class="comment-thread__content">
-      <div v-if="loading && comments.length === 0" class="comment-thread__loading">
+      <div
+        v-if="loading && comments.length === 0"
+        class="comment-thread__loading"
+      >
         <div class="comment-skeleton" v-for="i in 3" :key="i">
           <div class="comment-skeleton__avatar"></div>
           <div class="comment-skeleton__content">
@@ -58,7 +59,9 @@
         :table-id="tableId"
         :row-id="rowId"
         :parent-id="replyToComment"
-        :placeholder="replyToComment ? 'Write a reply...' : 'Write a comment...'"
+        :placeholder="
+          replyToComment ? 'Write a reply...' : 'Write a comment...'
+        "
         @submit="handleCommentSubmit"
         @cancel="cancelReply"
         class="comment-thread__form"
@@ -105,13 +108,13 @@ export default {
       if (this.showResolved) {
         return this.comments
       }
-      return this.comments.filter(comment => !comment.is_resolved)
+      return this.comments.filter((comment) => !comment.is_resolved)
     },
     totalComments() {
       return this.comments.length
     },
     hasUnresolvedComments() {
-      return this.comments.some(comment => !comment.is_resolved)
+      return this.comments.some((comment) => !comment.is_resolved)
     },
   },
   async mounted() {
@@ -184,7 +187,7 @@ export default {
       if (!confirm('Are you sure you want to delete this comment?')) {
         return
       }
-      
+
       try {
         await this.$store.dispatch('database/collaboration/deleteComment', {
           commentId,
@@ -197,9 +200,12 @@ export default {
     },
     async handleCommentResolve(commentId) {
       try {
-        await this.$store.dispatch('database/collaboration/toggleCommentResolution', {
-          commentId,
-        })
+        await this.$store.dispatch(
+          'database/collaboration/toggleCommentResolution',
+          {
+            commentId,
+          }
+        )
       } catch (error) {
         this.$toast.error('Failed to update comment status')
         console.error('Failed to toggle comment resolution:', error)
@@ -272,12 +278,12 @@ export default {
 
 .comment-thread__refresh-btn {
   padding: 8px;
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
-  
+
   .spinning {
     animation: spin 1s linear infinite;
   }
@@ -298,7 +304,7 @@ export default {
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
-  
+
   &__avatar {
     width: 32px;
     height: 32px;
@@ -306,11 +312,11 @@ export default {
     background: #e9ecef;
     animation: pulse 1.5s ease-in-out infinite;
   }
-  
+
   &__content {
     flex: 1;
   }
-  
+
   &__header {
     width: 120px;
     height: 12px;
@@ -319,7 +325,7 @@ export default {
     margin-bottom: 8px;
     animation: pulse 1.5s ease-in-out infinite;
   }
-  
+
   &__text {
     width: 100%;
     height: 40px;
@@ -337,13 +343,13 @@ export default {
   padding: 40px 20px;
   color: #6c757d;
   text-align: center;
-  
+
   i {
     font-size: 48px;
     margin-bottom: 16px;
     opacity: 0.5;
   }
-  
+
   p {
     margin: 0;
     font-size: 14px;
@@ -362,7 +368,8 @@ export default {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

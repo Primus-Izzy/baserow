@@ -6,7 +6,7 @@
         {{ $t('visualBuilder.iftttDescription') }}
       </p>
     </div>
-    
+
     <div class="rule-builder">
       <!-- IF Section -->
       <div class="rule-section if-section">
@@ -16,7 +16,7 @@
           </div>
           <h4>{{ $t('visualBuilder.if') }}</h4>
         </div>
-        
+
         <div class="trigger-selector">
           <div v-if="!selectedTrigger" class="selector-placeholder">
             <button @click="showTriggerSelector = true" class="select-btn">
@@ -24,7 +24,7 @@
               {{ $t('visualBuilder.chooseTrigger') }}
             </button>
           </div>
-          
+
           <div v-else class="selected-trigger">
             <div class="trigger-card">
               <div class="trigger-info">
@@ -38,7 +38,7 @@
                 <i class="iconoir-cancel"></i>
               </button>
             </div>
-            
+
             <!-- Trigger Configuration -->
             <div class="trigger-config">
               <component
@@ -51,7 +51,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- THEN Section -->
       <div class="rule-section then-section">
         <div class="section-header">
@@ -60,7 +60,7 @@
           </div>
           <h4>{{ $t('visualBuilder.then') }}</h4>
         </div>
-        
+
         <div class="actions-list">
           <div
             v-for="(action, index) in selectedActions"
@@ -84,7 +84,7 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Action Configuration -->
             <div v-if="action.showConfig" class="action-config">
               <component
@@ -95,7 +95,7 @@
               />
             </div>
           </div>
-          
+
           <div class="add-action">
             <button @click="showActionSelector = true" class="select-btn">
               <i class="iconoir-plus"></i>
@@ -105,14 +105,16 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Rule Preview -->
     <div class="rule-preview">
       <h4>{{ $t('visualBuilder.rulePreview') }}</h4>
       <div class="preview-text">
         <span class="if-text">
           {{ $t('visualBuilder.if') }}
-          <strong>{{ selectedTrigger?.name || $t('visualBuilder.somethingHappens') }}</strong>
+          <strong>{{
+            selectedTrigger?.name || $t('visualBuilder.somethingHappens')
+          }}</strong>
         </span>
         <span class="then-text">
           {{ $t('visualBuilder.then') }}
@@ -121,20 +123,29 @@
           </span>
           <span v-else>
             <strong v-for="(action, index) in selectedActions" :key="index">
-              {{ action.name }}{{ index < selectedActions.length - 1 ? ', ' : '' }}
+              {{ action.name
+              }}{{ index < selectedActions.length - 1 ? ', ' : '' }}
             </strong>
           </span>
         </span>
       </div>
     </div>
-    
+
     <!-- Action Buttons -->
     <div class="builder-actions">
-      <button @click="saveRule" :disabled="!canSaveRule" class="btn btn-primary">
+      <button
+        @click="saveRule"
+        :disabled="!canSaveRule"
+        class="btn btn-primary"
+      >
         <i class="iconoir-check"></i>
         {{ $t('visualBuilder.saveRule') }}
       </button>
-      <button @click="testRule" :disabled="!canTestRule" class="btn btn-secondary">
+      <button
+        @click="testRule"
+        :disabled="!canTestRule"
+        class="btn btn-secondary"
+      >
         <i class="iconoir-play"></i>
         {{ $t('visualBuilder.testRule') }}
       </button>
@@ -143,7 +154,7 @@
         {{ $t('visualBuilder.reset') }}
       </button>
     </div>
-    
+
     <!-- Trigger Selector Modal -->
     <Modal v-if="showTriggerSelector" @close="showTriggerSelector = false">
       <template #header>
@@ -156,7 +167,7 @@
         />
       </template>
     </Modal>
-    
+
     <!-- Action Selector Modal -->
     <Modal v-if="showActionSelector" @close="showActionSelector = false">
       <template #header>
@@ -205,11 +216,13 @@ export default {
   },
   computed: {
     canSaveRule() {
-      return this.selectedTrigger && 
-             this.selectedActions.length > 0 &&
-             this.isConfigurationValid()
+      return (
+        this.selectedTrigger &&
+        this.selectedActions.length > 0 &&
+        this.isConfigurationValid()
+      )
     },
-    
+
     canTestRule() {
       return this.canSaveRule
     },
@@ -223,12 +236,12 @@ export default {
       this.triggerConfiguration = {}
       this.showTriggerSelector = false
     },
-    
+
     removeTrigger() {
       this.selectedTrigger = null
       this.triggerConfiguration = {}
     },
-    
+
     selectAction(action) {
       const actionWithConfig = {
         ...action,
@@ -236,70 +249,77 @@ export default {
         configuration: {},
         showConfig: false,
       }
-      
+
       this.selectedActions.push(actionWithConfig)
       this.showActionSelector = false
     },
-    
+
     removeAction(index) {
       this.selectedActions.splice(index, 1)
     },
-    
+
     configureAction(index) {
-      this.selectedActions[index].showConfig = !this.selectedActions[index].showConfig
+      this.selectedActions[index].showConfig =
+        !this.selectedActions[index].showConfig
     },
-    
+
     getTriggerConfigComponent(triggerType) {
       // Map trigger types to their configuration components
       const componentMap = {
-        'date_based_trigger': 'DateBasedTriggerConfig',
-        'webhook_trigger': 'WebhookTriggerConfig',
-        'linked_record_change_trigger': 'LinkedRecordChangeTriggerConfig',
-        'conditional_trigger': 'ConditionalTriggerConfig',
-        'rows_created': 'RowsCreatedTriggerConfig',
-        'rows_updated': 'RowsUpdatedTriggerConfig',
-        'rows_deleted': 'RowsDeletedTriggerConfig',
+        date_based_trigger: 'DateBasedTriggerConfig',
+        webhook_trigger: 'WebhookTriggerConfig',
+        linked_record_change_trigger: 'LinkedRecordChangeTriggerConfig',
+        conditional_trigger: 'ConditionalTriggerConfig',
+        rows_created: 'RowsCreatedTriggerConfig',
+        rows_updated: 'RowsUpdatedTriggerConfig',
+        rows_deleted: 'RowsDeletedTriggerConfig',
       }
-      
+
       return componentMap[triggerType] || null
     },
-    
+
     getActionConfigComponent(actionType) {
       // Map action types to their configuration components
       const componentMap = {
-        'notification_action': 'NotificationActionConfig',
-        'webhook_action': 'WebhookActionConfig',
-        'status_change_action': 'StatusChangeActionConfig',
-        'conditional_branch': 'ConditionalBranchConfig',
-        'delay': 'DelayActionConfig',
-        'create_row': 'CreateRowActionConfig',
-        'update_row': 'UpdateRowActionConfig',
-        'delete_row': 'DeleteRowActionConfig',
+        notification_action: 'NotificationActionConfig',
+        webhook_action: 'WebhookActionConfig',
+        status_change_action: 'StatusChangeActionConfig',
+        conditional_branch: 'ConditionalBranchConfig',
+        delay: 'DelayActionConfig',
+        create_row: 'CreateRowActionConfig',
+        update_row: 'UpdateRowActionConfig',
+        delete_row: 'DeleteRowActionConfig',
       }
-      
+
       return componentMap[actionType] || null
     },
-    
+
     isConfigurationValid() {
       // Check if trigger configuration is valid
       if (this.selectedTrigger && this.selectedTrigger.requiresConfig) {
-        if (!this.triggerConfiguration || Object.keys(this.triggerConfiguration).length === 0) {
+        if (
+          !this.triggerConfiguration ||
+          Object.keys(this.triggerConfiguration).length === 0
+        ) {
           return false
         }
       }
-      
+
       // Check if all actions are properly configured
       for (const action of this.selectedActions) {
         if (action.requiresConfig) {
-          if (!action.configuration || Object.keys(action.configuration).length === 0) {
+          if (
+            !action.configuration ||
+            Object.keys(action.configuration).length === 0
+          ) {
             return false
           }
         }
       }
-      
+
       return true
     },
-    
+
     async saveRule() {
       try {
         const ruleData = {
@@ -307,27 +327,27 @@ export default {
             type: this.selectedTrigger.type,
             configuration: this.triggerConfiguration,
           },
-          actions: this.selectedActions.map(action => ({
+          actions: this.selectedActions.map((action) => ({
             type: action.type,
             configuration: action.configuration,
           })),
         }
-        
+
         await this.$store.dispatch('automationWorkflow/createFromIftttRule', {
           workflowId: this.workflow.id,
           ruleData,
         })
-        
+
         this.$emit('rule-saved', ruleData)
         this.resetBuilder()
-        
+
         this.$toast.success(this.$t('visualBuilder.ruleSaved'))
       } catch (error) {
         console.error('Failed to save rule:', error)
         this.$toast.error(this.$t('visualBuilder.ruleSaveFailed'))
       }
     },
-    
+
     async testRule() {
       try {
         const ruleData = {
@@ -335,17 +355,20 @@ export default {
             type: this.selectedTrigger.type,
             configuration: this.triggerConfiguration,
           },
-          actions: this.selectedActions.map(action => ({
+          actions: this.selectedActions.map((action) => ({
             type: action.type,
             configuration: action.configuration,
           })),
         }
-        
-        const result = await this.$store.dispatch('automationWorkflow/testIftttRule', {
-          workflowId: this.workflow.id,
-          ruleData,
-        })
-        
+
+        const result = await this.$store.dispatch(
+          'automationWorkflow/testIftttRule',
+          {
+            workflowId: this.workflow.id,
+            ruleData,
+          }
+        )
+
         this.$emit('rule-tested', result)
         this.$toast.success(this.$t('visualBuilder.ruleTestSuccess'))
       } catch (error) {
@@ -353,7 +376,7 @@ export default {
         this.$toast.error(this.$t('visualBuilder.ruleTestFailed'))
       }
     },
-    
+
     resetBuilder() {
       this.selectedTrigger = null
       this.triggerConfiguration = {}
@@ -361,7 +384,7 @@ export default {
       this.showTriggerSelector = false
       this.showActionSelector = false
     },
-    
+
     loadExistingRule() {
       if (this.existingRule) {
         // Load existing rule data
@@ -369,13 +392,16 @@ export default {
           this.selectedTrigger = {
             type: this.existingRule.trigger.type,
             name: this.getTriggerName(this.existingRule.trigger.type),
-            configComponent: this.getTriggerConfigComponent(this.existingRule.trigger.type),
+            configComponent: this.getTriggerConfigComponent(
+              this.existingRule.trigger.type
+            ),
           }
-          this.triggerConfiguration = this.existingRule.trigger.configuration || {}
+          this.triggerConfiguration =
+            this.existingRule.trigger.configuration || {}
         }
-        
+
         if (this.existingRule.actions) {
-          this.selectedActions = this.existingRule.actions.map(action => ({
+          this.selectedActions = this.existingRule.actions.map((action) => ({
             type: action.type,
             name: this.getActionName(action.type),
             configComponent: this.getActionConfigComponent(action.type),
@@ -385,24 +411,28 @@ export default {
         }
       }
     },
-    
+
     getTriggerName(triggerType) {
-      const triggerTypes = this.$registry.getOrderedList('node').filter(type => type.isTrigger)
-      const trigger = triggerTypes.find(t => t.getType() === triggerType)
+      const triggerTypes = this.$registry
+        .getOrderedList('node')
+        .filter((type) => type.isTrigger)
+      const trigger = triggerTypes.find((t) => t.getType() === triggerType)
       return trigger ? trigger.name : triggerType
     },
-    
+
     getActionName(actionType) {
-      const actionTypes = this.$registry.getOrderedList('node').filter(type => type.isWorkflowAction)
-      const action = actionTypes.find(a => a.getType() === actionType)
+      const actionTypes = this.$registry
+        .getOrderedList('node')
+        .filter((type) => type.isWorkflowAction)
+      const action = actionTypes.find((a) => a.getType() === actionType)
       return action ? action.name : actionType
     },
   },
-  
+
   mounted() {
     this.loadExistingRule()
   },
-  
+
   watch: {
     existingRule: {
       handler() {
@@ -427,14 +457,14 @@ export default {
 .builder-header {
   text-align: center;
   margin-bottom: 2rem;
-  
+
   h3 {
     margin: 0 0 0.5rem 0;
     font-size: 1.5rem;
     font-weight: 700;
     color: #333;
   }
-  
+
   .builder-description {
     margin: 0;
     color: #666;
@@ -454,15 +484,23 @@ export default {
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.3s ease;
-  
+
   &.if-section {
     border-color: #667eea;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(102, 126, 234, 0.05) 0%,
+      rgba(118, 75, 162, 0.05) 100%
+    );
   }
-  
+
   &.then-section {
     border-color: #4facfe;
-    background: linear-gradient(135deg, rgba(79, 172, 254, 0.05) 0%, rgba(0, 242, 254, 0.05) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(79, 172, 254, 0.05) 0%,
+      rgba(0, 242, 254, 0.05) 100%
+    );
   }
 }
 
@@ -471,7 +509,7 @@ export default {
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
-  
+
   h4 {
     margin: 0;
     font-size: 1.25rem;
@@ -488,17 +526,17 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   &.if-icon {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
   }
-  
+
   &.then-icon {
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     color: white;
   }
-  
+
   i {
     font-size: 1.5rem;
   }
@@ -522,13 +560,13 @@ export default {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: #e9ecef;
     border-color: #007bff;
     color: #007bff;
   }
-  
+
   i {
     font-size: 1.2rem;
   }
@@ -557,7 +595,7 @@ export default {
   align-items: center;
   gap: 1rem;
   flex: 1;
-  
+
   i {
     font-size: 1.5rem;
     color: #007bff;
@@ -572,7 +610,7 @@ export default {
     font-weight: 600;
     color: #333;
   }
-  
+
   p {
     margin: 0;
     font-size: 0.9rem;
@@ -596,7 +634,7 @@ export default {
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  
+
   i {
     font-size: 1rem;
   }
@@ -605,7 +643,7 @@ export default {
 .config-btn {
   background: #e9ecef;
   color: #6c757d;
-  
+
   &:hover {
     background: #007bff;
     color: white;
@@ -615,7 +653,7 @@ export default {
 .remove-btn {
   background: #f8d7da;
   color: #721c24;
-  
+
   &:hover {
     background: #dc3545;
     color: white;
@@ -644,7 +682,7 @@ export default {
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  
+
   h4 {
     margin: 0 0 1rem 0;
     font-size: 1.1rem;
@@ -656,12 +694,12 @@ export default {
 .preview-text {
   font-size: 1.1rem;
   line-height: 1.6;
-  
+
   .if-text,
   .then-text {
     display: block;
     margin-bottom: 0.5rem;
-    
+
     strong {
       color: #007bff;
       font-weight: 600;
@@ -686,35 +724,35 @@ export default {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
-  
+
   &.btn-primary {
     background: #007bff;
     color: white;
-    
+
     &:hover:not(:disabled) {
       background: #0056b3;
     }
   }
-  
+
   &.btn-secondary {
     background: #6c757d;
     color: white;
-    
+
     &:hover:not(:disabled) {
       background: #545b62;
     }
   }
-  
+
   &.btn-ghost {
     background: transparent;
     color: #6c757d;
     border: 1px solid #6c757d;
-    
+
     &:hover:not(:disabled) {
       background: #6c757d;
       color: white;

@@ -11,7 +11,10 @@
         <button
           v-for="category in categories"
           :key="category.key"
-          :class="['category-btn', { active: selectedCategory === category.key }]"
+          :class="[
+            'category-btn',
+            { active: selectedCategory === category.key },
+          ]"
           @click="selectedCategory = category.key"
         >
           <i :class="category.icon"></i>
@@ -19,7 +22,7 @@
         </button>
       </div>
     </div>
-    
+
     <div class="actions-grid">
       <div
         v-for="action in filteredActions"
@@ -34,7 +37,9 @@
           <h4>{{ action.name }}</h4>
           <p>{{ action.description }}</p>
           <div class="action-meta">
-            <span class="category-tag">{{ getCategoryLabel(action.category) }}</span>
+            <span class="category-tag">{{
+              getCategoryLabel(action.category)
+            }}</span>
             <span v-if="action.isPopular" class="popular-tag">
               <i class="iconoir-star"></i>
               {{ $t('visualBuilder.popular') }}
@@ -46,7 +51,7 @@
         </div>
       </div>
     </div>
-    
+
     <div v-if="filteredActions.length === 0" class="no-results">
       <i class="iconoir-search"></i>
       <h4>{{ $t('visualBuilder.noActionsFound') }}</h4>
@@ -99,10 +104,12 @@ export default {
         },
       ]
     },
-    
+
     availableActions() {
-      const actionTypes = this.$registry.getOrderedList('node').filter(type => type.isWorkflowAction)
-      
+      const actionTypes = this.$registry
+        .getOrderedList('node')
+        .filter((type) => type.isWorkflowAction)
+
       return [
         // Enhanced actions
         {
@@ -154,35 +161,40 @@ export default {
           requiresConfig: true,
         },
         // Standard actions from registry
-        ...actionTypes.map(actionType => ({
+        ...actionTypes.map((actionType) => ({
           type: actionType.getType(),
           name: actionType.name,
           description: actionType.description,
           iconClass: actionType.iconClass || 'iconoir-play',
           category: this.categorizeAction(actionType.getType()),
-          isPopular: ['create_row', 'update_row', 'http_request'].includes(actionType.getType()),
+          isPopular: ['create_row', 'update_row', 'http_request'].includes(
+            actionType.getType()
+          ),
           requiresConfig: true,
         })),
       ]
     },
-    
+
     filteredActions() {
       let actions = this.availableActions
-      
+
       // Filter by category
       if (this.selectedCategory !== 'all') {
-        actions = actions.filter(action => action.category === this.selectedCategory)
+        actions = actions.filter(
+          (action) => action.category === this.selectedCategory
+        )
       }
-      
+
       // Filter by search query
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase()
-        actions = actions.filter(action =>
-          action.name.toLowerCase().includes(query) ||
-          action.description.toLowerCase().includes(query)
+        actions = actions.filter(
+          (action) =>
+            action.name.toLowerCase().includes(query) ||
+            action.description.toLowerCase().includes(query)
         )
       }
-      
+
       // Sort by popularity and name
       return actions.sort((a, b) => {
         if (a.isPopular && !b.isPopular) return -1
@@ -195,29 +207,29 @@ export default {
     selectAction(action) {
       this.$emit('select', action)
     },
-    
+
     categorizeAction(actionType) {
       const categoryMap = {
-        'create_row': 'database',
-        'update_row': 'database',
-        'delete_row': 'database',
-        'get_row': 'database',
-        'list_rows': 'database',
-        'aggregate_rows': 'database',
-        'http_request': 'integration',
-        'smtp_email': 'notification',
-        'notification_action': 'notification',
-        'webhook_action': 'integration',
-        'status_change_action': 'database',
-        'conditional_branch': 'logic',
-        'delay': 'utility',
+        create_row: 'database',
+        update_row: 'database',
+        delete_row: 'database',
+        get_row: 'database',
+        list_rows: 'database',
+        aggregate_rows: 'database',
+        http_request: 'integration',
+        smtp_email: 'notification',
+        notification_action: 'notification',
+        webhook_action: 'integration',
+        status_change_action: 'database',
+        conditional_branch: 'logic',
+        delay: 'utility',
       }
-      
+
       return categoryMap[actionType] || 'utility'
     },
-    
+
     getCategoryLabel(categoryKey) {
-      const category = this.categories.find(c => c.key === categoryKey)
+      const category = this.categories.find((c) => c.key === categoryKey)
       return category ? category.label : categoryKey
     },
   },
@@ -244,7 +256,7 @@ export default {
   border-radius: 6px;
   font-size: 1rem;
   margin-bottom: 1rem;
-  
+
   &:focus {
     outline: none;
     border-color: #007bff;
@@ -270,19 +282,19 @@ export default {
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: #e9ecef;
     border-color: #007bff;
     color: #007bff;
   }
-  
+
   &.active {
     background: #007bff;
     border-color: #007bff;
     color: white;
   }
-  
+
   i {
     font-size: 1rem;
   }
@@ -305,7 +317,7 @@ export default {
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:hover {
     border-color: #007bff;
     box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
@@ -323,7 +335,7 @@ export default {
   justify-content: center;
   margin-right: 1rem;
   flex-shrink: 0;
-  
+
   i {
     font-size: 1.5rem;
     color: white;
@@ -332,14 +344,14 @@ export default {
 
 .action-content {
   flex: 1;
-  
+
   h4 {
     margin: 0 0 0.5rem 0;
     font-size: 1.1rem;
     font-weight: 600;
     color: #333;
   }
-  
+
   p {
     margin: 0 0 1rem 0;
     font-size: 0.9rem;
@@ -376,7 +388,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  
+
   i {
     font-size: 0.8rem;
   }
@@ -396,19 +408,19 @@ export default {
   padding: 3rem;
   text-align: center;
   color: #6c757d;
-  
+
   i {
     font-size: 3rem;
     margin-bottom: 1rem;
     opacity: 0.5;
   }
-  
+
   h4 {
     margin: 0 0 0.5rem 0;
     font-size: 1.2rem;
     font-weight: 600;
   }
-  
+
   p {
     margin: 0;
     font-size: 1rem;

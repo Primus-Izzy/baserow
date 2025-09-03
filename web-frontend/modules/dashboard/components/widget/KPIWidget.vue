@@ -40,14 +40,14 @@
 
       <div class="dashboard-kpi-widget__content widget__content">
         <!-- Number Display -->
-        <div v-if="widget.display_format === 'number'" class="kpi-widget__main-value">
+        <div
+          v-if="widget.display_format === 'number'"
+          class="kpi-widget__main-value"
+        >
           <span v-if="widget.prefix_text" class="kpi-widget__prefix">
             {{ widget.prefix_text }}
           </span>
-          <span 
-            class="kpi-widget__value"
-            :style="{ color: getValueColor() }"
-          >
+          <span class="kpi-widget__value" :style="{ color: getValueColor() }">
             {{ kpiData.formatted_value || '0' }}
           </span>
           <span v-if="widget.suffix_text" class="kpi-widget__suffix">
@@ -67,7 +67,10 @@
         />
 
         <!-- Progress Bar Display -->
-        <div v-else-if="widget.display_format === 'progress'" class="kpi-widget__progress">
+        <div
+          v-else-if="widget.display_format === 'progress'"
+          class="kpi-widget__progress"
+        >
           <div class="kpi-widget__progress-header">
             <span class="kpi-widget__progress-label">{{ widget.title }}</span>
             <span class="kpi-widget__progress-value">
@@ -75,23 +78,23 @@
             </span>
           </div>
           <div class="kpi-widget__progress-bar">
-            <div 
+            <div
               class="kpi-widget__progress-fill"
-              :style="{ 
+              :style="{
                 width: `${getProgressPercentage()}%`,
-                backgroundColor: getValueColor()
+                backgroundColor: getValueColor(),
               }"
             ></div>
           </div>
         </div>
 
         <!-- Sparkline Display -->
-        <div v-else-if="widget.display_format === 'sparkline'" class="kpi-widget__sparkline">
+        <div
+          v-else-if="widget.display_format === 'sparkline'"
+          class="kpi-widget__sparkline"
+        >
           <div class="kpi-widget__sparkline-value">
-            <span 
-              class="kpi-widget__value"
-              :style="{ color: getValueColor() }"
-            >
+            <span class="kpi-widget__value" :style="{ color: getValueColor() }">
               {{ kpiData.formatted_value || '0' }}
             </span>
           </div>
@@ -104,15 +107,12 @@
         </div>
 
         <!-- Comparison/Trend Information -->
-        <div 
+        <div
           v-if="widget.comparison_enabled && kpiData.comparison_value !== null"
           class="kpi-widget__comparison"
         >
           <div class="kpi-widget__trend">
-            <i 
-              :class="getTrendIcon()"
-              class="kpi-widget__trend-icon"
-            ></i>
+            <i :class="getTrendIcon()" class="kpi-widget__trend-icon"></i>
             <span class="kpi-widget__trend-text">
               {{ getTrendText() }}
             </span>
@@ -164,13 +164,13 @@ export default {
         comparison_value: null,
         trend: null,
         trend_percentage: null,
-        sparkline_data: []
+        sparkline_data: [],
       },
       defaultGaugeRanges: [
         { min: 0, max: 30, color: '#dc3545' },
         { min: 30, max: 70, color: '#ffc107' },
         { min: 70, max: 100, color: '#28a745' },
-      ]
+      ],
     }
   },
   computed: {
@@ -223,32 +223,34 @@ export default {
       if (this.widget.color_scheme === 'custom' && this.widget.custom_color) {
         return this.widget.custom_color
       }
-      
+
       const colorMap = {
         blue: '#5190ef',
         green: '#28a745',
         red: '#dc3545',
         orange: '#fd7e14',
-        purple: '#6f42c1'
+        purple: '#6f42c1',
       }
-      
+
       return colorMap[this.widget.color_scheme] || '#5190ef'
     },
     getTrendIcon() {
       if (!this.kpiData.trend) return ''
-      
-      return {
-        'up': 'fas fa-arrow-up',
-        'down': 'fas fa-arrow-down',
-        'neutral': 'fas fa-minus'
-      }[this.kpiData.trend] || ''
+
+      return (
+        {
+          up: 'fas fa-arrow-up',
+          down: 'fas fa-arrow-down',
+          neutral: 'fas fa-minus',
+        }[this.kpiData.trend] || ''
+      )
     },
     getTrendText() {
       if (!this.kpiData.trend_percentage) return ''
-      
+
       const percentage = Math.abs(this.kpiData.trend_percentage)
       const direction = this.kpiData.trend === 'up' ? 'increase' : 'decrease'
-      
+
       return `${percentage}% ${direction}`
     },
     async refreshData() {
@@ -269,44 +271,48 @@ export default {
       return Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100))
     },
     drawSparkline() {
-      if (this.widget.display_format !== 'sparkline' || !this.$refs.sparklineCanvas) return
-      
+      if (
+        this.widget.display_format !== 'sparkline' ||
+        !this.$refs.sparklineCanvas
+      )
+        return
+
       const canvas = this.$refs.sparklineCanvas
       const ctx = canvas.getContext('2d')
       const data = this.kpiData.sparkline_data || []
-      
+
       if (data.length === 0) return
-      
+
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      
+
       // Calculate dimensions
       const padding = 10
       const width = canvas.width - padding * 2
       const height = canvas.height - padding * 2
-      
+
       const minValue = Math.min(...data)
       const maxValue = Math.max(...data)
       const range = maxValue - minValue || 1
-      
+
       // Draw line
       ctx.beginPath()
       ctx.strokeStyle = this.getValueColor()
       ctx.lineWidth = 2
-      
+
       data.forEach((value, index) => {
         const x = padding + (index / (data.length - 1)) * width
         const y = padding + height - ((value - minValue) / range) * height
-        
+
         if (index === 0) {
           ctx.moveTo(x, y)
         } else {
           ctx.lineTo(x, y)
         }
       })
-      
+
       ctx.stroke()
-      
+
       // Draw area fill
       ctx.lineTo(padding + width, padding + height)
       ctx.lineTo(padding, padding + height)
@@ -316,7 +322,7 @@ export default {
     },
     addAlpha(color, alpha) {
       if (!color) return color
-      
+
       // Convert hex to rgba
       if (color.startsWith('#')) {
         const hex = color.slice(1)
@@ -325,9 +331,9 @@ export default {
         const b = parseInt(hex.slice(4, 6), 16)
         return `rgba(${r}, ${g}, ${b}, ${alpha})`
       }
-      
+
       return color
-    }
+    },
   },
 }
 </script>
@@ -391,15 +397,15 @@ export default {
 
   &__trend-icon {
     margin-right: 4px;
-    
+
     &.fa-arrow-up {
       color: #28a745;
     }
-    
+
     &.fa-arrow-down {
       color: #dc3545;
     }
-    
+
     &.fa-minus {
       color: #6c757d;
     }
@@ -469,19 +475,19 @@ export default {
   &--blue .kpi-widget__value {
     color: #5190ef;
   }
-  
+
   &--green .kpi-widget__value {
     color: #28a745;
   }
-  
+
   &--red .kpi-widget__value {
     color: #dc3545;
   }
-  
+
   &--orange .kpi-widget__value {
     color: #fd7e14;
   }
-  
+
   &--purple .kpi-widget__value {
     color: #6f42c1;
   }
@@ -491,7 +497,7 @@ export default {
   .kpi-widget__value {
     font-size: 36px;
   }
-  
+
   .dashboard-kpi-widget__content {
     padding: 16px;
   }

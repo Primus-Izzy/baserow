@@ -6,8 +6,8 @@
 
 /* prettier-ignore */
 %icon {
-  /* stylelint-disable-next-line scss/at-extend-no-missing-placeholder, scss/operator-no-unspaced */
-  @extend *[class^="iconoir-"];
+  /* Use @extend with individual selectors instead of compound selectors */
+  @extend [class^="iconoir-"];
 }
 
 /* prettier-ignore */

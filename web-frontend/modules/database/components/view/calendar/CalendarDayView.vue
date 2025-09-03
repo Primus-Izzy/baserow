@@ -11,7 +11,12 @@
           {{ currentDate.getDate() }}
         </div>
         <div class="calendar-day-view__day-month">
-          {{ currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) }}
+          {{
+            currentDate.toLocaleDateString(undefined, {
+              month: 'long',
+              year: 'numeric',
+            })
+          }}
         </div>
       </div>
     </div>
@@ -141,24 +146,24 @@ export default {
         this.currentDate.getFullYear() === today.getFullYear()
       )
     },
-    
+
     dayEvents() {
       const dateStr = this.currentDate.toISOString().split('T')[0]
-      return this.events.filter(event => {
+      return this.events.filter((event) => {
         if (!event.date) return false
         const eventDate = new Date(event.date).toISOString().split('T')[0]
         return eventDate === dateStr
       })
     },
-    
+
     currentTimeStyle() {
       if (!this.isToday) return {}
-      
+
       const now = new Date()
       const hour = now.getHours()
       const minutes = now.getMinutes()
-      const top = (hour * 80) + (minutes * 80 / 60) // 80px per hour
-      
+      const top = hour * 80 + (minutes * 80) / 60 // 80px per hour
+
       return {
         top: `${top}px`,
       }
@@ -169,7 +174,7 @@ export default {
     this.timeUpdateInterval = setInterval(() => {
       this.currentTime = new Date()
     }, 60000)
-    
+
     // Scroll to current time if today
     if (this.isToday) {
       this.$nextTick(() => {
@@ -186,41 +191,41 @@ export default {
     formatHour(hour) {
       const date = new Date()
       date.setHours(hour, 0, 0, 0)
-      return date.toLocaleTimeString(undefined, { 
+      return date.toLocaleTimeString(undefined, {
         hour: 'numeric',
         hour12: true,
       })
     },
-    
+
     scrollToCurrentTime() {
       const now = new Date()
       const hour = now.getHours()
       const scrollTop = Math.max(0, (hour - 2) * 80) // Scroll to 2 hours before current time
-      
+
       if (this.$refs.grid) {
         this.$refs.grid.scrollTop = scrollTop
       }
     },
-    
+
     getEventStyle(event) {
       let top = 0
       let height = 80 // Default height (1 hour)
       let width = '95%'
       let left = '2.5%'
-      
+
       if (event.date && event.date.includes('T')) {
         // Has time information
         const eventTime = new Date(event.date)
         const hour = eventTime.getHours()
         const minutes = eventTime.getMinutes()
-        
-        top = (hour * 80) + (minutes * 80 / 60) // 80px per hour
-        
+
+        top = hour * 80 + (minutes * 80) / 60 // 80px per hour
+
         // If there's an end time, calculate duration
         if (event.end_date && event.end_date.includes('T')) {
           const endTime = new Date(event.end_date)
           const duration = (endTime - eventTime) / (1000 * 60) // Duration in minutes
-          height = Math.max(20, (duration * 80 / 60)) // Minimum 20px height
+          height = Math.max(20, (duration * 80) / 60) // Minimum 20px height
         }
       } else {
         // All-day event - position at top
@@ -229,16 +234,16 @@ export default {
         width = '100%'
         left = '0'
       }
-      
+
       // Handle overlapping events
       const overlappingEvents = this.getOverlappingEvents(event)
       if (overlappingEvents.length > 1) {
-        const eventIndex = overlappingEvents.findIndex(e => e.id === event.id)
+        const eventIndex = overlappingEvents.findIndex((e) => e.id === event.id)
         const eventWidth = 95 / overlappingEvents.length
         width = `${eventWidth}%`
-        left = `${2.5 + (eventIndex * eventWidth)}%`
+        left = `${2.5 + eventIndex * eventWidth}%`
       }
-      
+
       return {
         position: 'absolute',
         top: `${top}px`,
@@ -248,78 +253,89 @@ export default {
         zIndex: 10,
       }
     },
-    
+
     getOverlappingEvents(targetEvent) {
       if (!targetEvent.date || !targetEvent.date.includes('T')) {
         return [targetEvent]
       }
-      
+
       const targetStart = new Date(targetEvent.date)
-      const targetEnd = targetEvent.end_date ? new Date(targetEvent.end_date) : new Date(targetStart.getTime() + 60 * 60 * 1000)
-      
-      return this.dayEvents.filter(event => {
-        if (event.id === targetEvent.id || !event.date || !event.date.includes('T')) {
+      const targetEnd = targetEvent.end_date
+        ? new Date(targetEvent.end_date)
+        : new Date(targetStart.getTime() + 60 * 60 * 1000)
+
+      return this.dayEvents.filter((event) => {
+        if (
+          event.id === targetEvent.id ||
+          !event.date ||
+          !event.date.includes('T')
+        ) {
           return event.id === targetEvent.id
         }
-        
+
         const eventStart = new Date(event.date)
-        const eventEnd = event.end_date ? new Date(event.end_date) : new Date(eventStart.getTime() + 60 * 60 * 1000)
-        
+        const eventEnd = event.end_date
+          ? new Date(event.end_date)
+          : new Date(eventStart.getTime() + 60 * 60 * 1000)
+
         // Check for overlap
         return targetStart < eventEnd && targetEnd > eventStart
       })
     },
-    
+
     handleDayClick(event) {
       if (this.readOnly) return
-      
+
       // Calculate the time based on click position
       const rect = event.currentTarget.getBoundingClientRect()
       const y = event.clientY - rect.top
       const hour = Math.floor(y / 80) // 80px per hour
-      const minutes = Math.round((y % 80) / 80 * 60 / 15) * 15 // Round to 15-minute intervals
-      
+      const minutes = Math.round((((y % 80) / 80) * 60) / 15) * 15 // Round to 15-minute intervals
+
       const clickDate = new Date(this.currentDate)
       clickDate.setHours(hour, minutes, 0, 0)
-      
+
       this.$emit('date-click', clickDate)
     },
-    
+
     handleEventDragStart(event, dragEvent) {
       if (this.readOnly) {
         dragEvent.preventDefault()
         return
       }
-      
+
       this.draggedEvent = event
       dragEvent.dataTransfer.effectAllowed = 'move'
-      dragEvent.dataTransfer.setData('text/plain', JSON.stringify({
-        eventId: event.id,
-        originalDate: event.date,
-      }))
+      dragEvent.dataTransfer.setData(
+        'text/plain',
+        JSON.stringify({
+          eventId: event.id,
+          originalDate: event.date,
+        })
+      )
     },
-    
+
     handleDragOver(event) {
       if (this.readOnly || !this.draggedEvent) return
-      
+
       event.preventDefault()
       event.dataTransfer.dropEffect = 'move'
     },
-    
+
     handleDrop(event) {
       event.preventDefault()
-      
+
       if (this.readOnly || !this.draggedEvent) return
-      
+
       // Calculate the time based on drop position
       const rect = event.currentTarget.getBoundingClientRect()
       const y = event.clientY - rect.top
       const hour = Math.floor(y / 80)
-      const minutes = Math.round((y % 80) / 80 * 60 / 15) * 15
-      
+      const minutes = Math.round((((y % 80) / 80) * 60) / 15) * 15
+
       const dropDate = new Date(this.currentDate)
       dropDate.setHours(hour, minutes, 0, 0)
-      
+
       this.$emit('event-move', this.draggedEvent, dropDate)
       this.draggedEvent = null
     },
@@ -337,13 +353,13 @@ export default {
   &__header {
     display: grid;
     grid-template-columns: 80px 1fr;
-    border-bottom: 1px solid $color-neutral-200;
-    background-color: $color-neutral-50;
+    border-bottom: 1px solid $palette-neutral-200;
+    background-color: $palette-neutral-50;
     flex-shrink: 0;
   }
 
   &__time-column-header {
-    border-right: 1px solid $color-neutral-200;
+    border-right: 1px solid $palette-neutral-200;
   }
 
   &__day-header {
@@ -380,7 +396,7 @@ export default {
   }
 
   &__time-column {
-    border-right: 1px solid $color-neutral-200;
+    border-right: 1px solid $palette-neutral-200;
     background-color: $color-neutral-25;
   }
 
@@ -414,13 +430,13 @@ export default {
     position: relative;
 
     &:hover {
-      background-color: $color-neutral-50;
+      background-color: $palette-neutral-50;
     }
   }
 
   &__quarter-hour {
     height: 20px;
-    border-bottom: 1px solid $color-neutral-50;
+    border-bottom: 1px solid $palette-neutral-50;
 
     &:last-child {
       border-bottom: none;

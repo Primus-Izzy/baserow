@@ -25,7 +25,7 @@ export default {
     liveCursors() {
       const cursors = this.$store.getters['database/collaboration/liveCursors']
       const now = Date.now()
-      
+
       // Filter out stale cursors (older than 10 seconds)
       return Object.fromEntries(
         Object.entries(cursors).filter(([, cursor]) => {
@@ -36,14 +36,23 @@ export default {
   },
   methods: {
     getUserName(userId) {
-      const presence = this.$store.getters['database/collaboration/userPresence'](userId)
+      const presence =
+        this.$store.getters['database/collaboration/userPresence'](userId)
       return presence?.userName || 'Unknown User'
     },
     getUserColor(userId) {
       // Generate consistent color based on user ID
       const colors = [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-        '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+        '#FF6B6B',
+        '#4ECDC4',
+        '#45B7D1',
+        '#96CEB4',
+        '#FFEAA7',
+        '#DDA0DD',
+        '#98D8C8',
+        '#F7DC6F',
+        '#BB8FCE',
+        '#85C1E9',
       ]
       return colors[userId % colors.length]
     },
@@ -88,7 +97,7 @@ export default {
   font-weight: 500;
   white-space: nowrap;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  
+
   &::before {
     content: '';
     position: absolute;

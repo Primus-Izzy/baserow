@@ -1,6 +1,9 @@
 <template>
-  <div class="progress-bar-display" :class="{ 'progress-bar-display--mobile': isMobile }">
-    <div 
+  <div
+    class="progress-bar-display"
+    :class="{ 'progress-bar-display--mobile': isMobile }"
+  >
+    <div
       class="progress-bar-container"
       :style="containerStyle"
       role="progressbar"
@@ -10,11 +13,8 @@
       :aria-valuetext="`${percentage}% complete`"
       :aria-label="`Progress: ${percentage}%`"
     >
-      <div 
-        class="progress-bar-fill"
-        :style="fillStyle"
-      />
-      <div 
+      <div class="progress-bar-fill" :style="fillStyle" />
+      <div
         v-if="showPercentage && field.show_percentage"
         class="progress-bar-text"
         :style="textStyle"
@@ -52,7 +52,11 @@ export default {
      * Calculate the percentage value based on field configuration
      */
     percentage() {
-      if (this.value === null || this.value === undefined || this.value === '') {
+      if (
+        this.value === null ||
+        this.value === undefined ||
+        this.value === ''
+      ) {
         return 0
       }
 
@@ -66,7 +70,10 @@ export default {
         return 0
       }
 
-      const clampedValue = Math.max(this.field.min_value, Math.min(this.field.max_value, numValue))
+      const clampedValue = Math.max(
+        this.field.min_value,
+        Math.min(this.field.max_value, numValue)
+      )
       const percentage = ((clampedValue - this.field.min_value) / range) * 100
       return Math.round(percentage * 100) / 100 // Round to 2 decimal places
     },
@@ -79,10 +86,10 @@ export default {
         success: { start: '#10b981', end: '#059669' },
         warning: { start: '#f59e0b', end: '#d97706' },
         danger: { start: '#ef4444', end: '#dc2626' },
-        custom: { 
-          start: this.field.custom_color_start || '#3b82f6', 
-          end: this.field.custom_color_end || '#1d4ed8' 
-        }
+        custom: {
+          start: this.field.custom_color_start || '#3b82f6',
+          end: this.field.custom_color_end || '#1d4ed8',
+        },
       }
 
       return colorSchemes[this.field.color_scheme] || colorSchemes.default
@@ -105,7 +112,7 @@ export default {
      */
     fillStyle() {
       const gradient = `linear-gradient(90deg, ${this.colorScheme.start} 0%, ${this.colorScheme.end} 100%)`
-      
+
       return {
         width: `${this.percentage}%`,
         height: '100%',
@@ -120,7 +127,7 @@ export default {
      */
     textStyle() {
       const isLightBackground = this.percentage < 50
-      
+
       return {
         position: 'absolute',
         top: '50%',
@@ -149,7 +156,7 @@ export default {
   display: flex;
   align-items: center;
   width: 100%;
-  
+
   &--mobile {
     .progress-bar-container {
       min-width: 120px;
@@ -166,7 +173,7 @@ export default {
 
 .progress-bar-fill {
   position: relative;
-  
+
   &::after {
     content: '';
     position: absolute;
@@ -196,7 +203,7 @@ export default {
       min-width: 100px;
       height: 22px;
     }
-    
+
     .progress-bar-text {
       font-size: 10px;
     }

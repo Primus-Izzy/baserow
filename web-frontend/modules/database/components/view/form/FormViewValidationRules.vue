@@ -43,7 +43,7 @@
           </Dropdown>
         </div>
 
-        <div 
+        <div
           v-if="ruleRequiresValue(rule.type)"
           class="form-view-validation-rules__rule-value"
         >
@@ -137,15 +137,42 @@ export default {
   computed: {
     availableRuleTypes() {
       return [
-        { value: 'required', label: this.$t('formViewValidationRules.ruleTypes.required') },
-        { value: 'min_length', label: this.$t('formViewValidationRules.ruleTypes.minLength') },
-        { value: 'max_length', label: this.$t('formViewValidationRules.ruleTypes.maxLength') },
-        { value: 'pattern', label: this.$t('formViewValidationRules.ruleTypes.pattern') },
-        { value: 'email', label: this.$t('formViewValidationRules.ruleTypes.email') },
-        { value: 'url', label: this.$t('formViewValidationRules.ruleTypes.url') },
-        { value: 'numeric', label: this.$t('formViewValidationRules.ruleTypes.numeric') },
-        { value: 'min_value', label: this.$t('formViewValidationRules.ruleTypes.minValue') },
-        { value: 'max_value', label: this.$t('formViewValidationRules.ruleTypes.maxValue') },
+        {
+          value: 'required',
+          label: this.$t('formViewValidationRules.ruleTypes.required'),
+        },
+        {
+          value: 'min_length',
+          label: this.$t('formViewValidationRules.ruleTypes.minLength'),
+        },
+        {
+          value: 'max_length',
+          label: this.$t('formViewValidationRules.ruleTypes.maxLength'),
+        },
+        {
+          value: 'pattern',
+          label: this.$t('formViewValidationRules.ruleTypes.pattern'),
+        },
+        {
+          value: 'email',
+          label: this.$t('formViewValidationRules.ruleTypes.email'),
+        },
+        {
+          value: 'url',
+          label: this.$t('formViewValidationRules.ruleTypes.url'),
+        },
+        {
+          value: 'numeric',
+          label: this.$t('formViewValidationRules.ruleTypes.numeric'),
+        },
+        {
+          value: 'min_value',
+          label: this.$t('formViewValidationRules.ruleTypes.minValue'),
+        },
+        {
+          value: 'max_value',
+          label: this.$t('formViewValidationRules.ruleTypes.maxValue'),
+        },
       ]
     },
   },
@@ -186,15 +213,21 @@ export default {
       return placeholders[ruleType] || ''
     },
     getRuleValueInputType(ruleType) {
-      return ['min_length', 'max_length', 'min_value', 'max_value'].includes(ruleType) 
-        ? 'number' 
+      return ['min_length', 'max_length', 'min_value', 'max_value'].includes(
+        ruleType
+      )
+        ? 'number'
         : 'text'
     },
     getDefaultErrorMessage(ruleType) {
       const messages = {
         required: this.$t('formViewValidationRules.defaultMessages.required'),
-        min_length: this.$t('formViewValidationRules.defaultMessages.minLength'),
-        max_length: this.$t('formViewValidationRules.defaultMessages.maxLength'),
+        min_length: this.$t(
+          'formViewValidationRules.defaultMessages.minLength'
+        ),
+        max_length: this.$t(
+          'formViewValidationRules.defaultMessages.maxLength'
+        ),
         pattern: this.$t('formViewValidationRules.defaultMessages.pattern'),
         email: this.$t('formViewValidationRules.defaultMessages.email'),
         url: this.$t('formViewValidationRules.defaultMessages.url'),
@@ -202,7 +235,10 @@ export default {
         min_value: this.$t('formViewValidationRules.defaultMessages.minValue'),
         max_value: this.$t('formViewValidationRules.defaultMessages.maxValue'),
       }
-      return messages[ruleType] || this.$t('formViewValidationRules.defaultMessages.default')
+      return (
+        messages[ruleType] ||
+        this.$t('formViewValidationRules.defaultMessages.default')
+      )
     },
     async updateValidationRules() {
       if (this.readOnly) return
@@ -219,10 +255,12 @@ export default {
     },
     validatePreview() {
       this.previewErrors = []
-      
+
       for (const rule of this.validationRules) {
         if (!this.validateRule(rule, this.previewValue)) {
-          this.previewErrors.push(rule.error_message || this.getDefaultErrorMessage(rule.type))
+          this.previewErrors.push(
+            rule.error_message || this.getDefaultErrorMessage(rule.type)
+          )
         }
       }
     },

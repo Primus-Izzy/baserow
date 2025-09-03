@@ -1,10 +1,6 @@
 <template>
   <div class="row-history-field-progress-bar">
-    <ProgressBarDisplay
-      :value="value"
-      :field="field"
-      :show-percentage="true"
-    />
+    <ProgressBarDisplay :value="value" :field="field" :show-percentage="true" />
   </div>
 </template>
 

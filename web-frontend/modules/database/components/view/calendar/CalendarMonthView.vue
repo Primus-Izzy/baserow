@@ -81,37 +81,37 @@ export default {
     dayHeaders() {
       const days = []
       const startDate = new Date(2023, 0, 2) // Monday
-      
+
       for (let i = 0; i < 7; i++) {
         const date = new Date(startDate)
         date.setDate(startDate.getDate() + i)
         days.push(date.toLocaleDateString(undefined, { weekday: 'short' }))
       }
-      
+
       return days
     },
-    
+
     calendarDays() {
       const days = []
       const year = this.currentDate.getFullYear()
       const month = this.currentDate.getMonth()
-      
+
       // Get first day of month and adjust to Monday start
       const firstDay = new Date(year, month, 1)
       const startDate = this.getStartOfWeek(firstDay)
-      
+
       // Generate 42 days (6 weeks)
       for (let i = 0; i < 42; i++) {
         const date = new Date(startDate)
         date.setDate(startDate.getDate() + i)
-        
+
         days.push({
           date,
           isCurrentMonth: date.getMonth() === month,
           isToday: this.isToday(date),
         })
       }
-      
+
       return days
     },
   },
@@ -124,7 +124,7 @@ export default {
       start.setHours(0, 0, 0, 0)
       return start
     },
-    
+
     isToday(date) {
       const today = new Date()
       return (
@@ -133,16 +133,16 @@ export default {
         date.getFullYear() === today.getFullYear()
       )
     },
-    
+
     getEventsForDay(date) {
       const dateStr = date.toISOString().split('T')[0]
-      return this.events.filter(event => {
+      return this.events.filter((event) => {
         if (!event.date) return false
         const eventDate = new Date(event.date).toISOString().split('T')[0]
         return eventDate === dateStr
       })
     },
-    
+
     handleEventMove(event, newDate) {
       this.$emit('event-move', event, newDate)
     },
@@ -159,8 +159,8 @@ export default {
   &__headers {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    border-bottom: 1px solid $color-neutral-200;
-    background-color: $color-neutral-50;
+    border-bottom: 1px solid $palette-neutral-200;
+    background-color: $palette-neutral-50;
   }
 
   &__header {
@@ -168,9 +168,9 @@ export default {
     text-align: center;
     font-weight: 600;
     font-size: 12px;
-    color: $color-neutral-600;
+    color: $palette-neutral-600;
     text-transform: uppercase;
-    border-right: 1px solid $color-neutral-200;
+    border-right: 1px solid $palette-neutral-200;
 
     &:last-child {
       border-right: none;

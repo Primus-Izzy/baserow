@@ -14,7 +14,7 @@
     @touchend="handleTouchEnd"
   >
     <!-- Card color indicator -->
-    <div 
+    <div
       v-if="cardColor"
       class="kanban-card__color-bar"
       :style="{ backgroundColor: cardColor }"
@@ -57,10 +57,8 @@
       <!-- Card metadata -->
       <div class="kanban-card__metadata">
         <!-- Row ID -->
-        <div class="kanban-card__id">
-          #{{ row.id }}
-        </div>
-        
+        <div class="kanban-card__id">#{{ row.id }}</div>
+
         <!-- Last modified -->
         <div v-if="row.updated_on" class="kanban-card__updated">
           {{ formatDate(row.updated_on) }}
@@ -136,18 +134,21 @@ export default {
      * Returns the primary field (first field in the table).
      */
     primaryField() {
-      return this.fields.find(field => field.primary) || this.fields[0]
+      return this.fields.find((field) => field.primary) || this.fields[0]
     },
     /**
      * Returns the visible fields for the card (excluding primary and status fields).
      */
     visibleFields() {
       const statusFieldId = this.view.single_select_field
-      return this.fields.filter(field => 
-        !field.primary && 
-        field.id !== statusFieldId &&
-        this.shouldShowField(field)
-      ).slice(0, 3) // Limit to 3 additional fields for card readability
+      return this.fields
+        .filter(
+          (field) =>
+            !field.primary &&
+            field.id !== statusFieldId &&
+            this.shouldShowField(field)
+        )
+        .slice(0, 3) // Limit to 3 additional fields for card readability
     },
     /**
      * Returns the color for the card based on field values or column.
@@ -156,16 +157,18 @@ export default {
       // Check if there's a color field configured (using card_cover_image_field for now)
       const colorFieldId = this.view.card_cover_image_field
       if (colorFieldId) {
-        const colorField = this.fields.find(f => f.id === colorFieldId)
+        const colorField = this.fields.find((f) => f.id === colorFieldId)
         if (colorField && colorField.type === 'single_select') {
           const value = this.row[`field_${colorField.id}`]
-          const option = colorField.select_options?.find(opt => opt.value === value)
+          const option = colorField.select_options?.find(
+            (opt) => opt.value === value
+          )
           if (option) {
             return this.getSelectOptionColor(option.color)
           }
         }
       }
-      
+
       // Fallback to column color
       return this.getSelectOptionColor(this.column.color)
     },
@@ -184,7 +187,13 @@ export default {
      */
     canEditInline(field) {
       // Allow inline editing for simple field types
-      const inlineEditableTypes = ['text', 'long_text', 'number', 'rating', 'boolean']
+      const inlineEditableTypes = [
+        'text',
+        'long_text',
+        'number',
+        'rating',
+        'boolean',
+      ]
       return !this.readOnly && inlineEditableTypes.includes(field.type)
     },
     /**
@@ -219,31 +228,31 @@ export default {
         event.preventDefault()
         return
       }
-      
+
       this.isDragging = true
-      
+
       // Set drag data
       const dragData = {
         type: 'kanban-card',
         row: this.row,
         column: this.column,
       }
-      
+
       event.dataTransfer.setData('text/plain', JSON.stringify(dragData))
       event.dataTransfer.effectAllowed = 'move'
-      
+
       // Add drag image
       const dragImage = this.$el.cloneNode(true)
       dragImage.style.transform = 'rotate(5deg)'
       dragImage.style.opacity = '0.8'
       document.body.appendChild(dragImage)
       event.dataTransfer.setDragImage(dragImage, 0, 0)
-      
+
       // Clean up drag image after a short delay
       setTimeout(() => {
         document.body.removeChild(dragImage)
       }, 0)
-      
+
       this.$emit('drag-start', event)
     },
     /**
@@ -261,7 +270,7 @@ export default {
       if (this.isDragging || event.target.closest('.kanban-card__action')) {
         return
       }
-      
+
       this.$emit('click', this.row)
     },
     /**
@@ -282,13 +291,13 @@ export default {
      */
     handleTouchStart(event) {
       if (this.readOnly) return
-      
+
       this.touchStartTime = Date.now()
       this.touchStartPos = {
         x: event.touches[0].clientX,
         y: event.touches[0].clientY,
       }
-      
+
       // Add visual feedback for touch
       this.$el.classList.add('kanban-card--touch-active')
     },
@@ -297,16 +306,16 @@ export default {
      */
     handleTouchMove(event) {
       if (this.readOnly) return
-      
+
       const touch = event.touches[0]
       const deltaX = Math.abs(touch.clientX - this.touchStartPos.x)
       const deltaY = Math.abs(touch.clientY - this.touchStartPos.y)
-      
+
       // If moved significantly, start drag mode
       if (deltaX > 15 || deltaY > 15) {
         event.preventDefault()
         this.$el.classList.add('kanban-card--touch-dragging')
-        
+
         // Create a visual drag indicator
         this.createTouchDragIndicator(touch)
       }
@@ -316,16 +325,19 @@ export default {
      */
     handleTouchEnd(event) {
       if (this.readOnly) return
-      
+
       const touchDuration = Date.now() - this.touchStartTime
       const touch = event.changedTouches[0]
       const deltaX = Math.abs(touch.clientX - this.touchStartPos.x)
       const deltaY = Math.abs(touch.clientY - this.touchStartPos.y)
-      
+
       // Clean up touch classes
-      this.$el.classList.remove('kanban-card--touch-active', 'kanban-card--touch-dragging')
+      this.$el.classList.remove(
+        'kanban-card--touch-active',
+        'kanban-card--touch-dragging'
+      )
       this.removeTouchDragIndicator()
-      
+
       // If it was a quick tap with minimal movement, treat as click
       if (touchDuration < 300 && deltaX < 15 && deltaY < 15) {
         this.handleClick(event)
@@ -352,9 +364,12 @@ export default {
      */
     handleTouchDragEnd(touch) {
       // Find the element under the touch point
-      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
+      const elementBelow = document.elementFromPoint(
+        touch.clientX,
+        touch.clientY
+      )
       const targetColumn = elementBelow?.closest('.kanban-column')
-      
+
       if (targetColumn) {
         // Extract column data and emit move event
         const columnId = targetColumn.dataset.columnId

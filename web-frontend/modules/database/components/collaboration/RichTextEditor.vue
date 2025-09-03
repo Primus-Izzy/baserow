@@ -68,10 +68,10 @@ export default {
       const textarea = this.$refs.textarea
       const cursorPos = textarea.selectionStart
       const textBeforeCursor = this.localValue.substring(0, cursorPos)
-      
+
       // Look for @ symbol followed by text
       const mentionMatch = textBeforeCursor.match(/@(\w*)$/)
-      
+
       if (mentionMatch) {
         const query = mentionMatch[1]
         const startPos = cursorPos - mentionMatch[0].length
@@ -111,13 +111,13 @@ export default {
   line-height: 1.5;
   resize: vertical;
   transition: border-color 0.2s ease;
-  
+
   &:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
   }
-  
+
   &::placeholder {
     color: #6c757d;
   }

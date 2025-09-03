@@ -1494,8 +1494,8 @@ export class TimelineViewType extends BaseBufferedRowViewTypeMixin(ViewType) {
     }
   }
 }
-expo
-rt class CalendarViewType extends ViewType {
+
+export class CalendarViewType extends ViewType {
   static getType() {
     return 'calendar'
   }

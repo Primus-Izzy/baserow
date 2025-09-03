@@ -2,20 +2,36 @@
   <div class="integration-provider-card">
     <div class="integration-provider-card__header">
       <div class="integration-provider-card__icon">
-        <img v-if="provider.icon_url" :src="provider.icon_url" :alt="provider.display_name" />
+        <img
+          v-if="provider.icon_url"
+          :src="provider.icon_url"
+          :alt="provider.display_name"
+        />
         <i v-else class="fas fa-plug"></i>
       </div>
       <div class="integration-provider-card__info">
-        <h3 class="integration-provider-card__title">{{ provider.display_name }}</h3>
-        <p class="integration-provider-card__description">{{ provider.description }}</p>
+        <h3 class="integration-provider-card__title">
+          {{ provider.display_name }}
+        </h3>
+        <p class="integration-provider-card__description">
+          {{ provider.description }}
+        </p>
       </div>
     </div>
-    
+
     <div class="integration-provider-card__status">
       <div v-if="connection" class="integration-provider-card__connected">
         <i class="fas fa-check-circle text-success"></i>
-        <span>Connected as {{ connection.external_user_name || connection.external_user_email }}</span>
-        <Badge v-if="connection.status !== 'active'" :color="getStatusColor(connection.status)">
+        <span
+          >Connected as
+          {{
+            connection.external_user_name || connection.external_user_email
+          }}</span
+        >
+        <Badge
+          v-if="connection.status !== 'active'"
+          :color="getStatusColor(connection.status)"
+        >
           {{ connection.status }}
         </Badge>
       </div>
@@ -24,7 +40,7 @@
         <span>Not connected</span>
       </div>
     </div>
-    
+
     <div class="integration-provider-card__actions">
       <Button
         v-if="!connection"
@@ -86,7 +102,7 @@ export default {
   },
   methods: {
     ...mapActions('integrations', ['startOAuthFlow', 'revokeConnection']),
-    
+
     async connect() {
       this.connecting = true
       try {
@@ -100,7 +116,7 @@ export default {
         this.connecting = false
       }
     },
-    
+
     async disconnect() {
       this.disconnecting = true
       try {
@@ -113,11 +129,14 @@ export default {
         this.disconnecting = false
       }
     },
-    
+
     async refreshToken() {
       this.refreshing = true
       try {
-        await this.$store.dispatch('integrations/refreshToken', this.connection.id)
+        await this.$store.dispatch(
+          'integrations/refreshToken',
+          this.connection.id
+        )
         this.$toast.success('Connection refreshed successfully')
       } catch (error) {
         this.$toast.error('Failed to refresh connection')
@@ -125,7 +144,7 @@ export default {
         this.refreshing = false
       }
     },
-    
+
     getStatusColor(status) {
       const colors = {
         active: 'success',
@@ -145,13 +164,13 @@ export default {
   border-radius: 8px;
   padding: 20px;
   background: var(--color-neutral-50);
-  
+
   &__header {
     display: flex;
     align-items: flex-start;
     margin-bottom: 16px;
   }
-  
+
   &__icon {
     width: 48px;
     height: 48px;
@@ -159,56 +178,56 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     img {
       width: 100%;
       height: 100%;
       object-fit: contain;
     }
-    
+
     i {
       font-size: 24px;
       color: var(--color-neutral-600);
     }
   }
-  
+
   &__info {
     flex: 1;
   }
-  
+
   &__title {
     margin: 0 0 8px 0;
     font-size: 18px;
     font-weight: 600;
     color: var(--color-neutral-900);
   }
-  
+
   &__description {
     margin: 0;
     color: var(--color-neutral-600);
     font-size: 14px;
     line-height: 1.4;
   }
-  
+
   &__status {
     margin-bottom: 16px;
-    
+
     &__connected,
     &__disconnected {
       display: flex;
       align-items: center;
       font-size: 14px;
-      
+
       i {
         margin-right: 8px;
       }
-      
+
       span {
         margin-right: 8px;
       }
     }
   }
-  
+
   &__actions {
     display: flex;
     gap: 8px;

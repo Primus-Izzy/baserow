@@ -92,7 +92,7 @@
           class="palette-search"
         />
       </div>
-      
+
       <div class="palette-categories">
         <div
           v-for="category in filteredNodeCategories"
@@ -124,7 +124,7 @@
           <i class="iconoir-cancel"></i>
         </button>
       </div>
-      
+
       <div class="panel-content">
         <component
           :is="selectedNodeConfigComponent"
@@ -161,7 +161,7 @@
           </button>
         </div>
       </div>
-      
+
       <div class="test-results" v-if="testResults">
         <div class="results-header">
           <h4>{{ $t('visualBuilder.testResults') }}</h4>
@@ -186,12 +186,14 @@
           </button>
           <select v-model="logFilter" class="log-filter">
             <option value="all">{{ $t('visualBuilder.allLogs') }}</option>
-            <option value="success">{{ $t('visualBuilder.successOnly') }}</option>
+            <option value="success">
+              {{ $t('visualBuilder.successOnly') }}
+            </option>
             <option value="failed">{{ $t('visualBuilder.errorsOnly') }}</option>
           </select>
         </div>
       </div>
-      
+
       <div class="execution-logs">
         <div
           v-for="log in filteredExecutionLogs"
@@ -199,7 +201,9 @@
           :class="['log-entry', log.status]"
         >
           <div class="log-header">
-            <span class="log-timestamp">{{ formatTimestamp(log.created_at) }}</span>
+            <span class="log-timestamp">{{
+              formatTimestamp(log.created_at)
+            }}</span>
             <span :class="['log-status', log.status]">{{ log.status }}</span>
             <span class="log-duration">{{ log.execution_time_ms }}ms</span>
           </div>
@@ -273,7 +277,7 @@ export default {
   },
   computed: {
     enhancedDisplayNodes() {
-      return this.nodes.map(node => ({
+      return this.nodes.map((node) => ({
         id: node.id.toString(),
         type: this.getNodeType(node),
         position: node.position || { x: 0, y: 0 },
@@ -283,10 +287,10 @@ export default {
         },
       }))
     },
-    
+
     enhancedComputedEdges() {
       const edges = []
-      
+
       // Create edges based on node connections
       this.nodes.forEach((node, index) => {
         if (index < this.nodes.length - 1) {
@@ -302,10 +306,10 @@ export default {
           })
         }
       })
-      
+
       return edges
     },
-    
+
     filteredNodeCategories() {
       const categories = [
         {
@@ -324,32 +328,34 @@ export default {
           nodes: this.getAvailableNodeTypes('logic'),
         },
       ]
-      
+
       if (this.searchQuery) {
-        return categories.map(category => ({
-          ...category,
-          nodes: category.nodes.filter(node =>
-            node.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-          ),
-        })).filter(category => category.nodes.length > 0)
+        return categories
+          .map((category) => ({
+            ...category,
+            nodes: category.nodes.filter((node) =>
+              node.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+            ),
+          }))
+          .filter((category) => category.nodes.length > 0)
       }
-      
+
       return categories
     },
-    
+
     selectedNodeConfigComponent() {
       if (!this.selectedNode) return null
-      
+
       const nodeType = this.$registry.get('node', this.selectedNode.type)
       return nodeType?.configComponent || null
     },
-    
+
     filteredExecutionLogs() {
       if (this.logFilter === 'all') {
         return this.executionLogs
       }
-      
-      return this.executionLogs.filter(log => {
+
+      return this.executionLogs.filter((log) => {
         if (this.logFilter === 'success') {
           return log.status === 'success'
         }
@@ -363,90 +369,94 @@ export default {
   methods: {
     getNodeType(node) {
       const nodeType = this.$registry.get('node', node.type)
-      
+
       if (nodeType.isTrigger) {
         return 'enhanced-trigger'
       }
-      
+
       if (node.type === 'conditional_branch') {
         return 'conditional-branch'
       }
-      
+
       if (node.type === 'delay') {
         return 'delay'
       }
-      
+
       return 'enhanced-action'
     },
-    
+
     getAvailableNodeTypes(category) {
       const nodeTypes = this.$registry.getOrderedList('node')
-      
+
       switch (category) {
         case 'trigger':
-          return nodeTypes.filter(type => type.isTrigger)
+          return nodeTypes.filter((type) => type.isTrigger)
         case 'action':
-          return nodeTypes.filter(type => type.isWorkflowAction && !type.isLogicNode)
+          return nodeTypes.filter(
+            (type) => type.isWorkflowAction && !type.isLogicNode
+          )
         case 'logic':
-          return nodeTypes.filter(type => type.isLogicNode)
+          return nodeTypes.filter((type) => type.isLogicNode)
         default:
           return []
       }
     },
-    
+
     onNodeDragStart(event, nodeType) {
       this.draggedNodeType = nodeType
       event.dataTransfer.effectAllowed = 'move'
     },
-    
+
     onNodesChange(changes) {
       // Handle node position changes, deletions, etc.
-      changes.forEach(change => {
+      changes.forEach((change) => {
         if (change.type === 'position' && change.position) {
           this.updateNodePosition(change.id, change.position)
         }
       })
     },
-    
+
     onEdgesChange(changes) {
       // Handle edge changes
       this.$emit('edges-change', changes)
     },
-    
+
     onConnect(connection) {
       // Handle new connections between nodes
       this.$emit('connect', connection)
     },
-    
+
     openNodeConfiguration(nodeId) {
-      this.selectedNode = this.nodes.find(node => node.id.toString() === nodeId)
+      this.selectedNode = this.nodes.find(
+        (node) => node.id.toString() === nodeId
+      )
     },
-    
+
     closeConfiguration() {
       this.selectedNode = null
     },
-    
+
     updateNodeConfiguration(nodeId, configuration) {
       this.$emit('update-node', { nodeId, configuration })
     },
-    
+
     updateNodePosition(nodeId, position) {
       this.$emit('update-node-position', { nodeId, position })
     },
-    
+
     deleteNode(nodeId) {
       this.$emit('delete-node', nodeId)
     },
-    
+
     async testWorkflow() {
       this.isTestingWorkflow = true
       this.testResults = null
-      
+
       try {
         const response = await this.$store.dispatch('automationWorkflow/test', {
           workflowId: this.workflow.id,
         })
-        
+
         this.testResults = {
           status: 'success',
           data: response.data,
@@ -460,15 +470,18 @@ export default {
         this.isTestingWorkflow = false
       }
     },
-    
+
     async debugWorkflow() {
       this.isDebuggingWorkflow = true
-      
+
       try {
-        const response = await this.$store.dispatch('automationWorkflow/debug', {
-          workflowId: this.workflow.id,
-        })
-        
+        const response = await this.$store.dispatch(
+          'automationWorkflow/debug',
+          {
+            workflowId: this.workflow.id,
+          }
+        )
+
         this.testResults = {
           status: 'debug',
           data: response.data,
@@ -482,40 +495,43 @@ export default {
         this.isDebuggingWorkflow = false
       }
     },
-    
+
     async refreshLogs() {
       try {
-        const response = await this.$store.dispatch('automationWorkflow/getExecutionLogs', {
-          workflowId: this.workflow.id,
-        })
-        
+        const response = await this.$store.dispatch(
+          'automationWorkflow/getExecutionLogs',
+          {
+            workflowId: this.workflow.id,
+          }
+        )
+
         this.executionLogs = response.data
       } catch (error) {
         console.error('Failed to fetch execution logs:', error)
       }
     },
-    
+
     formatTimestamp(timestamp) {
       return new Date(timestamp).toLocaleString()
     },
-    
+
     getNodeLabel(nodeId) {
-      const node = this.nodes.find(n => n.id === nodeId)
+      const node = this.nodes.find((n) => n.id === nodeId)
       if (!node) return `Node ${nodeId}`
-      
+
       const nodeType = this.$registry.get('node', node.type)
       return nodeType?.getLabel({ node }) || node.type
     },
   },
-  
+
   mounted() {
     this.refreshLogs()
-    
+
     // Set up real-time log updates
     this.$realtime.subscribe('automation_execution_log', (data) => {
       if (data.workflow_id === this.workflow.id) {
         this.executionLogs.unshift(data)
-        
+
         // Keep only the last 100 logs
         if (this.executionLogs.length > 100) {
           this.executionLogs = this.executionLogs.slice(0, 100)
@@ -523,7 +539,7 @@ export default {
       }
     })
   },
-  
+
   beforeDestroy() {
     this.$realtime.unsubscribe('automation_execution_log')
   },
@@ -536,8 +552,8 @@ export default {
   grid-template-columns: 300px 1fr 350px;
   grid-template-rows: 1fr 300px;
   grid-template-areas:
-    "palette canvas config"
-    "palette testing monitoring";
+    'palette canvas config'
+    'palette testing monitoring';
   height: 100vh;
   gap: 1rem;
   padding: 1rem;
@@ -568,7 +584,7 @@ export default {
 
 .palette-header {
   margin-bottom: 1rem;
-  
+
   h3 {
     margin: 0 0 0.5rem 0;
     font-size: 1.1rem;
@@ -613,21 +629,21 @@ export default {
   border-radius: 6px;
   cursor: grab;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: #e9ecef;
     border-color: #007bff;
   }
-  
+
   &:active {
     cursor: grabbing;
   }
-  
+
   i {
     font-size: 1.2rem;
     color: #007bff;
   }
-  
+
   span {
     font-size: 0.9rem;
     font-weight: 500;
@@ -667,7 +683,7 @@ export default {
   align-items: center;
   padding: 1rem;
   border-bottom: 1px solid #e9ecef;
-  
+
   h3 {
     margin: 0;
     font-size: 1rem;
@@ -688,42 +704,42 @@ export default {
 
 .test-results {
   margin-top: 1rem;
-  
+
   .results-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.5rem;
-    
+
     h4 {
       margin: 0;
       font-size: 0.9rem;
     }
   }
-  
+
   .status {
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
-    
+
     &.success {
       background: #d4edda;
       color: #155724;
     }
-    
+
     &.failed {
       background: #f8d7da;
       color: #721c24;
     }
-    
+
     &.debug {
       background: #fff3cd;
       color: #856404;
     }
   }
-  
+
   .results-content {
     background: #f8f9fa;
     border: 1px solid #e9ecef;
@@ -760,15 +776,15 @@ export default {
   padding: 0.75rem;
   border: 1px solid #e9ecef;
   border-radius: 6px;
-  
+
   &.success {
     border-left: 4px solid #28a745;
   }
-  
+
   &.failed {
     border-left: 4px solid #dc3545;
   }
-  
+
   &.pending {
     border-left: 4px solid #ffc107;
   }
@@ -791,17 +807,17 @@ export default {
   border-radius: 3px;
   font-weight: 600;
   text-transform: uppercase;
-  
+
   &.success {
     background: #d4edda;
     color: #155724;
   }
-  
+
   &.failed {
     background: #f8d7da;
     color: #721c24;
   }
-  
+
   &.pending {
     background: #fff3cd;
     color: #856404;
@@ -835,12 +851,12 @@ export default {
       cursor: pointer;
       font-size: 0.8rem;
       color: #007bff;
-      
+
       &:hover {
         text-decoration: underline;
       }
     }
-    
+
     pre {
       margin-top: 0.5rem;
       background: #f8f9fa;
@@ -858,7 +874,7 @@ export default {
   cursor: pointer;
   padding: 0.25rem;
   color: #666;
-  
+
   &:hover {
     color: #000;
   }
@@ -872,35 +888,35 @@ export default {
   font-size: 0.9rem;
   font-weight: 500;
   transition: all 0.2s ease;
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
-  
+
   &.btn-primary {
     background: #007bff;
     color: white;
-    
+
     &:hover:not(:disabled) {
       background: #0056b3;
     }
   }
-  
+
   &.btn-secondary {
     background: #6c757d;
     color: white;
-    
+
     &:hover:not(:disabled) {
       background: #545b62;
     }
   }
-  
+
   &.btn-ghost {
     background: transparent;
     color: #007bff;
     border: 1px solid #007bff;
-    
+
     &:hover:not(:disabled) {
       background: #007bff;
       color: white;

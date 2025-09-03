@@ -5,7 +5,7 @@
         {{ $t('calendarView.recurringEvent') }}
       </h2>
     </template>
-    
+
     <template #content>
       <div class="recurring-event-modal">
         <div class="recurring-event-modal__info">
@@ -21,10 +21,7 @@
           </p>
 
           <div class="recurring-event-modal__buttons">
-            <button
-              class="button button--large"
-              @click="editThisEvent"
-            >
+            <button class="button button--large" @click="editThisEvent">
               {{ $t('calendarView.editThisEvent') }}
             </button>
 
@@ -103,7 +100,10 @@ export default {
   },
   computed: {
     eventTitle() {
-      if (this.view.event_title_field && this.event[`field_${this.view.event_title_field}`]) {
+      if (
+        this.view.event_title_field &&
+        this.event[`field_${this.view.event_title_field}`]
+      ) {
         return this.event[`field_${this.view.event_title_field}`]
       }
       return this.event.title || `Event ${this.event.id}`
@@ -129,7 +129,7 @@ export default {
         console.error('Error fetching recurring pattern:', error)
       }
     },
-    
+
     formatDate(dateString) {
       if (!dateString) return ''
       const date = new Date(dateString)
@@ -140,7 +140,7 @@ export default {
         day: 'numeric',
       })
     },
-    
+
     getPatternTypeLabel(patternType) {
       const labels = {
         daily: this.$t('calendarView.daily'),
@@ -150,7 +150,7 @@ export default {
       }
       return labels[patternType] || patternType
     },
-    
+
     editThisEvent() {
       // Create an exception for this occurrence and edit it
       this.$emit('edit-occurrence', {
@@ -159,7 +159,7 @@ export default {
       })
       this.$emit('close')
     },
-    
+
     editAllEvents() {
       // Edit the original recurring event
       this.$emit('edit-series', {
@@ -168,7 +168,7 @@ export default {
       })
       this.$emit('close')
     },
-    
+
     deleteThisEvent() {
       // Add this date to the exceptions list
       this.$emit('delete-occurrence', {
@@ -177,7 +177,7 @@ export default {
       })
       this.$emit('close')
     },
-    
+
     deleteAllEvents() {
       // Delete the entire recurring series
       this.$emit('delete-series', {

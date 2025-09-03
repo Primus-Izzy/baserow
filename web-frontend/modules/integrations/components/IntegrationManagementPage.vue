@@ -4,7 +4,7 @@
       <h1>Integrations</h1>
       <p>Connect Baserow with your favorite tools and services</p>
     </div>
-    
+
     <div class="integration-management-page__content">
       <!-- Available Providers -->
       <div class="integration-section">
@@ -24,7 +24,7 @@
           />
         </div>
       </div>
-      
+
       <!-- Active Syncs -->
       <div v-if="connections.length > 0" class="integration-section">
         <div class="section-header">
@@ -37,19 +37,16 @@
             Create Sync
           </Button>
         </div>
-        
+
         <div v-if="syncs.length === 0" class="empty-state">
           <i class="fas fa-sync-alt"></i>
           <h3>No syncs configured</h3>
           <p>Create your first sync to start connecting your data</p>
-          <Button
-            type="primary"
-            @click="showCreateSyncModal = true"
-          >
+          <Button type="primary" @click="showCreateSyncModal = true">
             Create Sync
           </Button>
         </div>
-        
+
         <div v-else class="syncs-table">
           <table>
             <thead>
@@ -84,7 +81,9 @@
                   </div>
                 </td>
                 <td>{{ sync.table.name }}</td>
-                <td>{{ sync.external_resource_name || sync.external_resource_id }}</td>
+                <td>
+                  {{ sync.external_resource_name || sync.external_resource_id }}
+                </td>
                 <td>
                   <Badge :color="getSyncDirectionColor(sync.sync_direction)">
                     {{ getSyncDirectionLabel(sync.sync_direction) }}
@@ -137,7 +136,7 @@
           </table>
         </div>
       </div>
-      
+
       <!-- Integration Logs -->
       <div v-if="connections.length > 0" class="integration-section">
         <h2>Recent Activity</h2>
@@ -158,7 +157,7 @@
               <div class="log-content">
                 <div class="log-message">{{ log.message }}</div>
                 <div class="log-meta">
-                  {{ log.connection.provider.display_name }} • 
+                  {{ log.connection.provider.display_name }} •
                   {{ formatDate(log.created_at) }}
                 </div>
               </div>
@@ -167,7 +166,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Create/Edit Sync Modal -->
     <IntegrationSyncModal
       v-if="showCreateSyncModal || editingSync"
@@ -178,7 +177,7 @@
       @input="closeSyncModal"
       @sync-saved="handleSyncSaved"
     />
-    
+
     <!-- Connection Selection Modal -->
     <Modal
       :value="showConnectionModal"
@@ -202,13 +201,18 @@
             />
             <div class="connection-info">
               <h4>{{ connection.provider.display_name }}</h4>
-              <p>{{ connection.external_user_name || connection.external_user_email }}</p>
+              <p>
+                {{
+                  connection.external_user_name ||
+                  connection.external_user_email
+                }}
+              </p>
             </div>
           </div>
         </div>
       </div>
     </Modal>
-    
+
     <!-- Table Selection Modal -->
     <Modal
       :value="showTableModal"
@@ -280,7 +284,7 @@ export default {
       'triggerSync',
       'toggleSyncActive',
     ]),
-    
+
     async loadData() {
       this.loading = true
       try {
@@ -296,31 +300,31 @@ export default {
         this.loading = false
       }
     },
-    
+
     async loadSyncs() {
       // Load syncs for all connections
-      const syncPromises = this.connections.map(connection =>
+      const syncPromises = this.connections.map((connection) =>
         this.$services.integration.getSyncs(connection.id)
       )
-      
+
       const syncResponses = await Promise.all(syncPromises)
-      this.syncs = syncResponses.flatMap(response => response.data.results)
+      this.syncs = syncResponses.flatMap((response) => response.data.results)
     },
-    
+
     async loadTables() {
       const response = await this.$services.table.getAll(this.workspaceId)
       this.tables = response.data.results
     },
-    
+
     async refreshConnections() {
       await this.fetchConnections(this.workspaceId)
       await this.loadSyncs()
     },
-    
+
     getConnectionForProvider(provider) {
-      return this.connections.find(c => c.provider.id === provider.id)
+      return this.connections.find((c) => c.provider.id === provider.id)
     },
-    
+
     getSyncTypeIcon(syncType) {
       const icons = {
         calendar: 'fas fa-calendar-alt',
@@ -331,7 +335,7 @@ export default {
       }
       return icons[syncType] || 'fas fa-sync'
     },
-    
+
     getSyncTypeLabel(syncType) {
       const labels = {
         calendar: 'Calendar',
@@ -342,7 +346,7 @@ export default {
       }
       return labels[syncType] || syncType
     },
-    
+
     getSyncDirectionColor(direction) {
       const colors = {
         bidirectional: 'primary',
@@ -351,7 +355,7 @@ export default {
       }
       return colors[direction] || 'secondary'
     },
-    
+
     getSyncDirectionLabel(direction) {
       const labels = {
         bidirectional: 'Both ways',
@@ -360,7 +364,7 @@ export default {
       }
       return labels[direction] || direction
     },
-    
+
     getSyncStatusColor(status) {
       const colors = {
         success: 'success',
@@ -370,7 +374,7 @@ export default {
       }
       return colors[status] || 'secondary'
     },
-    
+
     getLogIcon(level) {
       const icons = {
         info: 'fas fa-info-circle',
@@ -379,11 +383,11 @@ export default {
       }
       return icons[level] || 'fas fa-info-circle'
     },
-    
+
     formatDate(dateString) {
       return new Date(dateString).toLocaleString()
     },
-    
+
     async triggerSync(sync) {
       sync.syncing = true
       try {
@@ -396,7 +400,7 @@ export default {
         sync.syncing = false
       }
     },
-    
+
     async toggleSyncActive(sync) {
       try {
         await this.toggleSyncActive(sync.id)
@@ -406,18 +410,18 @@ export default {
         this.$toast.error('Failed to toggle sync status')
       }
     },
-    
+
     editSync(sync) {
       this.editingSync = sync
       this.selectedConnection = sync.connection
       this.selectedTable = sync.table
     },
-    
+
     async deleteSync(sync) {
       if (!confirm('Are you sure you want to delete this sync?')) {
         return
       }
-      
+
       try {
         await this.$services.integration.deleteSync(sync.id)
         this.$toast.success('Sync deleted successfully')
@@ -426,13 +430,13 @@ export default {
         this.$toast.error('Failed to delete sync')
       }
     },
-    
+
     createSync() {
       if (this.connections.length === 0) {
         this.$toast.warning('Please connect to an integration first')
         return
       }
-      
+
       if (this.connections.length === 1) {
         this.selectedConnection = this.connections[0]
         this.showTableModal = true
@@ -440,26 +444,26 @@ export default {
         this.showConnectionModal = true
       }
     },
-    
+
     selectConnection(connection) {
       this.selectedConnection = connection
       this.showConnectionModal = false
       this.showTableModal = true
     },
-    
+
     selectTable(table) {
       this.selectedTable = table
       this.showTableModal = false
       this.showCreateSyncModal = true
     },
-    
+
     closeSyncModal() {
       this.showCreateSyncModal = false
       this.editingSync = null
       this.selectedConnection = null
       this.selectedTable = null
     },
-    
+
     async handleSyncSaved() {
       await this.loadSyncs()
     },
@@ -472,17 +476,17 @@ export default {
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
-  
+
   &__header {
     margin-bottom: 32px;
-    
+
     h1 {
       margin: 0 0 8px 0;
       font-size: 32px;
       font-weight: 700;
       color: var(--color-neutral-900);
     }
-    
+
     p {
       margin: 0;
       font-size: 16px;
@@ -493,7 +497,7 @@ export default {
 
 .integration-section {
   margin-bottom: 48px;
-  
+
   h2 {
     margin: 0 0 24px 0;
     font-size: 24px;
@@ -507,7 +511,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-  
+
   h2 {
     margin: 0;
   }
@@ -519,7 +523,7 @@ export default {
   justify-content: center;
   padding: 40px;
   gap: 12px;
-  
+
   .loading-spinner {
     width: 20px;
     height: 20px;
@@ -539,19 +543,19 @@ export default {
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  
+
   i {
     font-size: 48px;
     color: var(--color-neutral-400);
     margin-bottom: 16px;
   }
-  
+
   h3 {
     margin: 0 0 8px 0;
     font-size: 20px;
     color: var(--color-neutral-700);
   }
-  
+
   p {
     margin: 0 0 24px 0;
     color: var(--color-neutral-600);
@@ -563,11 +567,11 @@ export default {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  
+
   table {
     width: 100%;
     border-collapse: collapse;
-    
+
     th {
       background: var(--color-neutral-100);
       padding: 12px 16px;
@@ -576,13 +580,13 @@ export default {
       color: var(--color-neutral-700);
       border-bottom: 1px solid var(--color-neutral-200);
     }
-    
+
     td {
       padding: 12px 16px;
       border-bottom: 1px solid var(--color-neutral-100);
       vertical-align: middle;
     }
-    
+
     tr:hover {
       background: var(--color-neutral-50);
     }
@@ -593,7 +597,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   i {
     color: var(--color-primary-500);
   }
@@ -603,7 +607,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   .provider-icon {
     width: 20px;
     height: 20px;
@@ -651,19 +655,19 @@ export default {
   gap: 12px;
   padding: 12px 0;
   border-bottom: 1px solid var(--color-neutral-100);
-  
+
   &:last-child {
     border-bottom: none;
   }
-  
+
   &--error .log-icon i {
     color: var(--color-error-500);
   }
-  
+
   &--warning .log-icon i {
     color: var(--color-warning-500);
   }
-  
+
   &--info .log-icon i {
     color: var(--color-primary-500);
   }
@@ -671,12 +675,12 @@ export default {
 
 .log-content {
   flex: 1;
-  
+
   .log-message {
     font-weight: 500;
     margin-bottom: 4px;
   }
-  
+
   .log-meta {
     font-size: 12px;
     color: var(--color-neutral-600);
@@ -705,29 +709,29 @@ export default {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
-  
+
   &:hover {
     border-color: var(--color-primary-300);
     background: var(--color-primary-50);
   }
-  
+
   .provider-icon {
     width: 32px;
     height: 32px;
     object-fit: contain;
   }
-  
+
   i {
     font-size: 24px;
     color: var(--color-primary-500);
   }
-  
+
   h4 {
     margin: 0 0 4px 0;
     font-size: 16px;
     font-weight: 600;
   }
-  
+
   p {
     margin: 0;
     font-size: 14px;
@@ -736,7 +740,11 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

@@ -16,7 +16,7 @@
         :show-percentage="true"
       />
     </div>
-    
+
     <!-- Edit mode (only for manual input) -->
     <template v-if="editing && !isReadOnly">
       <input
@@ -90,7 +90,7 @@ export default {
       }
       return String(value)
     },
-    
+
     /**
      * Validate the input value
      */
@@ -98,25 +98,25 @@ export default {
       if (this.isReadOnly) {
         return true
       }
-      
+
       if (value === null || value === undefined || value === '') {
         return true // Allow empty values
       }
-      
+
       const numValue = parseFloat(value)
       if (isNaN(numValue)) {
         this.error = this.$t('fieldErrors.invalidNumber')
         return false
       }
-      
+
       if (numValue < this.field.min_value || numValue > this.field.max_value) {
         this.error = this.$t('fieldErrors.numberOutOfRange', {
           min: this.field.min_value,
-          max: this.field.max_value
+          max: this.field.max_value,
         })
         return false
       }
-      
+
       return true
     },
   },
@@ -130,7 +130,7 @@ export default {
   width: 100%;
   height: 100%;
   padding: 4px 8px;
-  
+
   .progress-bar-display {
     width: 100%;
   }
@@ -144,7 +144,7 @@ export default {
   background: transparent;
   font-size: 13px;
   padding: 0 8px;
-  
+
   &:focus {
     background: #fff;
     border: 1px solid #3b82f6;
@@ -154,7 +154,7 @@ export default {
 
 .grid-view__cell--readonly {
   cursor: default;
-  
+
   &:hover {
     background-color: transparent;
   }
@@ -164,12 +164,12 @@ export default {
 @media (max-width: 768px) {
   .grid-field-progress-bar {
     padding: 6px 8px;
-    
+
     .progress-bar-display {
       --progress-bar-height: 22px;
     }
   }
-  
+
   .grid-field-progress-bar__input {
     font-size: 14px;
     padding: 4px 8px;

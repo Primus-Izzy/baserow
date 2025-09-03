@@ -18,12 +18,17 @@
         v-for="preset in filterPresets"
         :key="preset.id"
         class="grid-view-filter-presets__preset"
-        :class="{ 'grid-view-filter-presets__preset--default': preset.is_default }"
+        :class="{
+          'grid-view-filter-presets__preset--default': preset.is_default,
+        }"
       >
         <div class="grid-view-filter-presets__preset-info">
           <div class="grid-view-filter-presets__preset-name">
             {{ preset.name }}
-            <span v-if="preset.is_default" class="grid-view-filter-presets__default-badge">
+            <span
+              v-if="preset.is_default"
+              class="grid-view-filter-presets__default-badge"
+            >
               {{ $t('gridView.filterPresets.default') }}
             </span>
           </div>
@@ -33,11 +38,7 @@
         </div>
 
         <div class="grid-view-filter-presets__preset-actions">
-          <Button
-            type="ghost"
-            size="small"
-            @click="applyPreset(preset)"
-          >
+          <Button type="ghost" size="small" @click="applyPreset(preset)">
             <i class="iconoir-filter"></i>
             {{ $t('gridView.filterPresets.apply') }}
           </Button>
@@ -74,19 +75,13 @@
     </div>
 
     <!-- Save Preset Modal -->
-    <Modal
-      v-if="showSaveModal"
-      @hidden="closeSaveModal"
-    >
+    <Modal v-if="showSaveModal" @hidden="closeSaveModal">
       <h2 slot="title">
         {{ $t('gridView.filterPresets.savePreset') }}
       </h2>
-      
+
       <form @submit.prevent="savePreset">
-        <FormGroup
-          :label="$t('gridView.filterPresets.presetName')"
-          required
-        >
+        <FormGroup :label="$t('gridView.filterPresets.presetName')" required>
           <FormInput
             v-model="presetForm.name"
             :placeholder="$t('gridView.filterPresets.presetNamePlaceholder')"
@@ -170,7 +165,9 @@ export default {
   methods: {
     async loadFilterPresets() {
       try {
-        const { data } = await GridViewService(this.$client).getFilterPresets(this.view.id)
+        const { data } = await GridViewService(this.$client).getFilterPresets(
+          this.view.id
+        )
         this.filterPresets = data
       } catch (error) {
         notifyIf(error, 'view')
@@ -183,11 +180,13 @@ export default {
       } else if (filterCount === 1) {
         return this.$t('gridView.filterPresets.oneFilter')
       } else {
-        return this.$t('gridView.filterPresets.multipleFilters', { count: filterCount })
+        return this.$t('gridView.filterPresets.multipleFilters', {
+          count: filterCount,
+        })
       }
     },
     getFilterDescription(filter) {
-      const field = this.fields.find(f => f.id === filter.field)
+      const field = this.fields.find((f) => f.id === filter.field)
       const fieldName = field ? field.name : `Field ${filter.field}`
       return `${fieldName} ${filter.type} ${filter.value}`
     },
@@ -196,7 +195,9 @@ export default {
         this.$emit('apply-preset', preset.filters)
         this.$store.dispatch('toast/info', {
           title: this.$t('gridView.filterPresets.applied'),
-          message: this.$t('gridView.filterPresets.appliedMessage', { name: preset.name }),
+          message: this.$t('gridView.filterPresets.appliedMessage', {
+            name: preset.name,
+          }),
         })
       } catch (error) {
         notifyIf(error, 'view')
@@ -210,25 +211,38 @@ export default {
           { is_default: true }
         )
         // Update local state
-        this.filterPresets.forEach(p => {
+        this.filterPresets.forEach((p) => {
           p.is_default = p.id === preset.id
         })
         this.$store.dispatch('toast/success', {
           title: this.$t('gridView.filterPresets.defaultSet'),
-          message: this.$t('gridView.filterPresets.defaultSetMessage', { name: preset.name }),
+          message: this.$t('gridView.filterPresets.defaultSetMessage', {
+            name: preset.name,
+          }),
         })
       } catch (error) {
         notifyIf(error, 'view')
       }
     },
     async deletePreset(preset) {
-      if (confirm(this.$t('gridView.filterPresets.confirmDelete', { name: preset.name }))) {
+      if (
+        confirm(
+          this.$t('gridView.filterPresets.confirmDelete', { name: preset.name })
+        )
+      ) {
         try {
-          await GridViewService(this.$client).deleteFilterPreset(this.view.id, preset.id)
-          this.filterPresets = this.filterPresets.filter(p => p.id !== preset.id)
+          await GridViewService(this.$client).deleteFilterPreset(
+            this.view.id,
+            preset.id
+          )
+          this.filterPresets = this.filterPresets.filter(
+            (p) => p.id !== preset.id
+          )
           this.$store.dispatch('toast/success', {
             title: this.$t('gridView.filterPresets.deleted'),
-            message: this.$t('gridView.filterPresets.deletedMessage', { name: preset.name }),
+            message: this.$t('gridView.filterPresets.deletedMessage', {
+              name: preset.name,
+            }),
           })
         } catch (error) {
           notifyIf(error, 'view')
@@ -246,20 +260,22 @@ export default {
             is_default: this.presetForm.is_default,
           }
         )
-        
+
         if (this.presetForm.is_default) {
           // Update other presets to not be default
-          this.filterPresets.forEach(p => {
+          this.filterPresets.forEach((p) => {
             p.is_default = false
           })
         }
-        
+
         this.filterPresets.push(data)
         this.closeSaveModal()
-        
+
         this.$store.dispatch('toast/success', {
           title: this.$t('gridView.filterPresets.saved'),
-          message: this.$t('gridView.filterPresets.savedMessage', { name: data.name }),
+          message: this.$t('gridView.filterPresets.savedMessage', {
+            name: data.name,
+          }),
         })
       } catch (error) {
         notifyIf(error, 'view')
@@ -285,7 +301,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
-    
+
     h3 {
       margin: 0;
       font-size: 16px;
@@ -306,7 +322,7 @@ export default {
     border: 1px solid #e1e5e9;
     border-radius: 6px;
     background: #fff;
-    
+
     &--default {
       border-color: #4285f4;
       background: #f8f9ff;
@@ -349,18 +365,18 @@ export default {
     text-align: center;
     padding: 40px 20px;
     color: #666;
-    
+
     i {
       font-size: 48px;
       margin-bottom: 16px;
       opacity: 0.5;
     }
-    
+
     p {
       margin: 0 0 8px 0;
       font-size: 14px;
     }
-    
+
     &-hint {
       font-size: 12px;
       opacity: 0.8;
@@ -369,7 +385,7 @@ export default {
 
   &__current-filters {
     margin: 16px 0;
-    
+
     h4 {
       margin: 0 0 8px 0;
       font-size: 14px;
