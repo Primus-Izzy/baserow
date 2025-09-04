@@ -353,13 +353,13 @@ export default {
   &__header {
     display: grid;
     grid-template-columns: 80px 1fr;
-    border-bottom: 1px solid $palette-neutral-200;
-    background-color: $palette-neutral-50;
+    border-bottom: 1px solid $color-neutral-200;
+    background-color: $color-neutral-50;
     flex-shrink: 0;
   }
 
   &__time-column-header {
-    border-right: 1px solid $palette-neutral-200;
+    border-right: 1px solid $color-neutral-200;
   }
 
   &__day-header {
@@ -396,8 +396,8 @@ export default {
   }
 
   &__time-column {
-    border-right: 1px solid $palette-neutral-200;
-    background-color: $color-neutral-25;
+    border-right: 1px solid $color-neutral-200;
+    background-color: $color-neutral-10;
   }
 
   &__time-slot {
@@ -420,7 +420,7 @@ export default {
     cursor: pointer;
 
     &:hover {
-      background-color: $color-neutral-25;
+      background-color: $color-neutral-10;
     }
   }
 
@@ -430,13 +430,13 @@ export default {
     position: relative;
 
     &:hover {
-      background-color: $palette-neutral-50;
+      background-color: $color-neutral-50;
     }
   }
 
   &__quarter-hour {
     height: 20px;
-    border-bottom: 1px solid $palette-neutral-50;
+    border-bottom: 1px solid $color-neutral-50;
 
     &:last-child {
       border-bottom: none;

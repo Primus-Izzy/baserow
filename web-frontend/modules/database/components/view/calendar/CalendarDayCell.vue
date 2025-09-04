@@ -228,7 +228,7 @@ export default {
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: $color-neutral-25;
+    background-color: $color-neutral-10;
   }
 
   &--other-month {

@@ -322,7 +322,7 @@ export default {
 
   &__time-column {
     border-right: 1px solid $color-neutral-200;
-    background-color: $color-neutral-25;
+    background-color: $color-neutral-10;
   }
 
   &__time-slot {
@@ -346,7 +346,7 @@ export default {
     cursor: pointer;
 
     &--today {
-      background-color: $color-primary-25;
+      background-color: $color-primary-100;
     }
 
     &:last-child {
@@ -354,7 +354,7 @@ export default {
     }
 
     &:hover {
-      background-color: $color-neutral-25;
+      background-color: $color-neutral-10;
     }
   }
 

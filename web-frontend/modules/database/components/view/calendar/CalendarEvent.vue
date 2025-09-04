@@ -240,7 +240,7 @@ export default {
   line-height: 1.3;
 
   &:hover {
-    background-color: $color-neutral-25;
+    background-color: $color-neutral-10;
     border-color: $color-neutral-300;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

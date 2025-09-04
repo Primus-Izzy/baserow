@@ -159,8 +159,8 @@ export default {
   &__headers {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    border-bottom: 1px solid $palette-neutral-200;
-    background-color: $palette-neutral-50;
+    border-bottom: 1px solid $color-neutral-200;
+    background-color: $color-neutral-50;
   }
 
   &__header {
@@ -168,9 +168,9 @@ export default {
     text-align: center;
     font-weight: 600;
     font-size: 12px;
-    color: $palette-neutral-600;
+    color: $color-neutral-600;
     text-transform: uppercase;
-    border-right: 1px solid $palette-neutral-200;
+    border-right: 1px solid $color-neutral-200;
 
     &:last-child {
       border-right: none;

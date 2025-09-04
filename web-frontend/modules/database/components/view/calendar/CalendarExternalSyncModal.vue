@@ -400,7 +400,7 @@ export default {
     padding: 16px;
     border: 1px solid $color-neutral-200;
     border-radius: 6px;
-    background-color: $color-neutral-25;
+    background-color: $color-neutral-10;
   }
 
   &__sync-info {
