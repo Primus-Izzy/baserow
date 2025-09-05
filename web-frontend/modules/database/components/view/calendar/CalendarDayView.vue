@@ -344,6 +344,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@baserow/modules/core/assets/scss/colors.scss';
+
 .calendar-day-view {
   display: flex;
   flex-direction: column;

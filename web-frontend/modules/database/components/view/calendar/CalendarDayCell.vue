@@ -218,6 +218,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@baserow/modules/core/assets/scss/colors.scss';
+
 .calendar-day-cell {
   position: relative;
   border-right: 1px solid $color-neutral-200;
@@ -241,7 +243,7 @@ export default {
   }
 
   &--today {
-    background-color: $color-primary-50;
+    background-color: $color-primary-100;
 
     .calendar-day-cell__day-number {
       background-color: $color-primary-600;

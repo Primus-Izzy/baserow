@@ -266,6 +266,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@baserow/modules/core/assets/scss/colors.scss';
+
 .calendar-week-view {
   display: flex;
   flex-direction: column;
@@ -290,7 +292,7 @@ export default {
     border-right: 1px solid $color-neutral-200;
 
     &--today {
-      background-color: $color-primary-50;
+      background-color: $color-primary-100;
     }
 
     &:last-child {

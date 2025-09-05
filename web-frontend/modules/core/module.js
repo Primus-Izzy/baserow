@@ -256,6 +256,8 @@ export default function CoreModule(options) {
     options: { iconoirCSS },
   })
 
+
+
   // Add the main scss file which contains all the generic scss code.
   this.options.css.push(path.resolve(__dirname, 'assets/scss/default.scss'))
 }

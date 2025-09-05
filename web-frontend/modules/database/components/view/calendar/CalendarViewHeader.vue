@@ -342,6 +342,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@baserow/modules/core/assets/scss/colors.scss';
+
 .calendar-config {
   padding: 12px;
   min-width: 280px;

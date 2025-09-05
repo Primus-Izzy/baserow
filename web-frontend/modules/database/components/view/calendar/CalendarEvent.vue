@@ -227,6 +227,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@baserow/modules/core/assets/scss/colors.scss';
+
 .calendar-event {
   position: relative;
   background-color: $color-neutral-0;

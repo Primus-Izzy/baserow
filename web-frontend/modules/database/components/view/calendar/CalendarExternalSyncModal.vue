@@ -372,6 +372,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@baserow/modules/core/assets/scss/colors.scss';
+
 .external-sync-modal {
   padding: 20px;
   max-width: 600px;

@@ -191,6 +191,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@baserow/modules/core/assets/scss/colors.scss';
+
 .recurring-event-modal {
   padding: 20px;
 
